@@ -45,6 +45,33 @@ jobs:
       - name: 契约守卫
         run: python3 tools/check-sources.py
 
+  commit-messages:
+    runs-on: ubuntu-latest
+    steps:
+      # 需要完整历史才能算出本次推送的提交范围。
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # git 钩子只有在 core.hooksPath 指向 tools/githooks 之后才生效，而那是每份
+      # 克隆的本地配置。2026-08-20 实测：多仓库远程会话里仓库自带的
+      # .claude/settings.json 不是「项目设置」，那条自动接电的路径不成立，
+      # 8 个提交一路无人拦。所以判据在这里再来一遍——CI 不依赖任何本地配置。
+      - name: 提交信息守卫（不依赖本地钩子）
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            python3 tools/check-commit-messages.py \
+              "${{ github.event.pull_request.base.sha }}" \
+              "${{ github.event.pull_request.head.sha }}"
+          else
+            python3 tools/check-commit-messages.py \
+              "${{ github.event.before }}" "${{ github.sha }}"
+          fi
+
   assets:
     runs-on: ubuntu-latest
     steps:

@@ -95,6 +95,21 @@ bash tools/install-hooks.sh      # Windows 不想开 Git Bash 就跑 tools\insta
 （git 自己的钩子没法从入库文件里自动生效：`core.hooksPath` 是每份克隆的本地配置，
 这是 git 有意为之的安全设计——否则 clone 一个仓库就等于执行任意代码。）
 
+> **🔴 那条「自动接电」在远程多仓库会话里不成立**（2026-08-20 实测）。
+> 会话的项目根是各仓库的**上一级目录**时，仓库自带的 `.claude/settings.json`
+> 不是「项目设置」，从未被加载；而设置只在会话启动时读一次，中途补写也不生效。
+> 后果是实测出来的：那一轮 8 个提交没有任何东西在拦，包括一个英文标题、
+> 无 `Co-authored-by` 的根提交——`pre-push` 放行它，是因为 `pre-push` 压根没跑。
+>
+> 所以**不要假设钩子是活的**。开工先自检一句：
+> ```bash
+> git config --get core.hooksPath      # 应输出 tools/githooks
+> ```
+> 空的就跑 `bash tools/install-hooks.sh`。
+> 同一套判据另有一份跑在 CI 里（`checks.yml` 的 `commit-messages` job，
+> 实现在 `tools/check-commit-messages.py`），**那一份不依赖任何本地配置**——
+> 钩子漏了它还在。
+
 | 钩子 | 拦什么 | 逃生口 |
 |---|---|---|
 | `commit-msg` | 标题非中文 / 缺 `Co-authored-by` / 缺「文档:」交代 | 信息里**顶格独占一行**写 `[skip-hooks]` |
