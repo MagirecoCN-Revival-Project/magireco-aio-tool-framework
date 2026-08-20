@@ -20,6 +20,9 @@
       ],
       "@aio/plugin-sdk": [
         "./packages/plugin-sdk/src/index.ts"
+      ],
+      "@aio/plugin-model-3d": [
+        "./packages/plugin-model-3d/src/index.ts"
       ]
     },
     "baseUrl": ".",

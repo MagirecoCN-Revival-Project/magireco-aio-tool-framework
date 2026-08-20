@@ -20,6 +20,7 @@
 | `@aio/resource` | 资源清单、多源回退、https 强制、sha256 校验 |
 | `@aio/kernel` | 插件注册、意图派发、surface 生命周期、WebGL 上下文治理、iframe RPC 桥 |
 | `@aio/plugin-sdk` | `definePlugin` + 无头测试宿主 |
+| `@aio/plugin-model-3d` | `example-model-viewer` 的插件封装。上游那两个类**注入**进来，所以本仓库不依赖 three.js，判据也能在 node 上跑 |
 
 ```bash
 npm install

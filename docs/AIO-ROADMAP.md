@@ -31,7 +31,7 @@
 | 步骤 | 说明 |
 |---|---|
 | 1.1 | ✅ **已完成** `apps/station`：Next.js + React 19 宿主外壳，`output: 'export'` 静态导出到 EdgeOne Pages 单项目。含 React↔内核的 surface 桥、能力驱动的 UI、插件装卸后台。占位插件待换真查看器，见 [`apps/station/README.md`](../apps/station/README.md) |
-| 1.2 | `plugins/model-3d`：把 example-model-viewer 包成插件，模型走资源面 |
+| 1.2 | ✅ **已完成** `packages/plugin-model-3d`：把 example-model-viewer 包成插件，模型走资源面。上游一行未改（它的构造函数本来就是 `Record<路径, URL>` 注入式），10 个测试全在 node 上跑——上游两个类是注入的，不需要 three.js 与 GPU。**尚未接进 `apps/station`**：要等 `upstream-three-subpackage` 可安装（发包或 git 依赖） |
 | 1.3 | `plugins/sprite-viewer`：cocos2d 子帧 + `MessagePort` 传输实现 |
 | 1.4 | 交叉表首批数据：先做 810 个精灵 unit ↔ charaId 的人工核对 |
 | 1.5 | 一个能演示的页面：角色档案 → 点一下出精灵、点一下出 3D |
