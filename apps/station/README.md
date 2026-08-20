@@ -50,9 +50,15 @@ src/app/        路由：/ 资料页、/admin 后台
 原样 import；manifest、能力声明、生命周期、事件总线、多源选路、
 `can()` 决定按钮画不画、插件装卸——都是生产路径。
 
+**已经是真的**：`sprite-viewer` 装的是 `@aio/plugin-sprite` + `createCanvas2dStage`
+——骨骼真解析、帧真插值、canvas 上真画。骨骼数据是合成的（铁律 9：素材不进这棵树），
+经 `data:` URL 由 `StaticProvider` 送进来，所以整条链路（fetch → 解析 → 推帧 → 渲染）
+都是生产路径。资源提供者也从 `ManifestCdnProvider` 换成了 `StaticProvider`，
+**插件与宿主一行没改**——那是 ADR 0002 第一层判据的实际兑现。
+
 **占位的**：
 
-- 三个插件的 `mount()` 内部渲染（画的是面板，不跑真查看器）。换法见
+- 另外两个插件的 `mount()` 内部渲染（画的是面板，不跑真查看器）。换法见
   [`docs/VIEWER-REFACTOR.md`](../../docs/VIEWER-REFACTOR.md)——四个查看器一个都不用重写。
 - 隔离级别：契约里 `sprite-viewer` / `adv-player` 是 `iframe`，占位版没有那些
   全局运行时，所以按 inline 走。接真查看器时用 `createIframePlugin()` 包一层，

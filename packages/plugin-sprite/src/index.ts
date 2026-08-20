@@ -5,6 +5,8 @@ import { SpritePlayer, type Stage } from './player.js';
 
 export * from './armature.js';
 export * from './player.js';
+export * from './pose.js';
+export * from './stage-canvas2d.js';
 
 /**
  * `sprite.show` 的一个实现——**从零写的，不碰任何上游代码**。

@@ -1,4 +1,5 @@
 import type { RegistryData } from '@aio/registry';
+import { StaticProvider } from '@aio/resource';
 import type { ManifestDoc, OriginConfig } from '@aio/resource';
 
 /**
@@ -83,3 +84,79 @@ export const DEMO_MANIFESTS: readonly ManifestDoc[] = [
     },
   },
 ];
+
+
+/**
+ * 骨架期的合成骨骼——**不是游戏素材**（铁律 9）。
+ *
+ * 三根骨骼、两个动作，够 canvas2d 舞台真的动起来：`idle` 循环上下浮动，
+ * `wave` 不循环、播完停住。这样「真实现 + 真舞台」在 station 里是可见的，
+ * 而不是又一个占位方块。
+ */
+const kf = (fi: number, x: number, y: number, cX = 1) => ({ fi, x, y, cX, cY: cX, kX: 0, kY: 0 });
+
+export const DEMO_SPRITE_ARMATURE = {
+  armature_data: [{ name: 'demo_armature', bone_data: [] }],
+  animation_data: [
+    {
+      name: 'demo_armature',
+      mov_data: [
+        {
+          name: 'idle',
+          dr: 40,
+          lp: true,
+          sc: 1,
+          mov_bone_data: [
+            { name: 'head', frame_data: [kf(0, 0, 40), kf(20, 0, 55), kf(39, 0, 40)] },
+            { name: 'body', frame_data: [kf(0, 0, 0), kf(20, 0, 6), kf(39, 0, 0)] },
+            { name: 'arm', frame_data: [kf(0, -30, 10), kf(20, -34, 16), kf(39, -30, 10)] },
+          ],
+        },
+        {
+          name: 'wave',
+          dr: 30,
+          lp: false,
+          sc: 1,
+          mov_bone_data: [
+            { name: 'head', frame_data: [kf(0, 0, 40), kf(29, 0, 40)] },
+            { name: 'body', frame_data: [kf(0, 0, 0), kf(29, 0, 0)] },
+            { name: 'arm', frame_data: [kf(0, -30, 10), kf(15, 40, 60, 1.4), kf(29, -30, 10)] },
+          ],
+        },
+      ],
+    },
+  ],
+  texture_data: [],
+};
+
+const dataUrl = (value: unknown): string =>
+  `data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(value))}`;
+
+/**
+ * 骨架期的资源提供者。
+ *
+ * 用 `StaticProvider` 而不是 `ManifestCdnProvider`：资源面（COS + EdgeOne）
+ * 还没搭起来，而 `StaticProvider` 正是为「离线包／本地目录／测试造数据」
+ * 这类场景存在的实现之一。**换 provider 插件零改动**——这正是 ADR 0002
+ * 第一层那条判据在实际用途上的兑现，不是演示。
+ *
+ * 精灵那条给的是 `data:` URL，所以真插件真的能 fetch 到、真的能解析、
+ * 真的能画。其余两条仍指向占位地址：那两个插件只调 `resolve()` 看看路由，
+ * 不 fetch。
+ */
+export function createDemoResources(): StaticProvider {
+  return new StaticProvider({
+    entries: {
+      'a:sprite/100100/d_r': [
+        { role: 'definition', path: 'sprite/100100/d_r.ExportJson', url: dataUrl(DEMO_SPRITE_ARMATURE) },
+      ],
+      'a:scenario/310241@zh': [
+        { role: 'script', path: 'scenario/310241.zh.json', url: 'https://assets.example.invalid/scenario/310241.zh.json' },
+      ],
+      'b:model3d/100101': [
+        { role: 'model', path: '3d/chara_100101/model.fbx.gz', url: 'https://assets.example.invalid/3d/chara_100101/model.fbx.gz' },
+        { role: 'texture', path: '3d/chara_100101/ctrl.png', url: 'https://assets.example.invalid/3d/chara_100101/ctrl.png' },
+      ],
+    },
+  });
+}

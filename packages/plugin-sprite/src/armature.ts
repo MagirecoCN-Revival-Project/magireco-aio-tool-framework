@@ -28,6 +28,27 @@ export class ArmatureParseError extends Error {
   }
 }
 
+/**
+ * 一条骨骼关键帧。字段名取自导出文件实测：
+ * `fi` 帧号、`x`/`y` 位移、`cX`/`cY` 缩放、`kX`/`kY` 斜切（旋转）。
+ */
+export interface BoneKeyframe {
+  readonly frame: number;
+  readonly x: number;
+  readonly y: number;
+  readonly scaleX: number;
+  readonly scaleY: number;
+  readonly skewX: number;
+  readonly skewY: number;
+}
+
+/** 一根骨骼在某个动作里的整条轨道。 */
+export interface MovementBone {
+  readonly name: string;
+  /** 按帧号升序。空轨道表示这根骨骼在这个动作里不动。 */
+  readonly keyframes: readonly BoneKeyframe[];
+}
+
 export interface SpriteMovement {
   readonly name: string;
   /** 帧长（导出文件里的 `dr`）。 */
@@ -36,8 +57,8 @@ export interface SpriteMovement {
   readonly loop: boolean;
   /** 速度倍率（`sc`）。 */
   readonly speedScale: number;
-  /** 参与这个动作的骨骼名，供舞台按需装配。 */
-  readonly bones: readonly string[];
+  /** 参与这个动作的骨骼轨道。舞台按帧求值后据此摆放。 */
+  readonly tracks: readonly MovementBone[];
 }
 
 export interface SpriteTexture {
@@ -61,6 +82,10 @@ function asRecord(value: unknown, what: string): Record<string, unknown> {
 function asArray(value: unknown, what: string): unknown[] {
   if (!Array.isArray(value)) throw new ArmatureParseError(`${what} 不是数组`);
   return value;
+}
+
+function num(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
 function str(value: unknown): string | undefined {
@@ -111,16 +136,39 @@ export function parseArmature(input: unknown): SpriteDoc {
     const speedScale =
       typeof scRaw === 'number' && Number.isFinite(scRaw) && scRaw > 0 ? scRaw : 1;
 
-    const bones: string[] = [];
+    const tracks: MovementBone[] = [];
     const boneRaw = mov['mov_bone_data'];
     if (Array.isArray(boneRaw)) {
       for (const b of boneRaw) {
-        const bone = str(asRecord(b, 'mov_bone_data[]')['name']);
-        if (bone !== undefined) bones.push(bone);
+        const bone = asRecord(b, 'mov_bone_data[]');
+        const boneName = str(bone['name']);
+        if (boneName === undefined) continue;
+
+        const keyframes: BoneKeyframe[] = [];
+        const fdRaw = bone['frame_data'];
+        if (Array.isArray(fdRaw)) {
+          for (const f of fdRaw) {
+            const fd = asRecord(f, `${boneName}.frame_data[]`);
+            keyframes.push({
+              frame: num(fd['fi'], 0),
+              x: num(fd['x'], 0),
+              y: num(fd['y'], 0),
+              // 缩放缺省是 1 而不是 0——缺省成 0 会让整根骨骼消失，
+              // 而「消失」看起来像是资源没加载，能查很久。
+              scaleX: num(fd['cX'], 1),
+              scaleY: num(fd['cY'], 1),
+              skewX: num(fd['kX'], 0),
+              skewY: num(fd['kY'], 0),
+            });
+          }
+          // 导出文件里帧号通常已升序，但不能指望——乱序会让插值取到错的区间。
+          keyframes.sort((a, b2) => a.frame - b2.frame);
+        }
+        tracks.push({ name: boneName, keyframes });
       }
     }
 
-    movements.push({ name, frames, loop: mov['lp'] === true, speedScale, bones });
+    movements.push({ name, frames, loop: mov['lp'] === true, speedScale, tracks });
   }
 
   if (movements.length === 0) {

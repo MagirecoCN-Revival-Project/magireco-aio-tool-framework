@@ -1,10 +1,14 @@
 import { formatRef } from '@aio/core';
 import type { Intent } from '@aio/core';
 import type { Plugin, PluginHost, PluginInstance, SurfaceTarget } from '@aio/kernel';
+import { createCanvas2dStage, createSpritePlugin } from '@aio/plugin-sprite';
 import type { CatalogEntry } from '../kernel/station';
 
 /**
- * 骨架期的占位插件。
+ * 工作站装的插件。
+ *
+ * **`sprite-viewer` 已经是真实现**（`@aio/plugin-sprite` + canvas2d 舞台）：
+ * 骨骼真解析、帧真插值、画面真画。另两个仍是占位。
  *
  * **真的**：manifest、能力声明、生命周期、事件总线、资源解析——全部走
  * `packages/` 里那份生产代码，与 demo 宿主用的是同一条路径。
@@ -131,56 +135,22 @@ function model3d(): Plugin {
   };
 }
 
+/**
+ * 战斗精灵——**已经是真实现了，不是占位**。
+ *
+ * `@aio/plugin-sprite` 负责解析骨骼与推帧，`createCanvas2dStage` 把算出来的
+ * 骨骼变换真的画在 canvas 上。骨骼数据是合成的（铁律 9：素材不进这棵树），
+ * 但解析、插值、循环、动作切换走的都是生产路径。
+ *
+ * canvas 2D 不占 WebGL 上下文，所以 `usesWebGL: false`——多声明一个不存在的
+ * 占用会让治理器白白挂起别的查看器。
+ */
 function spriteViewer(): Plugin {
-  return {
-    manifest: {
-      id: 'sprite-viewer',
-      version: '0.1.0',
-      title: '战斗精灵',
-      isolation: 'inline',
-      usesWebGL: true,
-      provides: [{ id: 'sprite.show', accepts: ['sprite', 'character'], title: '显示战斗精灵' }],
-      needs: ['sprite'],
-    },
-    async mount(target, intent, host) {
-      const body = panel(target, '战斗精灵', formatRef(intent.ref));
-      showParts(body, host, intent);
-
-      // 精灵是动画播放器，契约要求回报帧进度（UI 据此画帧进度条）。
-      // 占位版没有真骨骼，但**回话是契约行为，不是渲染的副产品**——
-      // 所以这里照样按帧推进并发 progress。
-      const total = 40;
-      let frame = 0;
-      let paused = false;
-      const timer = setInterval(() => {
-        if (paused) return;
-        frame = frame >= total - 1 ? 0 : frame + 1;
-        host.events.emit('progress', {
-          surfaceId: host.surfaceId,
-          ref: intent.ref,
-          position: frame,
-          total,
-        });
-      }, 500);
-
-      return {
-        suspend() {
-          paused = true;
-        },
-        resume() {
-          paused = false;
-        },
-        dispose() {
-          // 漏掉这行，套件的「关闭之后不再发事件」当场变红。
-          clearInterval(timer);
-        },
-        update(next) {
-          frame = 0;
-          showParts(panel(target, '战斗精灵', formatRef(next.ref)), host, next);
-        },
-      };
-    },
-  };
+  return createSpritePlugin({
+    createStage: (container) => createCanvas2dStage(container, { width: 320, height: 320 }),
+    usesWebGL: false,
+    fps: 30,
+  });
 }
 
 function advPlayer(): Plugin {
@@ -252,7 +222,7 @@ export const PLUGIN_CATALOG: readonly CatalogEntry[] = [
   {
     id: 'sprite-viewer',
     title: '战斗精灵',
-    note: 'example-sprite-mirror：cocos2d 靠 window.cc 活着，接真查看器时必须换成 iframe',
+    note: '真实现：@aio/plugin-sprite + canvas2d 舞台。骨骼真解析、真插值、真画',
     create: spriteViewer,
   },
   {

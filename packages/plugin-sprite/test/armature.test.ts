@@ -28,7 +28,7 @@ describe('parseArmature', () => {
     expect(d.armature).toBe('mini_000000');
     expect(d.movements.map((m) => m.name)).toEqual(['name_r', 'action_in']);
     expect(d.movements[1]).toMatchObject({ frames: 12, loop: true, speedScale: 2 });
-    expect(d.movements[0]?.bones).toEqual(['bone_a']);
+    expect(d.movements[0]?.tracks.map((t) => t.name)).toEqual(['bone_a']);
   });
 
   it('收集图集分片', () => {

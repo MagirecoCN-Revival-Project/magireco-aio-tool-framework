@@ -18,6 +18,7 @@ const config = {
     '@aio/kernel',
     '@aio/registry',
     '@aio/resource',
+    '@aio/plugin-sprite',
   ],
   // 资源全部外置到资源面（铁律 9），所以这里没有图片需要优化。
   images: { unoptimized: true },
