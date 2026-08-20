@@ -38,6 +38,9 @@
       ],
       "@aio/plugin-search": [
         "./packages/plugin-search/src/index.ts"
+      ],
+      "@aio/plugin-live2d": [
+        "./packages/plugin-live2d/src/index.ts"
       ]
     },
     "baseUrl": ".",

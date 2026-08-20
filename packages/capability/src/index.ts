@@ -96,9 +96,15 @@ export const LIVE2D_SHOW = contract({
   title: '查看 Live2D',
   accepts: ['live2d'],
   params: [
-    { name: 'costume', type: 'string', required: false, note: '服装 ID' },
-    { name: 'motion', type: 'string', required: false, note: '起始动作' },
+    { name: 'motion', type: 'string', required: false, note: '动作组名，必须来自模型数据；未知值忽略而不是崩' },
+    { name: 'expression', type: 'string', required: false, note: '表情名，同上' },
+    { name: 'lipSync', type: 'boolean', required: false, note: '口型同步；模型没登记 LipSync 参数时开不起来' },
   ],
+  // > 这里原本有一个 `costume` 参数。写实现时发现它是错的：一个
+  // > `model3.json` 描述的就是**一套**服装（Moc、贴图、动作、表情全绑在一起），
+  // > 换服装等于换一个模型文件——那是**另一条 ref**，不是同一模型的参数。
+  // > 留着它会诱使实现假装能就地换装，而它实际上必须重新加载。
+  // > 服装属于 ref 的段（如 `a:live2d/1001/costume03`），由清单与交叉表决定。
   emits: ['entity.focused'],
   webglTypical: true,
 });
