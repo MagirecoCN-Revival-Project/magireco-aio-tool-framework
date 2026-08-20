@@ -88,11 +88,28 @@ function showParts(body: HTMLElement | null, host: PluginHost, intent: Intent): 
   body.append(list);
 }
 
-function inert(): PluginInstance {
+/**
+ * 只渲染、没有内部状态的插件实例。
+ *
+ * `update` 不是可选的锦上添花：内核在同一插件已有 surface 时会**就地 update**
+ * 而不是新开一个，没有它，连点五次入口会开出五个实例——五个都占着 WebGL
+ * 上下文。能力一致性套件有一条判据专门盯这件事。
+ */
+function renderOnly(
+  target: SurfaceTarget,
+  host: PluginHost,
+  title: string,
+): PluginInstance {
+  const render = (i: Intent): void => {
+    showParts(panel(target, title, formatRef(i.ref)), host, i);
+  };
   return {
     suspend() {},
     resume() {},
     dispose() {},
+    update(next) {
+      render(next);
+    },
   };
 }
 
@@ -109,7 +126,7 @@ function model3d(): Plugin {
     },
     async mount(target, intent, host) {
       showParts(panel(target, '3D 模型查看器', formatRef(intent.ref)), host, intent);
-      return inert();
+      return renderOnly(target, host, '3D 模型查看器');
     },
   };
 }
@@ -127,7 +144,7 @@ function spriteViewer(): Plugin {
     },
     async mount(target, intent, host) {
       showParts(panel(target, '战斗精灵', formatRef(intent.ref)), host, intent);
-      return inert();
+      return renderOnly(target, host, '战斗精灵');
     },
   };
 }

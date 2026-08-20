@@ -30,13 +30,11 @@ export interface CapabilityFixture {
 export function runCapabilityConformance(fixture: CapabilityFixture): void {
   const { contract } = fixture;
 
-  const boot = (): Kernel => {
-    const kernel = new Kernel({
-      resources: fixture.createResources(),
-      surfaces: createHeadlessSurfaceProvider(),
-    });
+  const boot = () => {
+    const surfaces = createHeadlessSurfaceProvider();
+    const kernel = new Kernel({ resources: fixture.createResources(), surfaces });
     kernel.register(fixture.createPlugin());
-    return kernel;
+    return { kernel, surfaces };
   };
 
   describe(`能力一致性 ${contract.id} ← ${fixture.name}`, () => {
@@ -56,20 +54,31 @@ export function runCapabilityConformance(fixture: CapabilityFixture): void {
       }
     });
 
-    it('usesWebGL 与契约一致', () => {
-      const m = fixture.createPlugin().manifest;
-      // 占了却不声明，后果不是报错，是别人已打开的查看器突然变黑（铁律 5）。
-      expect(m.usesWebGL ?? false).toBe(contract.usesWebGL);
+    it('重复派发同一能力只保留一个实例，且句柄指向同一个 surface', async () => {
+      const { kernel, surfaces } = boot();
+      const a = await kernel.request({ capability: contract.id, ref: fixture.present });
+      const b = await kernel.request({ capability: contract.id, ref: fixture.present });
+      expect(a).not.toBeNull();
+      expect(b).not.toBeNull();
+
+      expect(
+        surfaces.active,
+        '重复派发开出了多个实例——它们会同时放音频、同时占 WebGL 上下文',
+      ).toHaveLength(1);
+      expect(b!.surfaceId).toBe(a!.surfaceId);
+
+      await b!.close();
+      expect(surfaces.active).toHaveLength(0);
     });
 
     it('资源不在清单里时 can() 为假——不画按钮，而不是点了才 404', () => {
-      const kernel = boot();
+      const { kernel } = boot();
       expect(kernel.can(contract.id, fixture.present)).toBe(true);
       expect(kernel.can(contract.id, fixture.absent)).toBe(false);
     });
 
     it('派发意图能挂载', async () => {
-      const kernel = boot();
+      const { kernel } = boot();
       const handle = await kernel.request({ capability: contract.id, ref: fixture.present });
       expect(handle).not.toBeNull();
       expect(handle!.pluginId).toBe(fixture.createPlugin().manifest.id);
@@ -77,7 +86,7 @@ export function runCapabilityConformance(fixture: CapabilityFixture): void {
     });
 
     it('容忍未知参数——契约会长出新参数，老实现不能因此崩', async () => {
-      const kernel = boot();
+      const { kernel } = boot();
       const handle = await kernel.request({
         capability: contract.id,
         ref: fixture.present,
@@ -89,7 +98,7 @@ export function runCapabilityConformance(fixture: CapabilityFixture): void {
     });
 
     it('关闭是幂等的——治理器会反复调', async () => {
-      const kernel = boot();
+      const { kernel } = boot();
       const handle = await kernel.request({ capability: contract.id, ref: fixture.present });
       await handle!.close();
       await expect(handle!.close()).resolves.toBeUndefined();
@@ -101,7 +110,7 @@ export function runCapabilityConformance(fixture: CapabilityFixture): void {
       // 挂载不该阻塞在墙钟上。
       vi.useFakeTimers();
       try {
-        const kernel = boot();
+        const { kernel } = boot();
         const handle = await kernel.request({ capability: contract.id, ref: fixture.present });
         await handle!.close();
 
@@ -121,7 +130,7 @@ export function runCapabilityConformance(fixture: CapabilityFixture): void {
       it('被驱动时发 progress——只能打开不能回话的东西是跳转链接，不是插件', async () => {
         vi.useFakeTimers();
         try {
-          const kernel = boot();
+          const { kernel } = boot();
           const seen: { position: number }[] = [];
           kernel.events.on('progress', (p) => seen.push({ position: p.position }));
 

@@ -29,6 +29,9 @@
       ],
       "@aio/conformance": [
         "./packages/conformance/src/index.ts"
+      ],
+      "@aio/plugin-adv": [
+        "./packages/plugin-adv/src/index.ts"
       ]
     },
     "baseUrl": ".",

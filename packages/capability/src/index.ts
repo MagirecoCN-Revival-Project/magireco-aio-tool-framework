@@ -47,13 +47,20 @@ export interface CapabilityContract {
    */
   readonly emits: readonly FrameworkEventName[];
   /**
-   * 会不会占 WebGL 上下文。
+   * 这个能力的实现**通常**是否需要 WebGL 上下文。**参考值，不是判据。**
    *
-   * 契约里钉死是因为它不是实现细节：浏览器同时活着的上下文有硬上限，
-   * 超了**不报错**，只是最早那个被静默丢弃（铁律 5）。
-   * 一个占了 WebGL 却不声明的实现，会让别人已经打开的查看器突然变黑。
+   * > 这里原本叫 `usesWebGL`，而且一致性套件断言「实现必须与契约相等」。
+   * > 写第二个 `adv.play` 实现时发现那是错的：同一个能力，DOM 舞台不占
+   * > WebGL，Pixi/Cubism 舞台占。**它是实现属性，不是能力属性**，
+   * > 断言相等会把合法实现判成不合规。
+   * >
+   * > 这正是 ADR 0002 那句「没有一个能跑的实现，契约一定设计错」当场应验。
+   *
+   * 真正该声明它的地方是 `PluginManifest.usesWebGL`——内核的上下文治理器读那里。
+   * 声明不足的后果不是报错，是浏览器静默丢弃最早的上下文（铁律 5）；
+   * 但那件事没法由测试自动查出来，只能靠实现者诚实，所以这里不假装能验。
    */
-  readonly usesWebGL: boolean;
+  readonly webglTypical: boolean;
 }
 
 const contract = (c: CapabilityContract): CapabilityContract => c;
@@ -66,7 +73,7 @@ export const MODEL3D_SHOW = contract({
     { name: 'animation', type: 'string', required: false, note: '起始动画名，缺省为静止姿态' },
   ],
   emits: [],
-  usesWebGL: true,
+  webglTypical: true,
 });
 
 export const SPRITE_SHOW = contract({
@@ -78,7 +85,7 @@ export const SPRITE_SHOW = contract({
     { name: 'paused', type: 'boolean', required: false, note: '是否挂起后再起播' },
   ],
   emits: [],
-  usesWebGL: true,
+  webglTypical: true,
 });
 
 export const LIVE2D_SHOW = contract({
@@ -90,7 +97,7 @@ export const LIVE2D_SHOW = contract({
     { name: 'motion', type: 'string', required: false, note: '起始动作' },
   ],
   emits: ['entity.focused'],
-  usesWebGL: true,
+  webglTypical: true,
 });
 
 export const ADV_PLAY = contract({
@@ -104,7 +111,7 @@ export const ADV_PLAY = contract({
   // 进度回流是这个能力存在的意义之一：阅读器据此高亮当前行，
   // 而它从未 import 过播放器。不发 progress 的实现只是个播放窗口。
   emits: ['progress', 'entity.focused'],
-  usesWebGL: true,
+  webglTypical: true,
 });
 
 export const SEARCH_QUERY = contract({
@@ -113,7 +120,7 @@ export const SEARCH_QUERY = contract({
   accepts: ['character'],
   params: [{ name: 'q', type: 'string', required: false, note: '查询串' }],
   emits: ['entity.focused'],
-  usesWebGL: false,
+  webglTypical: false,
 });
 
 export const CONTRACTS: readonly CapabilityContract[] = [

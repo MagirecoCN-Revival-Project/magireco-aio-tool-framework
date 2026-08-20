@@ -40,7 +40,7 @@ function referenceModel3d(): Plugin {
       version: '0.0.0',
       title: '参考 3D 实现',
       isolation: 'inline',
-      usesWebGL: MODEL3D_SHOW.usesWebGL,
+      usesWebGL: MODEL3D_SHOW.webglTypical,
       provides: [{ id: MODEL3D_SHOW.id, accepts: [...MODEL3D_SHOW.accepts], title: MODEL3D_SHOW.title }],
     },
     async mount(_target, intent, host) {
@@ -51,6 +51,11 @@ function referenceModel3d(): Plugin {
         suspend() {},
         resume() {},
         dispose() {},
+        // 契约要求能就地换资源：没有 update()，重复派发会开出第二个实例。
+        // 这个参考实现不渲染，所以换资源只需重新解析一次。
+        update(next) {
+          host.resources.resolve(next.ref);
+        },
       };
     },
   };
@@ -64,7 +69,7 @@ function referenceAdv(): Plugin {
       version: '0.0.0',
       title: '参考 ADV 实现',
       isolation: 'inline',
-      usesWebGL: ADV_PLAY.usesWebGL,
+      usesWebGL: ADV_PLAY.webglTypical,
       provides: [{ id: ADV_PLAY.id, accepts: [...ADV_PLAY.accepts], title: ADV_PLAY.title }],
     },
     async mount(_target, intent, host) {
@@ -89,6 +94,11 @@ function referenceAdv(): Plugin {
           // 不清掉它，套件的「关闭之后不再发事件」当场就红——
           // 这条判据抓的正是这类泄漏。
           clearInterval(timer);
+        },
+        update(next) {
+          host.resources.resolve(next.ref);
+          const l = next.params?.['line'];
+          if (typeof l === 'number') line = l;
         },
       };
     },
