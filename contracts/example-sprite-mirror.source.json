@@ -1,0 +1,21 @@
+{
+  "id": "kyu-sprite",
+  "repo": "MagirecoCN-Revival-Project/example-sprite-mirror",
+  "publish": "allowed",
+  "mount": "/viewer/sprite/",
+  "pages_project": "aio-viewer-sprite",
+  "integration": "static",
+  "phase": 1,
+  "budget": {
+    "files": 1000,
+    "bytes": 104857600,
+    "measured": false
+  },
+  "assets": {
+    "prefix": "sprite/",
+    "manifest": "manifest.json",
+    "approx_files": 8100,
+    "approx_bytes": 3326083072
+  },
+  "license_note": "cocos2d-html5 引擎 + 4025 组战斗精灵；精灵素材归版权方，全部外置到资产面。"
+}

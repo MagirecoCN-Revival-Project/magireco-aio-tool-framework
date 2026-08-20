@@ -1,0 +1,21 @@
+{
+  "id": "viewer-sp",
+  "repo": "another-org/example-live2d-viewer",
+  "publish": "allowed",
+  "mount": "/viewer/sp/",
+  "pages_project": "aio-viewer-sp",
+  "integration": "static",
+  "phase": 2,
+  "budget": {
+    "files": 500,
+    "bytes": 52428800,
+    "measured": false
+  },
+  "assets": {
+    "prefix": "sp/",
+    "manifest": "manifest.json",
+    "approx_files": 48964,
+    "approx_bytes": 6207569920
+  },
+  "license_note": "图片素材归版权方。48,964 张图必须全部外置——留在 Pages 项目里是文件数上限的 2.4 倍。"
+}

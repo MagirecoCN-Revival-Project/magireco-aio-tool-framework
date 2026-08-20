@@ -1,0 +1,26 @@
+{
+  "id": "example-model-viewer",
+  "repo": "CyberNova2333/example-model-viewer",
+  "publish": "allowed",
+  "mount": "/viewer/3d/",
+  "pages_project": "aio-viewer-3d",
+  "integration": "build",
+  "phase": 1,
+  "build": {
+    "command": "npm ci && npm run build",
+    "output": "dist",
+    "node": "22"
+  },
+  "budget": {
+    "files": 400,
+    "bytes": 52428800,
+    "measured": false
+  },
+  "assets": {
+    "prefix": "3d/",
+    "manifest": "manifest.json",
+    "approx_files": 1200,
+    "approx_bytes": 734003200
+  },
+  "license_note": "代码可用；模型素材归版权方，进资产面并支持整片下架。沿用其 edgeone.json 的 *.gz Content-Encoding 约定。"
+}

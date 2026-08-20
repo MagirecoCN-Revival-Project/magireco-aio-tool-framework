@@ -1,0 +1,26 @@
+{
+  "id": "example-adv-live2d",
+  "repo": "CyberNova2333/example-adv-live2d",
+  "publish": "allowed",
+  "mount": "/viewer/live2d/",
+  "pages_project": "aio-viewer-live2d",
+  "integration": "build",
+  "phase": 2,
+  "build": {
+    "command": "npm ci && npm run build",
+    "output": "dist",
+    "node": "22"
+  },
+  "budget": {
+    "files": 800,
+    "bytes": 104857600,
+    "measured": false
+  },
+  "assets": {
+    "prefix": "live2d/",
+    "manifest": "manifest.json",
+    "approx_files": 12000,
+    "approx_bytes": 7386169344
+  },
+  "license_note": "Cubism SDK 内嵌；Live2D 模型、HCA/OGG、WebM 归版权方，进资产面。Pixi 版本已 pin，接入时不得引入版本竞争。"
+}

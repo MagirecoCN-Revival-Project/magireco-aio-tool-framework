@@ -1,0 +1,9 @@
+{
+  "id": "example-reader",
+  "repo": "CyberNova2333/example-reader",
+  "publish": "allowed",
+  "mount": "/story/",
+  "integration": "proxy",
+  "phase": 3,
+  "license_note": "🔴 明确未授予任何开源许可：只能以 EdgeOne 路由规则反代其既有 Cloudflare 部署，不占 Pages 项目、不得 vendor、不得再分发其内容。"
+}

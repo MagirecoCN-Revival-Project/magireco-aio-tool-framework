@@ -1,0 +1,8 @@
+{
+  "id": "example-user-archive",
+  "repo": "MagirecoCN-Revival-Project/example-user-archive",
+  "publish": "forbidden",
+  "integration": "none",
+  "phase": 5,
+  "license_note": "🔴 私有仓库，190 名真实玩家的 55 天流量归档。即便已脱敏也不进公开面；API 规格浏览器只能在鉴权后台且 noindex。"
+}

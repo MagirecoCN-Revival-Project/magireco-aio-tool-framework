@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MagirecoCN-Revival-Project/magireco-aio-tool-framework/contracts/aio-source.schema.json",
+  "title": "AIO 上游接线契约",
+  "description": "每个上游仓库一份。AIO 只认这份契约，不认上游实现。分类由人写死，不由脚本推断。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "repo", "publish", "license_note"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "AIO 内部标识，全局唯一"
+    },
+    "repo": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$",
+      "description": "owner/name，必须在 repository-policy.json 中登记"
+    },
+    "publish": {
+      "enum": ["allowed", "forbidden"],
+      "description": "是否允许出现在公开面。必须与 repository-policy.json 一致"
+    },
+    "mount": {
+      "type": "string",
+      "pattern": "^/([a-z0-9-]+/)*$",
+      "description": "统一域名下的挂载路径，以 / 开头和结尾。publish=forbidden 时禁止出现"
+    },
+    "pages_project": {
+      "type": "string",
+      "pattern": "^aio-[a-z0-9-]+$",
+      "description": "EdgeOne Pages 项目名。publish=forbidden 时禁止出现"
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "output"],
+      "properties": {
+        "command": { "type": "string" },
+        "output": { "type": "string" },
+        "node": { "type": "string" },
+        "ref": { "type": "string", "description": "构建用的分支/标签，缺省为默认分支" }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["files", "bytes"],
+      "description": "该 Pages 项目部署产物的预算。必须小于 platform_limits.pages_project",
+      "properties": {
+        "files": { "type": "integer", "minimum": 1 },
+        "bytes": { "type": "integer", "minimum": 1 },
+        "measured": { "type": "boolean", "description": "false = 估算值，上线前必须实测回填" }
+      }
+    },
+    "assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prefix", "manifest"],
+      "description": "外置到资产面的部分",
+      "properties": {
+        "prefix": { "type": "string", "pattern": "^[a-z0-9-]+/$" },
+        "manifest": { "type": "string" },
+        "approx_files": { "type": "integer", "minimum": 0 },
+        "approx_bytes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "integration": {
+      "enum": ["build", "static", "proxy", "link", "none"],
+      "description": "build=AIO 构建其源码；static=直接取仓库静态文件；proxy=反代其既有部署；link=只在门户放链接；none=不接入公开面"
+    },
+    "license_note": {
+      "type": "string",
+      "description": "一句话说明许可约束，详见 docs/CONSTRAINTS.md"
+    },
+    "phase": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 6,
+      "description": "计划在哪个阶段接入，见 docs/AIO-ROADMAP.md"
+    }
+  }
+}

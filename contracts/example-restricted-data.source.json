@@ -1,0 +1,8 @@
+{
+  "id": "wiki-data",
+  "repo": "MagirecoCN-Revival-Project/example-restricted-data",
+  "publish": "forbidden",
+  "integration": "none",
+  "phase": 5,
+  "license_note": "🔴 上游自带 repository-policy.json + CI 禁止任何公开托管；2026-08-15 公开站已退役。资料能力只能进鉴权后台，且须先由维护者拍板。"
+}

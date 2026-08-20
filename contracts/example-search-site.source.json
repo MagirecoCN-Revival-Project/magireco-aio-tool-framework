@@ -1,0 +1,15 @@
+{
+  "id": "call-search",
+  "repo": "CyberNova2333/example-search-site",
+  "publish": "allowed",
+  "mount": "/search/",
+  "pages_project": "aio-search",
+  "integration": "static",
+  "phase": 4,
+  "budget": {
+    "files": 400,
+    "bytes": 99614720,
+    "measured": false
+  },
+  "license_note": "fork 自 third-party-author/character-story-search，须保留原作者署名与原始项目链接。接入前清掉入库的 node_modules 与 9 个 .deploy-*-trigger 文件。"
+}

@@ -1,0 +1,9 @@
+# 本仓库是控制面：不装依赖、不装产物、不装资源。
+node_modules/
+dist/
+.open-next/
+__pycache__/
+*.pyc
+.venv/
+work/
+.DS_Store

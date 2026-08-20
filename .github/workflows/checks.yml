@@ -1,0 +1,28 @@
+name: checks
+
+# 只在 push / PR 上跑守卫。本仓库不产出对外产物，也不做自动发版——
+# 沿用 example-client CONTRIBUTING §四 的分工：检查类 workflow
+# 允许 push 触发，发布类一律手动。
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 安装 jsonschema（跑完整 schema 校验）
+        run: pip install --quiet jsonschema
+
+      - name: 契约守卫自测（坏样本必须被拦下）
+        run: python3 tools/test-check-sources.py
+
+      - name: 契约守卫
+        run: python3 tools/check-sources.py
