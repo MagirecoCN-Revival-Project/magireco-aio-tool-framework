@@ -338,6 +338,90 @@ def check_branches(refs):
     return problems
 
 
+# ── 五、资源与代码分离（铁律 9）────────────────────────────────
+
+_ASSET_RULES = []
+
+
+def asset_rules():
+    """借 tools/check-assets.py 的规则表，而不是在这里再抄一份。
+
+    两处各写一份，迟早只改一处——而这条铁律漏一次的代价是 git 历史里
+    永久留着一个我们无权以 GPLv3 分发的文件。
+    """
+    if _ASSET_RULES:
+        return _ASSET_RULES[0]
+    import importlib.util
+    r = sh("git", "rev-parse", "--show-toplevel")
+    if r.returncode != 0:
+        return None
+    path = os.path.join(r.stdout.strip(), "tools", "check-assets.py")
+    if not os.path.exists(path):
+        return None
+    spec = importlib.util.spec_from_file_location("aio_check_assets", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    _ASSET_RULES.append(mod)
+    return mod
+
+
+def check_assets(refs):
+    """本次推送新增的提交里，有没有版权素材被加进来。
+
+    查的是提交对象而不是工作区：素材可以在提交之后从工作区删掉，
+    但它已经在历史里了，而推上去就再也收不回来。
+    """
+    mod = asset_rules()
+    if mod is None:
+        return []                                    # 拿不到规则表就不查（fail-open）
+    bad = []
+    for sha, _branch in iter_new(refs):
+        r = sh("git", "diff-tree", "--no-commit-id", "--name-only", "-r",
+               "--diff-filter=AM", sha)
+        if r.returncode != 0:
+            continue
+        for rel in r.stdout.split("\n"):
+            rel = rel.strip()
+            if not rel or rel in mod.ALLOW:
+                continue
+            kind = mod.kind_of(rel.rsplit("/", 1)[-1])
+            if kind:
+                bad.append((sha[:8], rel, kind + "素材"))
+                continue
+            hit = next((s for s in rel.split("/")[:-1]
+                        if s.lower() in mod.ASSET_DIRS), None)
+            if hit:
+                bad.append((sha[:8], rel, "资源目录 %s/" % hit))
+                continue
+            sz = sh("git", "cat-file", "-s", "%s:%s" % (sha, rel))
+            if sz.returncode != 0:
+                continue
+            try:
+                n = int(sz.stdout.strip())
+            except ValueError:
+                continue
+            if n > mod.MAX_FILE_BYTES:
+                bad.append((sha[:8], rel, "体积 %s" % mod.human(n)))
+    return bad
+
+
+def report_assets(bad):
+    sys.stderr.write("\n✗ 铁律 9：资源与代码必须分离，版权文件一个都不能进仓库\n\n")
+    for sha, rel, why in bad:
+        sys.stderr.write("  %s  %s\n      %s\n" % (sha, rel, why))
+    sys.stderr.write(
+        "\n  本仓库以 GPLv3 公开分发。游戏素材的版权不在我们手里，"
+        "把它放进这棵树\n"
+        "  等于替版权方做出一个我们无权做出的授权声明。\n"
+        "  而且 git 历史不可逆——推上去之后，删掉只让 HEAD 干净，"
+        "历史里那份仍在被分发。\n\n"
+        "  素材的去处是资源面（COS + EdgeOne CDN），"
+        "由 @aio/resource 按 ref 取用。\n"
+        "  确认是误伤: 在 tools/check-assets.py 的 ALLOW 里按路径登记并写明理由\n"
+        "  确需跳过: SKIP_ASSET_HOOK=1 git push ...  "
+        "（等于明知故推，请先想清楚上一段）\n\n")
+
+
 def report_branches(problems):
     sys.stderr.write("\n✘ push 被 pre-push 钩子拦下：正在新建分支\n\n")
     for i, p in enumerate(problems, 1):
@@ -402,6 +486,7 @@ def main():
         ("SKIP_POLICY_HOOK", "发布禁令检查", check_policy, report_policy),
         ("SKIP_REDLIGHT_HOOK", "红灯闸门", check_redlight, report_redlight),
         ("SKIP_BRANCH_HOOK", "分支纪律检查", check_branches, report_branches),
+        ("SKIP_ASSET_HOOK", "资源分离检查", check_assets, report_assets),
     ):
         if os.environ.get(env):
             sys.stderr.write("pre-push: %s=1，跳过%s\n" % (env, name))

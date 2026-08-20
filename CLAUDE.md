@@ -50,6 +50,21 @@
    沙箱、事件循环、响应式一律用平台原语（ES modules / iframe / MessagePort /
    AbortController）。凡是平台或标准库有的，不重造。
 
+9. **🔴 资源与代码必须分离，版权文件一个都不能进仓库**（受 `pre-push` 钩子
+   与 `tools/check-assets.py` 保护）。
+   本仓库以 **GPLv3 公开分发**，而游戏素材（立绘、语音、BGM、模型、剧情文本）
+   的版权在 各自的版权方手里——我们没有任何权利去授予。
+   一个版权文件进了这棵树，后果不是「多了个大文件」：
+
+   - 它让整份 GPLv3 分发变成一个**我们无权做出的授权声明**；
+   - **git 历史不可逆**。删掉它只让当前 HEAD 干净，历史里那份仍在被分发；
+     要真抹掉得改写历史并强推，而所有下游克隆不会自动跟着改；
+   - 下架请求来时，我们能下架的只有资源面，下不了别人手上的克隆。
+
+   所以判据是**一个都不能进**，不是「少放一点」。素材的去处是资源面
+   （COS + EdgeOne CDN），经 `@aio/resource` 的清单按 ref 取用。
+   这条同时是铁律 3 的上游：插件不碰 URL，正是因为 URL 后面的东西不属于我们。
+
 ## 提交约定
 
 - commit 信息用 **Conventional Commits 前缀 + 中文描述**：
@@ -87,6 +102,7 @@ bash tools/install-hooks.sh      # Windows 不想开 Git Bash 就跑 tools\insta
 | | 新建远端分支违反 AGENTS.md §0 | `SKIP_BRANCH_HOOK=1 git push` |
 | | 改动删掉了两条发布禁令（铁律 7） | `SKIP_POLICY_HOOK=1 git push` |
 | | 红灯期间推非修复类提交到 main | `SKIP_REDLIGHT_HOOK=1 git push` |
+| | 本次推送把版权素材加进了历史（铁律 9） | `SKIP_ASSET_HOOK=1 git push` |
 | `agent-guard.py` | `--no-verify` 与 `-c core.hooksPath=…`（绕过且不留痕迹） | 无——请改用上面的逃生口 |
 
 两个 git 钩子分两层：`commit-msg` / `pre-push` 是 POSIX sh 的启动层，只负责找一个

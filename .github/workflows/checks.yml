@@ -44,3 +44,20 @@ jobs:
 
       - name: 契约守卫
         run: python3 tools/check-sources.py
+
+  assets:
+    runs-on: ubuntu-latest
+    steps:
+      # 铁律 9 要查的是「有没有版权文件进过这棵树」，只看一个浅克隆的 HEAD
+      # 是不够的——但至少要把当前树查干净。历史体检另见 tools/check-assets.py 的说明。
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 资源分离守卫自测（坏样本必须被拦下）
+        run: python3 tools/test-check-assets.py
+
+      - name: 资源与代码分离守卫（铁律 9）
+        run: python3 tools/check-assets.py
