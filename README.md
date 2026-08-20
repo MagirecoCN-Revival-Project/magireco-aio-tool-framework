@@ -25,6 +25,7 @@
 | `@aio/plugin-model-3d` | `example-model-viewer` 的插件封装。上游那两个类**注入**进来，所以本仓库不依赖 three.js，判据也能在 node 上跑 |
 | `@aio/plugin-adv` | `adv.play` 的实现：worksheet 解析器 + 渲染无关的播放引擎，舞台注入。**不碰上游** |
 | `@aio/plugin-sprite` | `sprite.show` 的实现：CocosStudio 骨骼解析器 + 渲染无关的帧播放器，舞台注入。**不碰上游** |
+| `@aio/plugin-search` | `search.query` 的实现：跨中/日/罗马字/假名/别名匹配（片假名折叠），结果 ref 化。**不碰上游** |
 
 ```bash
 npm install

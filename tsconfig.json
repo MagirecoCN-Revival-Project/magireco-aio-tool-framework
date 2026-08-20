@@ -35,6 +35,9 @@
       ],
       "@aio/plugin-sprite": [
         "./packages/plugin-sprite/src/index.ts"
+      ],
+      "@aio/plugin-search": [
+        "./packages/plugin-search/src/index.ts"
       ]
     },
     "baseUrl": ".",
