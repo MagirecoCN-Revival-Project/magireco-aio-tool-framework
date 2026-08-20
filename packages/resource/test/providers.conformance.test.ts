@@ -3,7 +3,7 @@ import {
   runResourceProviderConformance,
   SHA,
   type ProviderFixture,
-} from './conformance.js';
+} from '@aio/conformance';
 
 /**
  * 同一套判据，两个实现各跑一遍。

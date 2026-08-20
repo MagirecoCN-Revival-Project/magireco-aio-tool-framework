@@ -20,6 +20,8 @@
 | `@aio/resource` | `ResourceProvider` 接口 + 两个实现：`ManifestCdnProvider`（清单、多源回退、https 强制、sha256）与 `StaticProvider`（离线包／本地目录）。一致性套件不 import 任何实现 |
 | `@aio/kernel` | 插件注册、意图派发、surface 生命周期、WebGL 上下文治理、iframe RPC 桥 |
 | `@aio/plugin-sdk` | `definePlugin` + 无头测试宿主 |
+| `@aio/capability` | 能力契约：每个能力**能被怎么用**（接受的 kind、参数、必发的事件、占不占 WebGL）。零依赖于任何实现 |
+| `@aio/conformance` | 一致性套件。不 import 任何具体实现——「换一个实现宿主零改动」因此可验证 |
 | `@aio/plugin-model-3d` | `example-model-viewer` 的插件封装。上游那两个类**注入**进来，所以本仓库不依赖 three.js，判据也能在 node 上跑 |
 
 ```bash

@@ -23,6 +23,12 @@
       ],
       "@aio/plugin-model-3d": [
         "./packages/plugin-model-3d/src/index.ts"
+      ],
+      "@aio/capability": [
+        "./packages/capability/src/index.ts"
+      ],
+      "@aio/conformance": [
+        "./packages/conformance/src/index.ts"
       ]
     },
     "baseUrl": ".",
