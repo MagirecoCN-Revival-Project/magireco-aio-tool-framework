@@ -2,15 +2,32 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "paths": {
-      "@aio/core": ["./packages/core/src/index.ts"],
-      "@aio/registry": ["./packages/registry/src/index.ts"],
-      "@aio/resource": ["./packages/resource/src/index.ts"],
-      "@aio/kernel": ["./packages/kernel/src/index.ts"],
-      "@aio/plugin-sdk": ["./packages/plugin-sdk/src/index.ts"]
+      "@aio/core": [
+        "./packages/core/src/index.ts"
+      ],
+      "@aio/registry": [
+        "./packages/registry/src/index.ts"
+      ],
+      "@aio/resource": [
+        "./packages/resource/src/index.ts"
+      ],
+      "@aio/kernel": [
+        "./packages/kernel/src/index.ts"
+      ],
+      "@aio/plugin-sdk": [
+        "./packages/plugin-sdk/src/index.ts"
+      ]
     },
     "baseUrl": "."
   },
-  "include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts", "vitest.config.ts"]
+  "include": [
+    "packages/*/src/**/*.ts",
+    "packages/*/test/**/*.ts",
+    "apps/*/src/**/*.ts",
+    "vitest.config.ts"
+  ]
 }

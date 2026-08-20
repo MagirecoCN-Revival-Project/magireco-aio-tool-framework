@@ -195,3 +195,41 @@ describe('WebGL 上下文治理', () => {
     expect(kernel.liveWebGLCount()).toBe(1);
   });
 });
+
+describe('插件卸载', () => {
+  it('卸载后 can() 立刻为 false，按钮随之消失', async () => {
+    const { kernel, rec } = makeKernel();
+    kernel.register(fakePlugin('adv', { capability: 'adv.play', accepts: ['scenario'] }, rec));
+    expect(kernel.can('adv.play', refs.scenario)).toBe(true);
+
+    await kernel.unregister('adv');
+    expect(kernel.can('adv.play', refs.scenario)).toBe(false);
+    expect(kernel.plugins).toEqual([]);
+    expect(await kernel.request({ capability: 'adv.play', ref: refs.scenario })).toBeNull();
+  });
+
+  it('卸载会关掉它开着的 surface 并归还宿主容器', async () => {
+    const { kernel, rec, surfaces } = makeKernel();
+    kernel.register(fakePlugin('adv', { capability: 'adv.play', accepts: ['scenario'] }, rec));
+    await kernel.request({ capability: 'adv.play', ref: refs.scenario });
+    expect(kernel.openSurfaces).toHaveLength(1);
+
+    await kernel.unregister('adv');
+    expect(rec.calls).toContain('adv:dispose');
+    expect(kernel.openSurfaces).toEqual([]);
+    expect(surfaces.active).toEqual([]);
+  });
+
+  it('卸载其中一个提供者，另一个仍在', async () => {
+    const { kernel, rec } = makeKernel();
+    kernel.register(fakePlugin('a', { capability: 'adv.play', accepts: ['scenario'] }, rec));
+    kernel.register(fakePlugin('b', { capability: 'adv.play', accepts: ['scenario'], priority: 5 }, rec));
+    await kernel.unregister('b');
+    expect(kernel.providersFor('adv.play', refs.scenario)).toEqual(['a']);
+  });
+
+  it('卸载不存在的插件是无操作', async () => {
+    const { kernel } = makeKernel();
+    await expect(kernel.unregister('nope')).resolves.toBeUndefined();
+  });
+});

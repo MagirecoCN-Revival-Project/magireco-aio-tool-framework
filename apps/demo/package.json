@@ -1,0 +1,13 @@
+{
+  "name": "@aio/demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@aio/core": "0.1.0",
+    "@aio/kernel": "0.1.0",
+    "@aio/registry": "0.1.0",
+    "@aio/resource": "0.1.0"
+  }
+}

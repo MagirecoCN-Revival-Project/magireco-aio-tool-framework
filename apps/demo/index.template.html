@@ -1,0 +1,271 @@
+<title>AIO 插件内核</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#F6F5F8; --surface:#FFFFFF; --sunken:#EFEDF3;
+  --ink:#1C1A24; --ink-2:#434052; --muted:#6C6880; --rule:#E1DEE8;
+  --signal:#A8690F; --signal-soft:#F6EBD8;
+  --ok:#2C7263; --ok-soft:#DDEDE8;
+  --off:#93505F; --off-soft:#F4E4E7;
+  --u-a:#4B59A8; --u-b:#8A4E90;
+  --shadow:0 1px 2px rgba(28,26,36,.06),0 6px 20px rgba(28,26,36,.05);
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI","Noto Sans SC",sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#131218; --surface:#1B1A22; --sunken:#100F15;
+    --ink:#E7E4F0; --ink-2:#BCB7CC; --muted:#8E89A2; --rule:#2C2936;
+    --signal:#E0A84A; --signal-soft:#332812;
+    --ok:#54B49C; --ok-soft:#14302A;
+    --off:#C9808F; --off-soft:#34191F;
+    --u-a:#8D99E8; --u-b:#C289C9;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#131218; --surface:#1B1A22; --sunken:#100F15;
+  --ink:#E7E4F0; --ink-2:#BCB7CC; --muted:#8E89A2; --rule:#2C2936;
+  --signal:#E0A84A; --signal-soft:#332812;
+  --ok:#54B49C; --ok-soft:#14302A;
+  --off:#C9808F; --off-soft:#34191F;
+  --u-a:#8D99E8; --u-b:#C289C9;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 22px 64px;
+  display:flex;flex-direction:column;gap:26px}
+code,.mono{font-family:var(--mono)}
+h1,h2,h3{text-wrap:balance;margin:0}
+.eyebrow{font-family:var(--cond);font-weight:600;font-size:11.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--muted)}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+/* ── 页头 ─────────────────────────────────────────── */
+header{display:flex;flex-direction:column;gap:10px;padding-bottom:22px;
+  border-bottom:1px solid var(--rule)}
+h1{font-size:clamp(26px,4vw,36px);font-weight:700;letter-spacing:-.018em}
+.thesis{max-width:62ch;color:var(--ink-2);font-size:16px}
+.thesis b{color:var(--ink);font-weight:600}
+.disclaim{font-size:13px;color:var(--muted);max-width:70ch}
+
+/* ── 插件架 ───────────────────────────────────────── */
+.rack-box{background:var(--surface);border:1px solid var(--rule);border-radius:10px;
+  padding:16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
+.rack{display:flex;flex-wrap:wrap;gap:10px}
+.chip{display:flex;align-items:center;gap:9px;padding:8px 13px;border-radius:8px;
+  border:1px solid var(--rule);background:var(--sunken);cursor:pointer;
+  transition:border-color .14s,background .14s}
+.chip.on{border-color:var(--ok);background:var(--ok-soft)}
+.chip input{accent-color:var(--ok);margin:0;cursor:pointer}
+.chip-name{font-weight:600;font-size:14px}
+.chip-caps{font-size:11.5px;color:var(--muted)}
+.iso{font-family:var(--cond);font-size:10.5px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;padding:2px 7px;border-radius:4px;border:1px solid var(--rule);
+  color:var(--muted);background:var(--surface)}
+.iso-iframe{color:var(--u-b);border-color:var(--u-b)}
+.hint{font-size:13.5px;color:var(--ink-2)}
+.hint b{color:var(--signal)}
+
+/* ── 主栅格 ───────────────────────────────────────── */
+.grid{display:grid;gap:20px;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:10px;
+  box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+.card > .card-head{padding:14px 18px 12px;border-bottom:1px solid var(--rule);
+  display:flex;flex-direction:column;gap:4px}
+.card-head h2{font-size:15px;font-weight:600}
+.card-body{padding:14px 18px 18px;display:flex;flex-direction:column;gap:12px}
+.state{font-size:13px;padding:7px 11px;border-radius:6px;border:1px solid transparent}
+.state.ok{color:var(--ok);background:var(--ok-soft);border-color:var(--ok)}
+.state.off{color:var(--off);background:var(--off-soft);border-color:var(--off)}
+
+/* ── 剧本 ─────────────────────────────────────────── */
+#script{display:flex;flex-direction:column}
+.line{display:grid;grid-template-columns:5.6em minmax(0,1fr) auto;gap:10px;align-items:baseline;
+  padding:7px 9px;border-radius:6px;border-left:2px solid transparent;transition:background .18s}
+.line.on{background:var(--signal-soft);border-left-color:var(--signal)}
+.who{font-size:12px;color:var(--muted);font-family:var(--cond);font-weight:600;
+  letter-spacing:.04em;text-align:right}
+.line.on .who{color:var(--signal)}
+.text{font-size:14px;color:var(--ink-2)}
+.line.on .text{color:var(--ink)}
+.play{border:1px solid var(--rule);background:var(--surface);color:var(--signal);
+  font-size:12px;padding:3px 9px;border-radius:5px;white-space:nowrap;
+  transition:border-color .14s,background .14s}
+.play:hover{border-color:var(--signal);background:var(--signal-soft)}
+
+/* ── 角色 ─────────────────────────────────────────── */
+#chars{display:flex;flex-direction:column;gap:10px}
+.char{border:1px solid var(--rule);border-radius:8px;padding:11px 13px;background:var(--sunken);
+  display:flex;flex-direction:column;gap:8px}
+.char-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.char-name{font-weight:600;font-size:14.5px}
+.ref{font-family:var(--mono);font-size:11.5px;padding:2px 6px;border-radius:4px;
+  background:var(--surface);border:1px solid var(--rule);color:var(--ink-2)}
+.ref.u-a{color:var(--u-a);border-color:var(--u-a)}
+.ref.u-b{color:var(--u-b);border-color:var(--u-b)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.act{border:1px solid var(--ok);background:var(--ok-soft);color:var(--ok);
+  font-size:12.5px;padding:4px 11px;border-radius:6px}
+.act:hover{filter:brightness(.96)}
+.muted{color:var(--muted);font-size:12.5px}
+
+/* ── surface 栈 ───────────────────────────────────── */
+#stack{display:flex;flex-direction:column;gap:12px}
+.surface{border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--sunken)}
+.surface-bar{display:flex;align-items:center;gap:8px;padding:6px 10px;
+  border-bottom:1px solid var(--rule);background:var(--surface)}
+.sid{font-family:var(--mono);font-size:11px;color:var(--muted);flex:1}
+.mini{border:1px solid var(--rule);background:var(--surface);color:var(--ink-2);
+  font-size:11.5px;padding:2px 8px;border-radius:5px}
+.mini:hover{border-color:var(--signal);color:var(--signal)}
+.surface-inner{padding:12px}
+.sf-head{display:flex;align-items:baseline;gap:9px;margin-bottom:9px;flex-wrap:wrap}
+.sf-title{font-weight:600;font-size:13.5px}
+.sf-body{display:flex;flex-direction:column;gap:9px}
+.adv-stage,.model-stage{height:88px;border-radius:6px;border:1px dashed var(--rule);
+  display:grid;place-items:center;background:var(--surface);transition:opacity .2s}
+.adv-stage::after{content:"ADV 舞台（占位）";font-size:11.5px;color:var(--muted)}
+.model-stage .glyph{font-size:34px;color:var(--u-b)}
+.suspended{opacity:.3}
+.adv-caption{margin:0;font-size:13px;color:var(--ink-2)}
+.meter{height:3px;background:var(--rule);border-radius:2px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--signal);transition:width .5s}
+.parts{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.parts li{display:flex;gap:7px;align-items:baseline;flex-wrap:wrap;font-size:11.5px}
+.role{font-family:var(--mono);color:var(--signal);font-size:11px}
+.parts .muted{font-size:11px;word-break:break-all;font-family:var(--mono)}
+.tag{font-size:10px;padding:1px 5px;border-radius:3px;background:var(--ok-soft);
+  color:var(--ok);border:1px solid var(--ok)}
+.note{margin:0;font-size:11.5px;color:var(--muted);font-family:var(--mono);word-break:break-all}
+.bad{color:var(--off);font-size:12px;margin:0}
+.frame{width:100%;height:150px;border:1px solid var(--rule);border-radius:6px;background:var(--sunken)}
+#stack-empty{color:var(--muted);font-size:13px;text-align:center;padding:26px 12px;
+  border:1px dashed var(--rule);border-radius:8px}
+.budget{display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--muted)}
+.num{font-family:var(--mono);font-weight:600;color:var(--ok);font-variant-numeric:tabular-nums}
+.num.warn{color:var(--signal)}
+
+/* ── 探针 ─────────────────────────────────────────── */
+.probes{display:flex;gap:9px;flex-wrap:wrap}
+.probe{border:1px solid var(--rule);background:var(--surface);color:var(--ink-2);
+  font-size:12.5px;padding:6px 12px;border-radius:6px}
+.probe:hover{border-color:var(--signal);color:var(--signal)}
+
+/* ── 日志 ─────────────────────────────────────────── */
+#log{font-family:var(--mono);font-size:12px;background:var(--sunken);
+  border:1px solid var(--rule);border-radius:8px;padding:11px 13px;
+  max-height:230px;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+.log-line{display:flex;gap:9px;align-items:baseline;word-break:break-word}
+.log-kind{font-family:var(--cond);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  padding:1px 6px;border-radius:3px;flex-shrink:0;min-width:4.6em;text-align:center;
+  border:1px solid var(--rule);color:var(--muted);background:var(--surface)}
+.log-intent .log-kind{color:var(--signal);border-color:var(--signal)}
+.log-guard .log-kind,.log-origin .log-kind{color:var(--u-a);border-color:var(--u-a)}
+.log-plugin .log-kind{color:var(--ok);border-color:var(--ok)}
+.log-focus .log-kind{color:var(--u-b);border-color:var(--u-b)}
+.log-bad .log-kind{color:var(--off);border-color:var(--off)}
+
+footer{border-top:1px solid var(--rule);padding-top:18px;color:var(--muted);font-size:13px;
+  display:flex;flex-direction:column;gap:6px}
+footer code{font-size:12px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">magireco-aio-tool-framework · 可操作演示</span>
+  <h1>AIO 插件内核</h1>
+  <p class="thesis">这一页跑的是仓库里的<b>真代码</b>——<code>Kernel</code>、<code>Registry</code>、
+    <code>ResourceClient</code>、<code>createIframePlugin</code> 全部原样打包进来。
+    要证明的只有一件事：<b>模块之间不互相 import、不知道对方存在，却能互相调用并回话。</b></p>
+  <p class="disclaim">三个插件的<em>内部渲染</em>是占位的（不真的跑 Live2D 或 three.js），
+    但它们与内核之间的接线是真的。角色与 ID 取自上游仓库实测；剧本文本是占位的，不是游戏原文。</p>
+</header>
+
+<section class="rack-box">
+  <span class="eyebrow">插件架</span>
+  <div class="rack" id="rack"></div>
+  <p class="hint"><b>先做这个：</b>取消勾选 <code>adv-player</code>。
+    剧本每一行的播放按钮会<b>整排消失</b>，而剧本照常可读——宿主依然自洽，只是少一项能力。
+    再勾回来，按钮立刻回来。这就是插件化与硬编码集成的分界。</p>
+</section>
+
+<div class="grid">
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <section class="card">
+      <div class="card-head">
+        <span class="eyebrow">宿主 · 剧情阅读器</span>
+        <h2>示例剧本 <code class="ref u-a">a:scenario/310241@zh</code></h2>
+      </div>
+      <div class="card-body">
+        <div class="state" id="adv-state"></div>
+        <div id="script"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <span class="eyebrow">宿主 · 角色档案</span>
+        <h2>按钮由「交叉表 + 已装插件」共同决定</h2>
+      </div>
+      <div class="card-body">
+        <div id="chars"></div>
+      </div>
+    </section>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <section class="card">
+      <div class="card-head">
+        <span class="eyebrow">交付 · surface 栈</span>
+        <h2>插件挂载在这里</h2>
+      </div>
+      <div class="card-body">
+        <div class="budget">WebGL 上下文预算
+          <span class="num" id="webgl">0 / 2</span>
+          <span class="muted">超额时最久未用的实例被挂起，不是被浏览器静默丢弃</span>
+        </div>
+        <div id="stack"></div>
+        <p id="stack-empty">还没有挂载任何插件。点左边的「▶ 从这行播」或「显示精灵」。</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <span class="eyebrow">机制探针</span>
+        <h2>那些「不报错才可怕」的地方</h2>
+      </div>
+      <div class="card-body">
+        <div class="probes">
+          <button class="probe" id="btn-bare">解析裸 ID「100101」</button>
+          <button class="probe" id="btn-collide">两个作品的同号角色</button>
+          <button class="probe" id="btn-fail">让主源连续失败</button>
+          <button class="probe" id="btn-missing">查一条不存在的资源</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<section class="card">
+  <div class="card-head">
+    <span class="eyebrow">派发日志</span>
+    <h2>意图怎么流动</h2>
+  </div>
+  <div class="card-body"><div id="log"></div></div>
+</section>
+
+<footer>
+  <span>GPLv3 · <code>MagirecoCN-Revival-Project/magireco-aio-tool-framework</code></span>
+  <span>与版权方无关联，未获授权或认可。游戏内容版权归 各自的版权方所有。</span>
+</footer>
+</div>
+<script>/*BUNDLE*/</script>

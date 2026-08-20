@@ -98,6 +98,31 @@ export class Kernel {
     }
   }
 
+  /**
+   * 卸载插件：关掉它开着的所有 surface，从能力表里摘掉。
+   *
+   * 插件系统装得上却卸不掉是不完整的——宿主要支持「关掉某个能力」
+   * （用户偏好、A/B、故障隔离），而卸载之后 `can()` 必须立刻返回 false，
+   * 依赖它的按钮随之消失。这正是插件化与硬编码集成的分界。
+   */
+  async unregister(pluginId: string): Promise<void> {
+    const plugin = this.#plugins.get(pluginId);
+    if (plugin === undefined) return;
+
+    for (const [surfaceId, live] of [...this.#surfaces]) {
+      if (live.plugin.manifest.id === pluginId) {
+        await this.close(surfaceId);
+      }
+    }
+
+    this.#plugins.delete(pluginId);
+    for (const [cap, list] of [...this.#byCapability]) {
+      const next = list.filter((p) => p.manifest.id !== pluginId);
+      if (next.length === 0) this.#byCapability.delete(cap);
+      else this.#byCapability.set(cap, next);
+    }
+  }
+
   get plugins(): readonly string[] {
     return [...this.#plugins.keys()];
   }
