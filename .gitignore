@@ -8,3 +8,6 @@ __pycache__/
 work/
 .DS_Store
 apps/demo/dist/
+apps/station/.next/
+apps/station/out/
+apps/station/next-env.d.ts

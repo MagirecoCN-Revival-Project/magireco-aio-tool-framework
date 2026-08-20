@@ -1,0 +1,40 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "noEmit": true,
+    "allowJs": true,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@aio/core": [
+        "../../packages/core/src/index.ts"
+      ],
+      "@aio/registry": [
+        "../../packages/registry/src/index.ts"
+      ],
+      "@aio/resource": [
+        "../../packages/resource/src/index.ts"
+      ],
+      "@aio/kernel": [
+        "../../packages/kernel/src/index.ts"
+      ]
+    },
+    "esModuleInterop": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "next-env.d.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

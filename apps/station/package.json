@@ -1,0 +1,24 @@
+{
+  "name": "@aio/station",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@aio/core": "0.1.0",
+    "@aio/kernel": "0.1.0",
+    "@aio/registry": "0.1.0",
+    "@aio/resource": "0.1.0",
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3"
+  }
+}

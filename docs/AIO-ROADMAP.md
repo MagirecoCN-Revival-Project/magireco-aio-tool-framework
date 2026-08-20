@@ -30,7 +30,7 @@
 
 | 步骤 | 说明 |
 |---|---|
-| 1.1 | `apps/station`：宿主外壳（surface 容器、主题、路由），EdgeOne Pages 单项目 |
+| 1.1 | ✅ **已完成** `apps/station`：Next.js + React 19 宿主外壳，`output: 'export'` 静态导出到 EdgeOne Pages 单项目。含 React↔内核的 surface 桥、能力驱动的 UI、插件装卸后台。占位插件待换真查看器，见 [`apps/station/README.md`](../apps/station/README.md) |
 | 1.2 | `plugins/model-3d`：把 example-model-viewer 包成插件，模型走资源面 |
 | 1.3 | `plugins/sprite-viewer`：cocos2d 子帧 + `MessagePort` 传输实现 |
 | 1.4 | 交叉表首批数据：先做 810 个精灵 unit ↔ charaId 的人工核对 |

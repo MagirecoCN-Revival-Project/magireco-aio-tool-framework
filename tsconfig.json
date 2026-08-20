@@ -22,12 +22,14 @@
         "./packages/plugin-sdk/src/index.ts"
       ]
     },
-    "baseUrl": "."
+    "baseUrl": ".",
+    "jsx": "preserve"
   },
   "include": [
     "packages/*/src/**/*.ts",
     "packages/*/test/**/*.ts",
     "apps/*/src/**/*.ts",
+    "apps/*/src/**/*.tsx",
     "vitest.config.ts"
   ]
 }
