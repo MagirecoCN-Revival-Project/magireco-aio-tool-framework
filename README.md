@@ -1,53 +1,77 @@
 # magireco-aio-tool-framework
 
-**AIO 工作站的控制面。**
+**一个把散落在 10 个仓库里的能力缝成一套系统的开源框架**，外加它的控制面。
 
-这个仓库不装业务代码，也不装资源。它装的是：把散在 10 个仓库里的东西，
-缝成一个域名下的工作站，所需要的**契约、策略、守卫与编排**。
+不是把几个网站放进一个域名。判据只有一条：
 
-交付平台以 **EdgeOne Maker / Pages** 为主，资产走 **COS + EdgeOne CDN**。
+> 模块之间**不互相 import、不知道对方存在**，却能互相调用并回话。
+> 少装一个模块，宿主依然自洽，只是少一项能力。
 
-## 为什么不是 monorepo
+看剧情时点一下，ADV 插件就地实机播放，并把行号回传给阅读器高亮；
+看角色档案时点一下，精灵查看器（跑在自己的 iframe 里，因为 cocos2d 靠
+`window.cc` 活着）就地显示——而档案页从未 import 过它。
 
-三条各自独立、任何一条都足以否掉合并的理由：
+## 包
 
-1. **许可证互斥。** `example-client` 是 GPLv3 + 附加条款；
-   `example-reader` 明确写着"No open-source license is granted"；
-   `example-sprite-mirror` / `example-live2d-viewer` 里是游戏原始素材，归版权方。
-   把它们 vendor 进同一棵树，本仓库的 GPLv3 当场自相矛盾。
-2. **发布禁令是既有硬约束。** `example-restricted-data` 用 `repository-policy.json` +
-   CI 明令禁止接入任何公开托管；`example-user-archive` 是 190 名真实玩家的流量归档。
-   这两个仓库**不进入本工作站的任何公开面**。
-3. **平台限额在物理上不允许。** EdgeOne Pages 单项目 5 GiB / 20,000 文件 /
-   单文件 25 MiB。`example-live2d-viewer` 的 48,964 张图是文件数上限的 2.4 倍，
-   `example-reader` 的 47,886 个文件同理。
-
-所以本工作站的原则是 **不合并仓库，只合并入口**：上游各自保持主权，
-AIO 只消费它们**已发布的产物**，并按一份人写死的契约表把它们挂到统一路由上。
-
-## 目录
-
-```
-docs/AIO-ARCHITECTURE.md    架构：三个平面、项目拆分、路由与资产面
-docs/AIO-ROADMAP.md         落地方案：六个阶段、验收判据、工作量
-docs/CONSTRAINTS.md         硬约束登记：发布禁令、许可义务、平台限额
-docs/reports/               上游仓库盘点报告
-contracts/                  上游接线契约（每仓库一份）+ Schema
-repository-policy.json      公开面策略：谁允许上公开站，谁禁止
-tools/check-sources.py      守卫：契约自洽、禁令不被绕过、预算不超限
-```
-
-## 守卫
+| 包 | 干什么 |
+|---|---|
+| `@aio/core` | 资源引用语法、能力/意图类型、事件总线。**零依赖** |
+| `@aio/registry` | 实体交叉表：角色 ↔ 精灵 / Live2D / 3D / 语音 |
+| `@aio/resource` | 资源清单、多源回退、https 强制、sha256 校验 |
+| `@aio/kernel` | 插件注册、意图派发、surface 生命周期、WebGL 上下文治理、iframe RPC 桥 |
+| `@aio/plugin-sdk` | `definePlugin` + 无头测试宿主 |
 
 ```bash
-python3 tools/check-sources.py
+npm install
+npm run check      # typecheck + 测试 + 契约守卫
 ```
 
-契约不合 schema、禁发仓库被挂了路由、两个源抢同一个挂载点、Pages 项目预算
-超过平台限额——四种情况都红灯。**这套东西的目的就是最后两条**：撞限额是这个
-架构最可能翻车的地方，而它翻车的时候不报错，只是部署到一半失败。
+## 三个设计决定，都是被证据逼出来的
+
+**1. 资源引用必须带作品前缀。** 实测：命名空间 b 的 `100101` 是角色乙，
+命名空间 a的 `100100` 是角色甲——**同号不同人**。裸数字在系统里流动，
+迟早把一个角色的档案配上另一个角色的模型，而且不报错。所以
+`parseRef('100101')` 直接抛错。
+
+**2. 交叉表是数据，不是公式。** 看着有规律（charaId + 服装号 = 精灵 unit），
+但 wiki 给 `1001` 登记的服装是 `03/04/50/53`，镜像里实际存在的是
+`00/01/09`——规律不成立。查不到就返回空，**绝不猜**：猜错的代价是显示了
+另一个角色，而没人会立刻发现。
+
+**3. 老库跑在 iframe 里，但调用方不知道。** cocos2d-html5 挂 `window.cc`，
+Cubism Core 挂 `window.Live2DCubismCore`，同 realm 会互相覆盖。框架把 realm
+隔离藏进内核——`host.request(...)` 的写法与调用 inline 插件一模一样。
+
+## 资源与网站分离
+
+判据：**网站源码里 grep 不到任何资源路径。**
+
+插件只说「给我这条 ref 的 texture」，剩下的（清单查表、按权重选路、失败冷却、
+sha256 校验、下架降级）全在 `@aio/resource` 里。换 CDN、加备份源、
+下架某批素材，都不需要动插件。
+
+选路语义照抄 `example-client` 的 `CNMirrors`——那套被真实玩家验证过。
+
+## 文档
+
+```
+docs/AIO-ARCHITECTURE.md    架构：三个概念、隔离、资源面、宿主模型
+docs/PLUGIN-AUTHORING.md    怎么写插件 / 怎么包装一个既有查看器
+docs/AIO-ROADMAP.md         落地方案：七个阶段与验收判据
+docs/CONSTRAINTS.md         硬约束：发布禁令、许可义务、平台限额
+docs/reports/               上游仓库盘点
+contracts/                  每个上游仓库如何成为插件（或明确不接入）
+tools/check-sources.py      守卫：禁令、插件冲突、资源前缀、外置判据
+```
+
+## 两条禁令
+
+`example-restricted-data`（上游 CI 强制的公开部署禁令）与 `example-user-archive`
+（190 名真实玩家的流量归档）**不进入任何公开面**。守卫会拦下绕过尝试，
+自测里有对应的坏样本。
 
 ## 许可
 
-本仓库自身按 **GPLv3** 授权（见 `LICENSE`）。上游各仓库的许可各归各的，
-逐条登记在 `docs/CONSTRAINTS.md`。
+本仓库 **GPLv3**（见 `LICENSE`）。上游各仓库的许可各归各的，逐条登记在
+`docs/CONSTRAINTS.md`。特别地：`example-reader` 未授予任何开源许可，
+**不得 vendor**——它作为独立宿主安装插件，主权不变，能力增加。

@@ -2,20 +2,29 @@
   "id": "viewer-sp",
   "repo": "another-org/example-live2d-viewer",
   "publish": "allowed",
-  "mount": "/viewer/sp/",
-  "pages_project": "aio-viewer-sp",
-  "integration": "static",
-  "phase": 2,
-  "budget": {
-    "files": 500,
-    "bytes": 52428800,
-    "measured": false
+  "integration": "plugin",
+  "phase": 3,
+  "plugin": {
+    "pluginId": "viewer-sp",
+    "isolation": "iframe",
+    "isolation_reason": "自带 live2d 运行时与全局状态，且是无构建的纯静态站",
+    "usesWebGL": true,
+    "capabilities": [
+      {
+        "id": "live2d.show",
+        "accepts": [
+          "live2d",
+          "character"
+        ],
+        "title": "换装与动作"
+      }
+    ]
   },
   "assets": {
     "prefix": "sp/",
-    "manifest": "manifest.json",
     "approx_files": 48964,
-    "approx_bytes": 6207569920
+    "approx_bytes": 6207569920,
+    "note": "48,964 张图必须全部外置——留在部署产物里是 Pages 文件数上限的 2.4 倍"
   },
-  "license_note": "图片素材归版权方。48,964 张图必须全部外置——留在 Pages 项目里是文件数上限的 2.4 倍。"
+  "license_note": "图片素材归版权方。"
 }

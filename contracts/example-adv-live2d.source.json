@@ -2,25 +2,36 @@
   "id": "example-adv-live2d",
   "repo": "CyberNova2333/example-adv-live2d",
   "publish": "allowed",
-  "mount": "/viewer/live2d/",
-  "pages_project": "aio-viewer-live2d",
-  "integration": "build",
+  "integration": "plugin",
   "phase": 2,
-  "build": {
-    "command": "npm ci && npm run build",
-    "output": "dist",
-    "node": "22"
-  },
-  "budget": {
-    "files": 800,
-    "bytes": 104857600,
-    "measured": false
+  "plugin": {
+    "pluginId": "adv-player",
+    "isolation": "iframe",
+    "isolation_reason": "Cubism Core 挂 window.Live2DCubismCore；且 Pixi 版本已 pin，与宿主共 realm 会引入版本竞争，作废其已完成的固化工作",
+    "usesWebGL": true,
+    "capabilities": [
+      {
+        "id": "adv.play",
+        "accepts": [
+          "scenario"
+        ],
+        "title": "实机播放剧情"
+      },
+      {
+        "id": "live2d.show",
+        "accepts": [
+          "live2d",
+          "character"
+        ],
+        "title": "查看 Live2D"
+      }
+    ]
   },
   "assets": {
     "prefix": "live2d/",
-    "manifest": "manifest.json",
     "approx_files": 12000,
-    "approx_bytes": 7386169344
+    "approx_bytes": 7386169344,
+    "note": "Cubism 模型、HCA/OGG、WebM"
   },
-  "license_note": "Cubism SDK 内嵌；Live2D 模型、HCA/OGG、WebM 归版权方，进资产面。Pixi 版本已 pin，接入时不得引入版本竞争。"
+  "license_note": "代码可用；Live2D 模型与音视频归版权方。"
 }

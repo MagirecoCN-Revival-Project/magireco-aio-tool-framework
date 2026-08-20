@@ -2,14 +2,28 @@
   "id": "call-search",
   "repo": "CyberNova2333/example-search-site",
   "publish": "allowed",
-  "mount": "/search/",
-  "pages_project": "aio-search",
-  "integration": "static",
+  "integration": "plugin",
   "phase": 4,
-  "budget": {
-    "files": 400,
-    "bytes": 99614720,
-    "measured": false
+  "plugin": {
+    "pluginId": "call-search",
+    "isolation": "inline",
+    "isolation_reason": "纯 DOM 与图表，无全局运行时",
+    "capabilities": [
+      {
+        "id": "search.query",
+        "accepts": [
+          "character"
+        ],
+        "title": "称呼检索"
+      },
+      {
+        "id": "chart.height",
+        "accepts": [
+          "character"
+        ],
+        "title": "身高图表"
+      }
+    ]
   },
-  "license_note": "fork 自 third-party-author/character-story-search，须保留原作者署名与原始项目链接。接入前清掉入库的 node_modules 与 9 个 .deploy-*-trigger 文件。"
+  "license_note": "fork 自 third-party-author/character-story-search，须保留原作者署名与原始项目链接。"
 }

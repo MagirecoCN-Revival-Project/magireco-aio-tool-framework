@@ -60,24 +60,28 @@ def case(name: str, needle: str):
     return deco
 
 
-@case("禁发仓库被挂上路由", "publish=forbidden 却有 mount")
+@case("禁发仓库被接进运行时", "必须是 none")
 def _(work):
     c = load(work, "wiki-data.source.json")
-    c["mount"] = "/codex/"
+    c["integration"] = "plugin"
     save(work, "wiki-data.source.json", c)
 
 
-@case("禁发仓库被配了 Pages 项目", "publish=forbidden 却有 pages_project")
+@case("禁发仓库被配了插件段", "却有 plugin")
 def _(work):
     c = load(work, "example-user-archive.source.json")
-    c["pages_project"] = "aio-lab"
+    c["plugin"] = {
+        "pluginId": "lab",
+        "isolation": "inline",
+        "capabilities": [{"id": "lab.open", "accepts": ["character"]}],
+    }
     save(work, "example-user-archive.source.json", c)
 
 
-@case("禁发仓库被改成 build 接入", "必须是 none")
+@case("禁发仓库被挂上反代路由", "却有 mount")
 def _(work):
     c = load(work, "wiki-data.source.json")
-    c["integration"] = "build"
+    c["mount"] = "/codex/"
     save(work, "wiki-data.source.json", c)
 
 
@@ -88,63 +92,80 @@ def _(work):
     save(work, "wiki-data.source.json", c)
 
 
-@case("无许可仓库被 vendor 进交付面", "vendor=forbidden 却 integration")
+@case("无许可仓库被包装成插件", "vendor=forbidden")
 def _(work):
     c = load(work, "example-reader.source.json")
-    c["integration"] = "build"
-    c["pages_project"] = "aio-story"
-    c["budget"] = {"files": 100, "bytes": 1048576}
+    c["integration"] = "plugin"
+    c.pop("mount", None)
+    c["plugin"] = {
+        "pluginId": "story-reader",
+        "isolation": "inline",
+        "capabilities": [{"id": "story.read", "accepts": ["scenario"]}],
+    }
     save(work, "example-reader.source.json", c)
 
 
-@case("两个源抢同一个挂载点", "重复")
+@case("pluginId 重复", "内核会拒绝注册")
 def _(work):
     c = load(work, "call-search.source.json")
-    c["mount"] = "/viewer/3d/"
+    c["plugin"]["pluginId"] = "model-3d"
     save(work, "call-search.source.json", c)
 
 
-@case("挂载点互为前缀", "互为前缀")
+@case("资源前缀重复", "清单会互相覆盖")
 def _(work):
-    c = load(work, "call-search.source.json")
-    c["mount"] = "/viewer/"
-    save(work, "call-search.source.json", c)
+    c = load(work, "kyu-sprite.source.json")
+    c["assets"]["prefix"] = "3d/"
+    save(work, "kyu-sprite.source.json", c)
 
 
-@case("Pages 项目名重复", "pages_project aio-viewer-3d")
-def _(work):
-    c = load(work, "call-search.source.json")
-    c["pages_project"] = "aio-viewer-3d"
-    save(work, "call-search.source.json", c)
-
-
-@case("预算文件数超平台上限", "超过单项目上限")
-def _(work):
-    c = load(work, "viewer-sp.source.json")
-    c["budget"] = {"files": 48964, "bytes": 1048576, "measured": True}
-    save(work, "viewer-sp.source.json", c)
-
-
-@case("预算体积超平台上限", "超过单项目上限")
-def _(work):
-    # viewerSP 的 5.8 G 图片不外置直接进 Pages 项目的样子
-    c = load(work, "viewer-sp.source.json")
-    c["budget"] = {"files": 500, "bytes": 6227702579, "measured": True}
-    save(work, "viewer-sp.source.json", c)
-
-
-@case("Pages 项目没有预算", "没有 budget")
+@case("能力标识不合约定", "不合约定")
 def _(work):
     c = load(work, "example-model-viewer.source.json")
-    del c["budget"]
+    c["plugin"]["capabilities"][0]["id"] = "ShowModel"
     save(work, "example-model-viewer.source.json", c)
 
 
-@case("反代却占了 Pages 项目", "integration=proxy 却占了 pages_project")
+@case("能力没声明接受任何 kind", "没声明接受")
+def _(work):
+    c = load(work, "example-model-viewer.source.json")
+    c["plugin"]["capabilities"][0]["accepts"] = []
+    save(work, "example-model-viewer.source.json", c)
+
+
+@case("插件没有任何能力", "没有声明任何 capability")
+def _(work):
+    c = load(work, "example-model-viewer.source.json")
+    c["plugin"]["capabilities"] = []
+    save(work, "example-model-viewer.source.json", c)
+
+
+@case("iframe 隔离没写理由", "必须写 isolation_reason")
+def _(work):
+    c = load(work, "kyu-sprite.source.json")
+    del c["plugin"]["isolation_reason"]
+    save(work, "kyu-sprite.source.json", c)
+
+
+@case("integration=plugin 却没有 plugin 段", "却没有 plugin 段")
+def _(work):
+    c = load(work, "example-model-viewer.source.json")
+    del c["plugin"]
+    save(work, "example-model-viewer.source.json", c)
+
+
+@case("反代却没有挂载路径", "却没有 mount")
 def _(work):
     c = load(work, "example-reader.source.json")
-    c["pages_project"] = "aio-story"
+    del c["mount"]
     save(work, "example-reader.source.json", c)
+
+
+@case("非反代却填了挂载路径", "只有 integration=proxy 才用 mount")
+def _(work):
+    c = load(work, "example-model-viewer.source.json")
+    c["mount"] = "/3d/"
+    save(work, "example-model-viewer.source.json", c)
 
 
 @case("仓库未在策略里登记", "未在 repository-policy.json 登记")

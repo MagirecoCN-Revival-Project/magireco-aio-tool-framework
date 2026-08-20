@@ -2,20 +2,29 @@
   "id": "kyu-sprite",
   "repo": "MagirecoCN-Revival-Project/example-sprite-mirror",
   "publish": "allowed",
-  "mount": "/viewer/sprite/",
-  "pages_project": "aio-viewer-sprite",
-  "integration": "static",
+  "integration": "plugin",
   "phase": 1,
-  "budget": {
-    "files": 1000,
-    "bytes": 104857600,
-    "measured": false
+  "plugin": {
+    "pluginId": "sprite-viewer",
+    "isolation": "iframe",
+    "isolation_reason": "cocos2d-html5 靠 window.cc 活着，与任何其它 cocos 运行时同 realm 会互相覆盖",
+    "usesWebGL": true,
+    "capabilities": [
+      {
+        "id": "sprite.show",
+        "accepts": [
+          "sprite",
+          "character"
+        ],
+        "title": "显示战斗精灵"
+      }
+    ]
   },
   "assets": {
     "prefix": "sprite/",
-    "manifest": "manifest.json",
     "approx_files": 8100,
-    "approx_bytes": 3326083072
+    "approx_bytes": 3326083072,
+    "note": "810 个 unit 的 ExportJson/plist/png 三件套"
   },
-  "license_note": "cocos2d-html5 引擎 + 4025 组战斗精灵；精灵素材归版权方，全部外置到资产面。"
+  "license_note": "精灵素材归版权方，全部外置到资源面。"
 }

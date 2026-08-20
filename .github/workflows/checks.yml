@@ -1,6 +1,6 @@
 name: checks
 
-# 只在 push / PR 上跑守卫。本仓库不产出对外产物，也不做自动发版——
+# 只在 push / PR 上跑守卫与测试。本仓库不产出对外产物，也不做自动发版——
 # 沿用 example-client CONTRIBUTING §四 的分工：检查类 workflow
 # 允许 push 触发，发布类一律手动。
 on:
@@ -9,6 +9,24 @@ on:
   workflow_dispatch:
 
 jobs:
+  framework:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: 类型检查（strict）
+        run: npm run typecheck
+
+      - name: 单元与整合测试
+        run: npm test
+
   contracts:
     runs-on: ubuntu-latest
     steps:

@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 """AIO 接线契约守卫。
 
-四件事，任何一件不成立就红灯：
+五件事，任何一件不成立就红灯：
 
-  1. 契约自洽      —— 必填字段、枚举、路径格式、id 与文件名一致
-  2. 禁令不被绕过  —— publish=forbidden 的源不得有 mount / pages_project；
-                      vendor=forbidden 的源不得被 build/static 方式复制进交付面
-  3. 挂载不打架    —— 挂载路径不重复、不互为前缀；Pages 项目名不重复
-  4. 预算不超限    —— 每个 Pages 项目的预算必须小于平台限额
+  1. 契约自洽      —— 必填字段、枚举、id 与文件名一致
+  2. 禁令不被绕过  —— publish=forbidden 的源不得接入运行时；
+                      vendor=forbidden 的源不得被包装成插件（那要复制其代码）
+  3. 插件不打架    —— pluginId 唯一；能力标识合约定
+  4. 资源前缀唯一  —— 两个源共用一个资源前缀会互相覆盖对方的清单
+  5. 资源必须外置  —— 声明的资产量若逼近 Pages 单项目限额，说明它没有真的外置
 
-第 4 条是这个脚本存在的主要理由：撞 EdgeOne Pages 限额时不会报错，
-只会部署失败或者文件静默缺失，等发现时已经在线上了。
+第 5 条是这套架构的地基：assets 全部走资源面之后，交付面只需要一个小体量的
+Pages 项目。哪天有人把资源塞回部署产物里，这条会先红。
 
-不依赖第三方库。装了 jsonschema 的话会额外跑一遍完整 schema 校验。
+不依赖第三方库。装了 jsonschema 会额外跑一遍完整 schema 校验。
 """
 
 from __future__ import annotations
@@ -27,14 +28,17 @@ POLICY = ROOT / "repository-policy.json"
 CONTRACTS = ROOT / "contracts"
 SCHEMA = CONTRACTS / "aio-source.schema.json"
 
-MOUNT_RE = re.compile(r"^/([a-z0-9-]+/)*$")
-PROJECT_RE = re.compile(r"^aio-[a-z0-9-]+$")
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 REPO_RE = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
+CAP_RE = re.compile(r"^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+$")
+MOUNT_RE = re.compile(r"^/([a-z0-9-]+/)*$")
+PREFIX_RE = re.compile(r"^[a-z0-9-]+/$")
 
-INTEGRATIONS = {"build", "static", "proxy", "link", "none"}
-# 会把上游内容复制进我们的交付面的接入方式——vendor=forbidden 的源不许用
-COPYING = {"build", "static"}
+INTEGRATIONS = {"plugin", "data", "proxy", "link", "none"}
+# 会把上游代码复制进交付面的接入方式
+COPYING = {"plugin"}
+# 不接入运行时也不出现在公开面的方式
+OFFLINE = {"none"}
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -48,10 +52,10 @@ def warn(where: str, msg: str) -> None:
     warnings.append(f"{where}: {msg}")
 
 
-def human(n: int) -> str:
+def human(n: float) -> str:
     for unit in ("B", "KiB", "MiB", "GiB"):
         if n < 1024 or unit == "GiB":
-            return f"{n:.1f} {unit}" if unit != "B" else f"{n} B"
+            return f"{n:.1f} {unit}" if unit != "B" else f"{int(n)} B"
         n /= 1024.0
     return str(n)
 
@@ -64,8 +68,7 @@ def main() -> int:
     if not policy["platform_limits"].get("verified"):
         warn(
             "repository-policy.json",
-            "platform_limits.verified=false —— 限额数字尚未经官方文档/控制台复核，"
-            "预算检查的结论只在这些数字正确时成立",
+            "platform_limits.verified=false —— 限额数字尚未经官方文档/控制台复核",
         )
 
     paths = sorted(p for p in CONTRACTS.glob("*.source.json"))
@@ -73,9 +76,10 @@ def main() -> int:
         err("contracts/", "一个契约都没有")
         return report()
 
-    seen_ids: dict[str, pathlib.Path] = {}
+    seen_ids: dict[str, str] = {}
+    seen_plugin_ids: dict[str, str] = {}
+    seen_prefixes: dict[str, str] = {}
     seen_mounts: dict[str, str] = {}
-    seen_projects: dict[str, str] = {}
 
     for path in paths:
         where = f"contracts/{path.name}"
@@ -85,30 +89,30 @@ def main() -> int:
             err(where, f"JSON 解析失败：{exc}")
             continue
 
-        # --- 1. 契约自洽 ---------------------------------------------------
-        for field in ("id", "repo", "publish", "license_note"):
-            if field not in c:
-                err(where, f"缺必填字段 {field}")
-        if errors and where in errors[-1]:
+        missing = [f for f in ("id", "repo", "publish", "integration", "license_note") if f not in c]
+        if missing:
+            err(where, f"缺必填字段 {', '.join(missing)}")
             continue
 
+        # --- 1. 契约自洽 ---------------------------------------------------
         cid = c["id"]
         if not ID_RE.match(cid):
             err(where, f"id 格式非法：{cid!r}")
         if path.name != f"{cid}.source.json":
             err(where, f"文件名与 id 不一致（id={cid}）")
         if cid in seen_ids:
-            err(where, f"id 与 {seen_ids[cid].name} 重复")
-        seen_ids[cid] = path
+            err(where, f"id 与 {seen_ids[cid]} 重复")
+        seen_ids[cid] = path.name
 
         if not REPO_RE.match(c["repo"]):
             err(where, f"repo 格式非法：{c['repo']!r}")
         if c["publish"] not in ("allowed", "forbidden"):
             err(where, f"publish 取值非法：{c['publish']!r}")
 
-        integration = c.get("integration", "none")
+        integration = c["integration"]
         if integration not in INTEGRATIONS:
             err(where, f"integration 取值非法：{integration!r}")
+            continue
 
         # --- 2. 禁令不被绕过 -----------------------------------------------
         entry = repos.get(c["repo"])
@@ -124,81 +128,96 @@ def main() -> int:
             )
 
         if c["publish"] == "forbidden":
-            for field in ("mount", "pages_project"):
+            if integration not in OFFLINE:
+                err(
+                    where,
+                    f"🔴 publish=forbidden 却 integration={integration!r}，必须是 none"
+                    f"（{entry['reason']}）",
+                )
+            for field in ("plugin", "mount"):
                 if field in c:
                     err(
                         where,
-                        f"🔴 publish=forbidden 却有 {field}={c[field]!r} —— "
-                        f"这会把禁止公开的仓库挂上公开面（{entry['reason']}）",
+                        f"🔴 publish=forbidden 却有 {field} —— 这会把禁止公开的仓库接进运行时",
                     )
-            if integration != "none":
-                err(
-                    where,
-                    f"🔴 publish=forbidden 却 integration={integration!r}，必须是 none",
-                )
 
         if entry.get("vendor") == "forbidden" and integration in COPYING:
             err(
                 where,
                 f"🔴 vendor=forbidden 却 integration={integration!r} —— "
-                f"该方式会把上游内容复制进交付面（{entry['reason']}）",
+                f"包装成插件需要复制其代码（{entry['reason']}）",
             )
 
-        # --- 3. 挂载不打架 -------------------------------------------------
+        # --- 3. 插件不打架 -------------------------------------------------
+        plugin = c.get("plugin")
+        if integration == "plugin" and plugin is None:
+            err(where, "integration=plugin 却没有 plugin 段")
+        if plugin is not None:
+            if integration != "plugin":
+                err(where, f"integration={integration!r} 却填了 plugin 段")
+            pid = plugin.get("pluginId", "")
+            if not ID_RE.match(pid):
+                err(where, f"pluginId 格式非法：{pid!r}")
+            elif pid in seen_plugin_ids:
+                err(where, f"pluginId {pid} 与 {seen_plugin_ids[pid]} 重复——内核会拒绝注册")
+            else:
+                seen_plugin_ids[pid] = cid
+
+            if plugin.get("isolation") not in ("inline", "iframe"):
+                err(where, f"isolation 取值非法：{plugin.get('isolation')!r}")
+            if plugin.get("isolation") == "iframe" and not plugin.get("isolation_reason"):
+                # 隔离是有代价的（一次 iframe 启动、一条 RPC）。用它必须说清为什么，
+                # 否则下一个人无从判断能不能改回 inline。
+                err(where, "isolation=iframe 必须写 isolation_reason")
+
+            caps = plugin.get("capabilities") or []
+            if not caps:
+                err(where, "plugin 没有声明任何 capability——内核会拒绝注册")
+            for cap in caps:
+                if not CAP_RE.match(cap.get("id", "")):
+                    err(where, f"能力标识 {cap.get('id')!r} 不合约定（<域>.<动词>）")
+                if not cap.get("accepts"):
+                    err(where, f"能力 {cap.get('id')} 没声明接受任何 ref kind")
+
+        # --- 4. 资源前缀唯一 -----------------------------------------------
+        assets = c.get("assets")
+        if assets is not None:
+            prefix = assets.get("prefix", "")
+            if not PREFIX_RE.match(prefix):
+                err(where, f"资源前缀格式非法：{prefix!r}")
+            elif prefix in seen_prefixes:
+                err(where, f"资源前缀 {prefix} 与 {seen_prefixes[prefix]} 重复——清单会互相覆盖")
+            else:
+                seen_prefixes[prefix] = cid
+
+            # --- 5. 资源必须真的外置 ---------------------------------------
+            approx_bytes = assets.get("approx_bytes")
+            approx_files = assets.get("approx_files")
+            if approx_bytes is not None and approx_bytes > limits["max_bytes"]:
+                warn(
+                    where,
+                    f"资产 {human(approx_bytes)} 超过 Pages 单项目上限 "
+                    f"{human(limits['max_bytes'])} —— 确认它走的是资源面（COS），不是部署产物",
+                )
+            if approx_files is not None and approx_files > limits["max_files"]:
+                warn(
+                    where,
+                    f"资产 {approx_files} 个文件超过 Pages 单项目上限 {limits['max_files']}"
+                    f" —— 同上",
+                )
+
         mount = c.get("mount")
         if mount is not None:
+            if integration != "proxy":
+                err(where, f"只有 integration=proxy 才用 mount，当前是 {integration!r}")
             if not MOUNT_RE.match(mount):
                 err(where, f"mount 格式非法：{mount!r}（须形如 /a/b/）")
             elif mount in seen_mounts:
                 err(where, f"mount {mount} 与 {seen_mounts[mount]} 重复")
             else:
-                for other, owner in seen_mounts.items():
-                    if mount.startswith(other) or other.startswith(mount):
-                        err(
-                            where,
-                            f"mount {mount} 与 {owner} 的 {other} 互为前缀，路由会打架",
-                        )
                 seen_mounts[mount] = cid
-
-        project = c.get("pages_project")
-        if project is not None:
-            if not PROJECT_RE.match(project):
-                err(where, f"pages_project 格式非法：{project!r}（须以 aio- 开头）")
-            elif project in seen_projects:
-                err(where, f"pages_project {project} 与 {seen_projects[project]} 重复")
-            else:
-                seen_projects[project] = cid
-
-        if integration in COPYING and project is None:
-            err(where, f"integration={integration} 却没有 pages_project")
-        if integration == "proxy":
-            # 反代是一条 EdgeOne 路由规则，不部署产物，因此不占 Pages 项目、
-            # 也没有预算可言。给它配一个项目名说明有人搞混了这两件事。
-            if project is not None:
-                err(where, f"integration=proxy 却占了 pages_project={project!r}")
-            if mount is None:
-                err(where, "integration=proxy 却没有 mount，反代不知道挂在哪")
-
-        # --- 4. 预算不超限 -------------------------------------------------
-        budget = c.get("budget")
-        if project is not None and budget is None:
-            err(where, f"{project} 没有 budget —— 预算无人看管就会撞限额")
-        if project is None and budget is not None:
-            err(where, "没有 pages_project 却填了 budget —— 这份预算不对应任何部署")
-        if budget is not None:
-            if budget["files"] > limits["max_files"]:
-                err(
-                    where,
-                    f"预算文件数 {budget['files']} 超过单项目上限 {limits['max_files']}",
-                )
-            if budget["bytes"] > limits["max_bytes"]:
-                err(
-                    where,
-                    f"预算体积 {human(budget['bytes'])} 超过单项目上限 "
-                    f"{human(limits['max_bytes'])}",
-                )
-            if not budget.get("measured", False):
-                warn(where, f"budget 仍是估算值（measured=false），上线前必须实测回填")
+        elif integration == "proxy":
+            err(where, "integration=proxy 却没有 mount，反代不知道挂在哪")
 
     # --- 可选：完整 schema 校验 --------------------------------------------
     try:
@@ -209,9 +228,7 @@ def main() -> int:
         schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
         for path in paths:
             try:
-                jsonschema.validate(
-                    json.loads(path.read_text(encoding="utf-8")), schema
-                )
+                jsonschema.validate(json.loads(path.read_text(encoding="utf-8")), schema)
             except jsonschema.ValidationError as exc:
                 err(f"contracts/{path.name}", f"schema 校验失败：{exc.message}")
 

@@ -2,14 +2,7 @@
   "id": "legacy-client",
   "repo": "MagirecoCN-Revival-Project/example-client",
   "publish": "allowed",
-  "mount": "/client/",
-  "pages_project": "aio-client",
   "integration": "link",
   "phase": 5,
-  "budget": {
-    "files": 200,
-    "bytes": 20971520,
-    "measured": false
-  },
-  "license_note": "GPLv3 + 附加条款 + 第三方声明义务（aria2/GnuTLS/libarchive/ShadowHook/字体）。只链接 Release 产物与线上 config.json，不 vendor 其源码。"
+  "license_note": "GPLv3 + 附加条款 + 第三方声明义务。只链接 Release 产物与线上 config.json，不 vendor 其源码。"
 }

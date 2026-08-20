@@ -1,0 +1,17 @@
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    include: ['packages/*/test/**/*.test.ts', 'apps/*/test/**/*.test.ts'],
+    environment: 'node',
+  },
+  resolve: {
+    alias: {
+      '@aio/core': new URL('./packages/core/src/index.ts', import.meta.url).pathname,
+      '@aio/registry': new URL('./packages/registry/src/index.ts', import.meta.url).pathname,
+      '@aio/resource': new URL('./packages/resource/src/index.ts', import.meta.url).pathname,
+      '@aio/kernel': new URL('./packages/kernel/src/index.ts', import.meta.url).pathname,
+      '@aio/plugin-sdk': new URL('./packages/plugin-sdk/src/index.ts', import.meta.url).pathname,
+    },
+  },
+});

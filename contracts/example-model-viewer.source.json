@@ -2,25 +2,29 @@
   "id": "example-model-viewer",
   "repo": "CyberNova2333/example-model-viewer",
   "publish": "allowed",
-  "mount": "/viewer/3d/",
-  "pages_project": "aio-viewer-3d",
-  "integration": "build",
+  "integration": "plugin",
   "phase": 1,
-  "build": {
-    "command": "npm ci && npm run build",
-    "output": "dist",
-    "node": "22"
-  },
-  "budget": {
-    "files": 400,
-    "bytes": 52428800,
-    "measured": false
+  "plugin": {
+    "pluginId": "model-3d",
+    "isolation": "inline",
+    "isolation_reason": "three.js 0.182 是 ESM，不污染全局，可与 Pixi 同 realm 共存",
+    "usesWebGL": true,
+    "capabilities": [
+      {
+        "id": "model3d.show",
+        "accepts": [
+          "model3d",
+          "character"
+        ],
+        "title": "查看 3D 模型"
+      }
+    ]
   },
   "assets": {
     "prefix": "3d/",
-    "manifest": "manifest.json",
     "approx_files": 1200,
-    "approx_bytes": 734003200
+    "approx_bytes": 734003200,
+    "note": "沿用其 compress_fbx_gzip 与 *.gz 的 Content-Encoding 约定"
   },
-  "license_note": "代码可用；模型素材归版权方，进资产面并支持整片下架。沿用其 edgeone.json 的 *.gz Content-Encoding 约定。"
+  "license_note": "代码可用；模型素材归版权方，进资源面并支持整片下架。"
 }

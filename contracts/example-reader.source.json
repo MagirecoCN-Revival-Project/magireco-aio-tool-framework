@@ -2,8 +2,8 @@
   "id": "example-reader",
   "repo": "CyberNova2333/example-reader",
   "publish": "allowed",
-  "mount": "/story/",
   "integration": "proxy",
+  "mount": "/story/",
   "phase": 3,
-  "license_note": "🔴 明确未授予任何开源许可：只能以 EdgeOne 路由规则反代其既有 Cloudflare 部署，不占 Pages 项目、不得 vendor、不得再分发其内容。"
+  "license_note": "🔴 明确未授予任何开源许可：不得 vendor 其代码。它作为**独立宿主**接入——安装框架插件后自己获得 adv.play 等能力，而不是被框架吸收。反代仅为统一域名。"
 }
