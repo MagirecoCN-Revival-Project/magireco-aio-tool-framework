@@ -1,69 +1,39 @@
-import { formatRef, type ResourceRef } from '@aio/core';
+import type { ResourceRef } from '@aio/core';
 import type { Manifest } from './manifest.js';
 import type { OriginPool } from './origins.js';
+import {
+  ResourceUnavailableError,
+  sha256Hex,
+  type ResolvedResource,
+  type ResourceProvider,
+} from './provider.js';
 
 /**
- * 资源客户端：插件拿资源的**唯一**入口。
+ * 清单 + 多源回退的资源提供者——线上那条路。
  *
  * 插件不碰 URL、不碰 fetch、不知道 CDN 有几条线。它只说「给我这条 ref 的
  * `texture` 那一份」。换 CDN、加备份源、把某批资源下架，全都不需要动插件——
  * 这就是「把 assets 从网站里分离出去」在代码层面的判据：**网站源码里
  * grep 不到任何资源路径**。
+ *
+ * 这是 `ResourceProvider` 的**一个**实现，不是接口本身（ADR 0002）。
+ * 离线包与本地研究用 `StaticProvider`，宿主与插件两边都不用改。
  */
 
-/** 一个候选下载点。base 单独带着，失败时才知道该给哪条线路记账。 */
-export interface Candidate {
-  readonly url: string;
-  readonly base: string;
-}
-
-export interface ResolvedPart {
-  readonly role: string;
-  /**
-   * 清单里登记的相对路径（不含 base）。
-   *
-   * 包装既有查看器时用得上：它们大多按**文件路径**索引资源，而不是按 role
-   * （example-model-viewer 要的是 `Record<路径, URL>`，viewer-sp 的 fetch 拦截器要按
-   * 原路径改写）。不给出路径的话，插件只能从 URL 里减去 base 反推，
-   * 那是把资源层的内部约定漏给插件——正是铁律 3 要避免的。
-   */
-  readonly path: string;
-  /** 按当前选路顺序排好的候选，逐条回退。 */
-  readonly candidates: readonly Candidate[];
-  readonly bytes?: number;
-  readonly sha256?: string;
-  readonly encoding?: 'gzip';
-}
-
-export interface ResolvedResource {
-  readonly ref: ResourceRef;
-  readonly parts: readonly ResolvedPart[];
-}
-
-export class ResourceUnavailableError extends Error {
-  constructor(
-    readonly ref: ResourceRef,
-    reason: string,
-  ) {
-    super(`资源 ${formatRef(ref)} 不可用：${reason}`);
-    this.name = 'ResourceUnavailableError';
-  }
-}
-
-export interface ResourceClientOptions {
+export interface ManifestCdnProviderOptions {
   readonly origins: OriginPool;
   readonly manifests: readonly Manifest[];
   readonly fetchImpl?: typeof fetch;
   readonly subtle?: Pick<SubtleCrypto, 'digest'>;
 }
 
-export class ResourceClient {
+export class ManifestCdnProvider implements ResourceProvider {
   readonly #origins: OriginPool;
   readonly #manifests = new Map<string, Manifest>();
   readonly #fetch: typeof fetch;
   readonly #subtle: Pick<SubtleCrypto, 'digest'> | undefined;
 
-  constructor(options: ResourceClientOptions) {
+  constructor(options: ManifestCdnProviderOptions) {
     this.#origins = options.origins;
     for (const m of options.manifests) {
       this.#manifests.set(`${m.universe}:${m.kind}`, m);
@@ -126,7 +96,7 @@ export class ResourceClient {
         }
         const buf = await res.arrayBuffer();
         if (part.sha256 !== undefined) {
-          const actual = await this.#sha256Hex(buf);
+          const actual = await sha256Hex(this.#subtle, buf);
           if (actual !== part.sha256) {
             // 内容不对不算这条线路「通了」。地址不是身份，sha256 才是——
             // 与客户端 baseline 同一条原则。
@@ -143,13 +113,5 @@ export class ResourceClient {
       }
     }
     throw new ResourceUnavailableError(ref, `所有源都失败：${errors.join('；')}`);
-  }
-
-  async #sha256Hex(buf: ArrayBuffer): Promise<string> {
-    if (this.#subtle === undefined) {
-      throw new Error('当前环境没有 WebCrypto，无法校验 sha256');
-    }
-    const digest = await this.#subtle.digest('SHA-256', buf);
-    return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
   }
 }

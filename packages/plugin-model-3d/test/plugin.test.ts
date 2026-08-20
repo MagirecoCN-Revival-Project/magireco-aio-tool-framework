@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { parseRef } from '@aio/core';
 import { Kernel } from '@aio/kernel';
-import { Manifest, OriginPool, ResourceClient } from '@aio/resource';
+import { Manifest, OriginPool, ManifestCdnProvider } from '@aio/resource';
 import { createHeadlessSurfaceProvider } from '@aio/plugin-sdk';
 import {
   createModel3dPlugin,
@@ -55,7 +55,7 @@ function setup(overrides: Partial<Model3dDeps> = {}) {
   };
 
   const kernel = new Kernel({
-    resources: new ResourceClient({
+    resources: new ManifestCdnProvider({
       origins: new OriginPool([{ base: 'https://assets.example.com/', weight: 1 }]),
       manifests: [
         Manifest.from({

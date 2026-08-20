@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { parseRef } from '@aio/core';
-import { Manifest, ManifestError, OriginPool, ResourceClient, ResourceUnavailableError } from '@aio/resource';
+import { Manifest, ManifestError, OriginPool, ManifestCdnProvider, ResourceUnavailableError } from '@aio/resource';
 
 const spriteManifest = Manifest.from({
   version: 1,
@@ -29,7 +29,7 @@ const scenarioManifest = Manifest.from({
 });
 
 function client(fetchImpl?: typeof fetch, subtle?: Pick<SubtleCrypto, 'digest'>) {
-  return new ResourceClient({
+  return new ManifestCdnProvider({
     origins: new OriginPool(
       [
         { base: 'https://fast.example/', weight: 80 },
@@ -83,7 +83,7 @@ describe('Manifest', () => {
   });
 });
 
-describe('ResourceClient', () => {
+describe('ManifestCdnProvider', () => {
   it('resolve 出多源候选，按选路顺序', () => {
     const r = client().resolve(parseRef('a:sprite/100100/d_r'));
     expect(r.parts.map((p) => p.role)).toEqual(['definition', 'atlas', 'texture']);
@@ -148,7 +148,7 @@ describe('ResourceClient', () => {
       },
     };
 
-    const c = new ResourceClient({
+    const c = new ManifestCdnProvider({
       origins: new OriginPool([
         { base: 'https://fast.example/', weight: 80 },
         { base: 'https://slow.example/', weight: 10 },

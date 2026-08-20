@@ -1,14 +1,14 @@
 /**
  * 演示宿主。
  *
- * 这一整页跑的是 packages/ 下的真代码：Kernel、Registry、ResourceClient、
+ * 这一整页跑的是 packages/ 下的真代码：Kernel、Registry、ManifestCdnProvider、
  * OriginPool、createIframePlugin 全部原样 import，没有替身。
  * 只有三个插件的**内部渲染**是占位的——它们与内核之间的接线是真的。
  */
 import { formatRef, parseRef, type ResourceRef, type SurfaceHint } from '@aio/core';
 import { Kernel, type SurfaceProvider, type SurfaceTarget } from '@aio/kernel';
 import { Registry } from '@aio/registry';
-import { Manifest, OriginPool, ResourceClient } from '@aio/resource';
+import { Manifest, OriginPool, ManifestCdnProvider } from '@aio/resource';
 import { manifests, registryData, script } from './data.js';
 import { advPlayer, model3d, spriteViewer } from './plugins.js';
 
@@ -23,7 +23,7 @@ const origins = new OriginPool(
   { failuresBeforeCooldown: 2, cooldownMs: 60_000 },
 );
 
-const resources = new ResourceClient({
+const resources = new ManifestCdnProvider({
   origins,
   manifests: manifests.map((m) => Manifest.from(m)),
 });

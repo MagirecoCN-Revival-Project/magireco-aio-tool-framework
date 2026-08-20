@@ -1,6 +1,6 @@
 import { parseRef } from '@aio/core';
 import { Registry } from '@aio/registry';
-import { Manifest, OriginPool, ResourceClient } from '@aio/resource';
+import { Manifest, OriginPool, ManifestCdnProvider } from '@aio/resource';
 import type { Plugin, PluginInstance } from '@aio/kernel';
 import { definePlugin } from '@aio/plugin-sdk';
 
@@ -20,7 +20,7 @@ export const registry = Registry.from({
 });
 
 export function makeResources() {
-  return new ResourceClient({
+  return new ManifestCdnProvider({
     origins: new OriginPool([{ base: 'https://assets.example/', weight: 80 }]),
     manifests: [
       Manifest.from({

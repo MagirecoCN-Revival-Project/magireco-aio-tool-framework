@@ -10,7 +10,7 @@ import {
   type SurfaceHint,
 } from '@aio/core';
 import { Registry } from '@aio/registry';
-import type { ResourceClient } from '@aio/resource';
+import type { ResourceProvider } from '@aio/resource';
 import { ContextGovernor, type GovernorOptions } from './governor.js';
 import type { Plugin, PluginHost, PluginInstance, SurfaceHandle, SurfaceTarget } from './types.js';
 
@@ -28,7 +28,7 @@ export interface SurfaceProvider {
 }
 
 export interface KernelOptions {
-  readonly resources: ResourceClient;
+  readonly resources: ResourceProvider;
   readonly registry?: Registry;
   readonly surfaces: SurfaceProvider;
   readonly governor?: GovernorOptions;
@@ -44,7 +44,7 @@ interface LiveSurface {
 
 export class Kernel {
   readonly events: EventBus;
-  readonly resources: ResourceClient;
+  readonly resources: ResourceProvider;
   readonly registry: Registry;
 
   readonly #plugins = new Map<string, Plugin>();

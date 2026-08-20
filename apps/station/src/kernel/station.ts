@@ -1,6 +1,6 @@
 import { Kernel } from '@aio/kernel';
 import type { Plugin } from '@aio/kernel';
-import { Manifest, OriginPool, ResourceClient } from '@aio/resource';
+import { Manifest, OriginPool, ManifestCdnProvider } from '@aio/resource';
 import { Registry } from '@aio/registry';
 import { SurfaceStore } from './surface-store';
 import { DEMO_MANIFESTS, DEMO_ORIGINS, DEMO_REGISTRY } from '../station/data';
@@ -35,7 +35,7 @@ export class Station {
   constructor() {
     this.surfaces = new SurfaceStore();
     this.kernel = new Kernel({
-      resources: new ResourceClient({
+      resources: new ManifestCdnProvider({
         origins: new OriginPool(DEMO_ORIGINS),
         manifests: DEMO_MANIFESTS.map((doc) => Manifest.from(doc)),
       }),

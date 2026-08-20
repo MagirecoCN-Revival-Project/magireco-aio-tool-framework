@@ -17,7 +17,7 @@
 |---|---|
 | `@aio/core` | 资源引用语法、能力/意图类型、事件总线。**零依赖** |
 | `@aio/registry` | 实体交叉表：角色 ↔ 精灵 / Live2D / 3D / 语音 |
-| `@aio/resource` | 资源清单、多源回退、https 强制、sha256 校验 |
+| `@aio/resource` | `ResourceProvider` 接口 + 两个实现：`ManifestCdnProvider`（清单、多源回退、https 强制、sha256）与 `StaticProvider`（离线包／本地目录）。一致性套件不 import 任何实现 |
 | `@aio/kernel` | 插件注册、意图派发、surface 生命周期、WebGL 上下文治理、iframe RPC 桥 |
 | `@aio/plugin-sdk` | `definePlugin` + 无头测试宿主 |
 | `@aio/plugin-model-3d` | `example-model-viewer` 的插件封装。上游那两个类**注入**进来，所以本仓库不依赖 three.js，判据也能在 node 上跑 |

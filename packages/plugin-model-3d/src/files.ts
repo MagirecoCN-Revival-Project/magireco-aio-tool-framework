@@ -1,6 +1,6 @@
 import { formatRef, refId } from '@aio/core';
 import type { ResourceRef } from '@aio/core';
-import type { ResourceClient } from '@aio/resource';
+import type { ResourceProvider } from '@aio/resource';
 
 /**
  * 「把 example-model-viewer 接进来」实际要写的那**一个函数**（docs/VIEWER-REFACTOR.md 的结论）。
@@ -43,10 +43,10 @@ export interface BuiltFiles {
 /**
  * 按 ref 从资源清单构造 `path → URL` 表。
  *
- * 只取每一份的**首选**候选：多源回退是 `ResourceClient` 的职责，上游查看器
+ * 只取每一份的**首选**候选：多源回退是资源提供者的职责，上游查看器
  * 拿到的是普通 URL，它不知道也不需要知道后面有几条线路（铁律 3）。
  */
-export function buildFiles(resources: ResourceClient, ref: ResourceRef): BuiltFiles {
+export function buildFiles(resources: ResourceProvider, ref: ResourceRef): BuiltFiles {
   const resolved = resources.resolve(ref);
 
   const files: Record<string, string> = {};

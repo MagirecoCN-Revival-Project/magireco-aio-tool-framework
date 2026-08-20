@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { parseRef } from '@aio/core';
-import { Manifest, OriginPool, ResourceClient } from '@aio/resource';
+import { Manifest, OriginPool, ManifestCdnProvider } from '@aio/resource';
 import type { ManifestDoc } from '@aio/resource';
 import { buildFiles, Model3dFilesError } from '../src/files.js';
 
-function client(entries: ManifestDoc['entries']): ResourceClient {
-  return new ResourceClient({
+function client(entries: ManifestDoc['entries']): ManifestCdnProvider {
+  return new ManifestCdnProvider({
     origins: new OriginPool([{ base: 'https://assets.example.com/', weight: 1 }]),
     manifests: [Manifest.from({ version: 1, universe: 'b', kind: 'model3d', entries })],
   });

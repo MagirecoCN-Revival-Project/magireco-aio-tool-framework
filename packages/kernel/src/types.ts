@@ -8,7 +8,7 @@ import type {
   SurfaceHint,
 } from '@aio/core';
 import type { Registry } from '@aio/registry';
-import type { ResourceClient } from '@aio/resource';
+import type { ResourceProvider } from '@aio/resource';
 
 /**
  * 插件契约。
@@ -53,7 +53,7 @@ export interface PluginManifest {
 
 /** 内核交给插件的把手。插件能做的事，全在这里。 */
 export interface PluginHost {
-  readonly resources: ResourceClient;
+  readonly resources: ResourceProvider;
   readonly registry: Registry;
   readonly events: EventBus;
   /** 这个实例挂在哪个 surface 上。发事件时要带。 */

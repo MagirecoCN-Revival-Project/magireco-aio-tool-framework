@@ -49,7 +49,7 @@ export function advPlayer(): Plugin {
       meter.append(fill);
       body.append(stage, caption, meter);
 
-      // 资源解析是真的：走 ResourceClient → 清单 → 多源选路
+      // 资源解析是真的：走资源提供者 → 清单 → 多源选路
       let total = 8;
       try {
         const resolved = host.resources.resolve(intent.ref);
