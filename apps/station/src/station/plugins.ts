@@ -20,10 +20,30 @@ import type { CatalogEntry } from '../kernel/station';
  * 这类全局活着，必须独占 realm。占位版没有那些运行时，也就没有隔离的理由，
  * 所以按 inline 走。接真查看器时改用 `createIframePlugin()` 包一层，
  * **调用方一行都不用改**（demo 宿主里有一个跑通的 iframe RPC 例子）。
+ *
+ * ## 为什么每处都要判断有没有 DOM
+ *
+ * `SurfaceTarget.container` 的类型是 `unknown`，约定写明「测试环境可为 null」。
+ * 这三个插件最初直接当 `HTMLElement` 用，被能力一致性套件一次抓出 13 处失败
+ * （`Cannot read properties of null`）——**渲染是可选的，契约行为不是**：
+ * 资源解析、生命周期、进度回流在没有 DOM 的环境里同样必须成立，
+ * 否则它们既不能在 node 上测，也过不了 SSR 预检。
  */
 
-function panel(target: SurfaceTarget, title: string, ref: string): HTMLElement {
-  const root = target.container as HTMLElement;
+/** 鸭子判定，不依赖 DOM 全局——node 环境下 `HTMLElement` 根本不存在。 */
+function asElement(container: unknown): HTMLElement | null {
+  return typeof container === 'object' &&
+    container !== null &&
+    typeof (container as HTMLElement).replaceChildren === 'function'
+    ? (container as HTMLElement)
+    : null;
+}
+
+/** 没有 DOM 时返回 null，调用方据此跳过渲染。 */
+function panel(target: SurfaceTarget, title: string, ref: string): HTMLElement | null {
+  const root = asElement(target.container);
+  if (root === null) return null;
+
   root.replaceChildren();
   const head = document.createElement('div');
   head.className = 'sf-head';
@@ -39,22 +59,30 @@ function panel(target: SurfaceTarget, title: string, ref: string): HTMLElement {
   return body;
 }
 
-/** 把资源解析结果画出来——证明插件确实只经 host.resources 拿资源（铁律 3）。 */
-function showParts(body: HTMLElement, host: PluginHost, intent: Intent): void {
+/**
+ * 解析资源并（在有 DOM 时）画出来。
+ *
+ * **解析本身无论有没有 DOM 都要做**：它是契约行为，也是插件只经
+ * `host.resources` 拿资源这条铁律的落点（铁律 3）。
+ */
+function showParts(body: HTMLElement | null, host: PluginHost, intent: Intent): void {
+  let lines: string[];
+  try {
+    lines = host.resources
+      .resolve(intent.ref)
+      .parts.map((part) => `${part.role} → ${part.candidates[0]?.url ?? '(无可用源)'}`);
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    host.log('warn', `解析 ${formatRef(intent.ref)} 失败：${reason}`);
+    lines = [reason];
+  }
+
+  if (body === null) return;
   const list = document.createElement('ul');
   list.className = 'parts';
-  try {
-    const resolved = host.resources.resolve(intent.ref);
-    for (const part of resolved.parts) {
-      const li = document.createElement('li');
-      const first = part.candidates[0];
-      li.textContent = `${part.role} → ${first ? first.url : '(无可用源)'}`;
-      list.append(li);
-    }
-  } catch (err) {
+  for (const text of lines) {
     const li = document.createElement('li');
-    li.className = 'warn';
-    li.textContent = err instanceof Error ? err.message : String(err);
+    li.textContent = text;
     list.append(li);
   }
   body.append(list);
@@ -80,8 +108,7 @@ function model3d(): Plugin {
       needs: ['model3d'],
     },
     async mount(target, intent, host) {
-      const body = panel(target, '3D 模型查看器', formatRef(intent.ref));
-      showParts(body, host, intent);
+      showParts(panel(target, '3D 模型查看器', formatRef(intent.ref)), host, intent);
       return inert();
     },
   };
@@ -99,8 +126,7 @@ function spriteViewer(): Plugin {
       needs: ['sprite'],
     },
     async mount(target, intent, host) {
-      const body = panel(target, '战斗精灵', formatRef(intent.ref));
-      showParts(body, host, intent);
+      showParts(panel(target, '战斗精灵', formatRef(intent.ref)), host, intent);
       return inert();
     },
   };
@@ -121,16 +147,22 @@ function advPlayer(): Plugin {
       const body = panel(target, 'ADV 播放器', formatRef(intent.ref));
       showParts(body, host, intent);
 
-      // 进度回流：阅读器据此高亮当前行，而它从未 import 过本插件。
       const total = 120;
       let line = typeof intent.params?.['line'] === 'number' ? intent.params['line'] : 0;
-      const caption = document.createElement('p');
-      caption.className = 'adv-caption';
-      body.append(caption);
 
+      // 有 DOM 就画字幕；没有也照样发进度——回流是契约行为，不是渲染的副产品。
+      let caption: HTMLElement | null = null;
+      if (body !== null) {
+        caption = document.createElement('p');
+        caption.className = 'adv-caption';
+        body.append(caption);
+      }
+
+      let paused = false;
       const timer = setInterval(() => {
+        if (paused) return;
         line = line >= total ? 0 : line + 1;
-        caption.textContent = `第 ${line} / ${total} 行`;
+        if (caption !== null) caption.textContent = `第 ${line} / ${total} 行`;
         host.events.emit('progress', {
           surfaceId: host.surfaceId,
           ref: intent.ref,
@@ -139,7 +171,6 @@ function advPlayer(): Plugin {
         });
       }, 900);
 
-      let paused = false;
       return {
         suspend() {
           paused = true;
@@ -148,10 +179,10 @@ function advPlayer(): Plugin {
           paused = false;
         },
         dispose() {
+          // 漏掉这一行，套件的「关闭之后不再发事件」当场变红。
           clearInterval(timer);
         },
         update(next) {
-          if (paused) return;
           const l = next.params?.['line'];
           if (typeof l === 'number') line = l;
         },
