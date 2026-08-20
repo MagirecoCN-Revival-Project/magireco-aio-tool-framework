@@ -143,8 +143,42 @@ function spriteViewer(): Plugin {
       needs: ['sprite'],
     },
     async mount(target, intent, host) {
-      showParts(panel(target, '战斗精灵', formatRef(intent.ref)), host, intent);
-      return renderOnly(target, host, '战斗精灵');
+      const body = panel(target, '战斗精灵', formatRef(intent.ref));
+      showParts(body, host, intent);
+
+      // 精灵是动画播放器，契约要求回报帧进度（UI 据此画帧进度条）。
+      // 占位版没有真骨骼，但**回话是契约行为，不是渲染的副产品**——
+      // 所以这里照样按帧推进并发 progress。
+      const total = 40;
+      let frame = 0;
+      let paused = false;
+      const timer = setInterval(() => {
+        if (paused) return;
+        frame = frame >= total - 1 ? 0 : frame + 1;
+        host.events.emit('progress', {
+          surfaceId: host.surfaceId,
+          ref: intent.ref,
+          position: frame,
+          total,
+        });
+      }, 500);
+
+      return {
+        suspend() {
+          paused = true;
+        },
+        resume() {
+          paused = false;
+        },
+        dispose() {
+          // 漏掉这行，套件的「关闭之后不再发事件」当场变红。
+          clearInterval(timer);
+        },
+        update(next) {
+          frame = 0;
+          showParts(panel(target, '战斗精灵', formatRef(next.ref)), host, next);
+        },
+      };
     },
   };
 }

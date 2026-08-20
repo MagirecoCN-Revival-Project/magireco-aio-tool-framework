@@ -82,9 +82,12 @@ export const SPRITE_SHOW = contract({
   accepts: ['sprite'],
   params: [
     { name: 'variant', type: 'string', required: false, note: '变体（如 d_r），缺省用清单里第一个' },
+    { name: 'movement', type: 'string', required: false, note: '动作名，必须来自骨骼数据；未知值忽略而不是崩' },
     { name: 'paused', type: 'boolean', required: false, note: '是否挂起后再起播' },
   ],
-  emits: [],
+  // 帧进度回流：UI 据此画帧进度条，而它不知道是谁在推帧。
+  // 精灵是**动画**播放器（骨骼里就带着一串动作），所以「第几帧」是有意义的量。
+  emits: ['progress'],
   webglTypical: true,
 });
 
