@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { MovementBone, SpriteMovement } from '../src/armature.js';
+import type { BoneKeyframe, MovementBone, SpriteMovement } from '../src/armature.js';
 import { IDENTITY, poseAt, poseOfBone } from '../src/pose.js';
 
-const kf = (frame: number, over: Partial<Record<string, number>> = {}) => ({
+const kf = (frame: number, over: Partial<Record<string, number>> = {}): BoneKeyframe => ({
   frame,
   x: 0,
   y: 0,
@@ -10,10 +10,12 @@ const kf = (frame: number, over: Partial<Record<string, number>> = {}) => ({
   scaleY: 1,
   skewX: 0,
   skewY: 0,
+  displayIndex: 0,
+  z: null,
   ...over,
 });
 
-const bone = (name: string, keyframes: ReturnType<typeof kf>[]): MovementBone => ({
+const bone = (name: string, keyframes: BoneKeyframe[]): MovementBone => ({
   name,
   keyframes,
 });

@@ -1,10 +1,13 @@
-import { formatRef } from '@aio/core';
-import type { Plugin, PluginInstance } from '@aio/kernel';
-import { parseArmature } from './armature.js';
+import { formatRef, type ResourceRef } from '@aio/core';
+import type { Plugin, PluginHost, PluginInstance } from '@aio/kernel';
+import { parseArmature, type SpriteDoc } from './armature.js';
+import { parseAtlas, type SpriteAtlas } from './atlas.js';
 import { SpritePlayer, type Stage } from './player.js';
+import type { SpriteStageContext } from './stage-canvas2d.js';
 
 export * from './armature.js';
 export * from './atlas.js';
+export * from './draw.js';
 export * from './player.js';
 export * from './plist.js';
 export * from './pose.js';
@@ -19,8 +22,19 @@ export * from './stage-canvas2d.js';
  */
 
 export interface SpriteDeps {
-  /** 造舞台。拿不到 DOM 时返回 null——播放器照常推帧，只是不画。 */
-  createStage(container: unknown): Stage | null;
+  /**
+   * 造舞台。拿不到 DOM 时返回 null——播放器照常推帧，只是不画。
+   *
+   * 第二个参数带着骨架、图集与已解码的贴图：舞台要么画真图，要么退回画骨骼
+   * 方块，**由它自己决定**。插件不替它判断，因为「能不能画贴图」是舞台的属性。
+   */
+  createStage(container: unknown, ctx: SpriteStageContext): Stage | null;
+  /**
+   * 把贴图字节解成能画的东西。**不给就不取贴图**——解码要浏览器 API
+   * （`createImageBitmap`），而这个包必须能在 node 上 import。
+   * 浏览器宿主传 `decodeTextureWithImageBitmap` 即可。
+   */
+  decodeTexture?: (bytes: ArrayBuffer) => Promise<unknown>;
   /**
    * 这个舞台占不占 WebGL 上下文。
    *
@@ -33,6 +47,49 @@ export interface SpriteDeps {
 }
 
 const decoder = new TextDecoder();
+
+/**
+ * 取图集与贴图。
+ *
+ * **取不到不是错误**：资源面还没上线（路线图 Phase 2）时这条 ref 只有骨骼文件，
+ * 舞台退回画骨骼方块，插件照常可用。所以这里全程不抛，只 `log('warn')`——
+ * 让「精灵打不开」与「精灵没有贴图」是两件不同的事。
+ *
+ * 骨骼文件里的 `texture_data[].plistFile` 记着图集文件名，但**这里一个路径都不拼**
+ * （铁律 3）：图集与贴图各是一个 role，路径在清单里。
+ */
+async function loadTexture(
+  doc: SpriteDoc,
+  ref: ResourceRef,
+  host: PluginHost,
+  deps: SpriteDeps,
+): Promise<{ atlas: SpriteAtlas | null; texture: unknown }> {
+  if (deps.decodeTexture === undefined) return { atlas: null, texture: null };
+
+  let roles: ReadonlySet<string>;
+  try {
+    roles = new Set(host.resources.resolve(ref).parts.map((p) => p.role));
+  } catch {
+    /* c8 ignore next */
+    return { atlas: null, texture: null };
+  }
+  if (!roles.has('atlas') || !roles.has('texture')) {
+    if (doc.textures.length > 0) {
+      // 骨骼说它有图集分片，清单里却没有——多半是清单少登记了，值得说一声。
+      host.log('info', `${formatRef(ref)} 的清单里没有 atlas/texture，只画骨骼`);
+    }
+    return { atlas: null, texture: null };
+  }
+
+  try {
+    const atlas = parseAtlas(decoder.decode(await host.resources.fetchPart(ref, 'atlas')));
+    const texture = await deps.decodeTexture(await host.resources.fetchPart(ref, 'texture'));
+    return texture == null ? { atlas: null, texture: null } : { atlas, texture };
+  } catch (err) {
+    host.log('warn', `${formatRef(ref)} 的图集用不了，只画骨骼：${String(err)}`);
+    return { atlas: null, texture: null };
+  }
+}
 
 export function createSpritePlugin(deps: SpriteDeps): Plugin {
   return {
@@ -61,7 +118,8 @@ export function createSpritePlugin(deps: SpriteDeps): Plugin {
         throw new Error(`骨骼解析失败：${reason}`);
       }
 
-      const stage = deps.createStage(target.container);
+      const { atlas, texture } = await loadTexture(doc, intent.ref, host, deps);
+      const stage = deps.createStage(target.container, { doc, atlas, texture });
 
       const wanted = intent.params?.['movement'];
       const player = new SpritePlayer({

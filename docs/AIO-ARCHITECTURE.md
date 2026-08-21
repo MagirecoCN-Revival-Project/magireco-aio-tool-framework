@@ -246,6 +246,17 @@ EdgeOne Makers 的 Agent 托管留到最后（诊断 Agent > 剧情语义检索 
 2. EdgeOne Pages Functions 的 CPU 时间 / 内存 / 请求体上限。
 3. 自定义域名的 ICP 备案要求；Cloudflare 托管的根域名不支持绑定，需用子域。
 4. COS 与 EdgeOne 回源的计费口径（资源面约 20 GiB，以图片小文件为主）。
+5. **精灵图集里 `rotated=true` 的帧转的是哪个方向。** 打包器把竖长图转 90°
+   塞进图集，两个方向都会画出一张「看着像那么回事」的图，错的那个是上下颠倒
+   或镜像的零件，**不报错**。所以 `plugin-sprite` 的 `placeFrame()` 目前对这类帧
+   **返回 null 而不是蒙一个**，舞台跳过并经 `onSkipped` 报出来。
+   复核方式：拿一张真实图集，找一个 `rotated=true` 的帧比对它在游戏里的朝向；
+   定了之后补一次 90° 旋转（五行）与一条判据。
+6. **CocosStudio 导出的 `version >= 0.3`（combined）要不要那两步补偿。**
+   运行时对这类导出会先把 `bone_data` 并进每一帧再做 `scale -= 1`，那是它为
+   自己的插值方式做的修正。没有真实导出文件无从验证，所以 `worldPoseAt()`
+   **不做**这两步，只做无歧义的父级合成，并把根上的 `version` 原样放在
+   `doc.dataVersion` 里备查。复核方式见 `packages/plugin-sprite/src/pose.ts`。
 
 ## 待拍板事项
 

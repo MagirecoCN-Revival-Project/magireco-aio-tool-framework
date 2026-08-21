@@ -1,7 +1,11 @@
 import type { Plugin } from '@aio/kernel';
 import { createAdvPlugin, createDomStage } from '@aio/plugin-adv';
 import { createGltfPlugin } from '@aio/plugin-gltf';
-import { createCanvas2dStage, createSpritePlugin } from '@aio/plugin-sprite';
+import {
+  createCanvas2dStage,
+  createSpritePlugin,
+  decodeTextureWithImageBitmap,
+} from '@aio/plugin-sprite';
 import type { CatalogEntry } from '../kernel/station';
 
 /**
@@ -57,7 +61,14 @@ function model3d(): Plugin {
  */
 function spriteViewer(): Plugin {
   return createSpritePlugin({
-    createStage: (container) => createCanvas2dStage(container, { width: 320, height: 320 }),
+    createStage: (container, ctx) =>
+      createCanvas2dStage(container, ctx, {
+        width: 320,
+        height: 320,
+        onSkipped: (reason) => console.warn(`[sprite] ${reason}`),
+      }),
+    // 有图集与贴图时画真图，没有时退回画骨骼——`decodeTexture` 传了才会去取。
+    decodeTexture: decodeTextureWithImageBitmap,
     usesWebGL: false,
     fps: 30,
   });

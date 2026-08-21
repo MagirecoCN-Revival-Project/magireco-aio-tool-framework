@@ -92,11 +92,24 @@ export const DEMO_MANIFESTS: readonly ManifestDoc[] = [
  * 三根骨骼、两个动作，够 canvas2d 舞台真的动起来：`idle` 循环上下浮动，
  * `wave` 不循环、播完停住。这样「真实现 + 真舞台」在 station 里是可见的，
  * 而不是又一个占位方块。
+ *
+ * `bone_data` 里 `arm` 挂在 `body` 下面，所以父级合成在画面上是**可见**的：
+ * body 上下浮动时 arm 跟着走，而它自己的轨道只管相对 body 的挥动。
+ * 画序也在这里定（body 在最上层），否则遮挡关系每次渲染都可能不一样。
  */
 const kf = (fi: number, x: number, y: number, cX = 1) => ({ fi, x, y, cX, cY: cX, kX: 0, kY: 0 });
 
 export const DEMO_SPRITE_ARMATURE = {
-  armature_data: [{ name: 'demo_armature', bone_data: [] }],
+  armature_data: [
+    {
+      name: 'demo_armature',
+      bone_data: [
+        { name: 'body', parent: '', x: 0, y: 0, cX: 1, cY: 1, kX: 0, kY: 0, z: 2 },
+        { name: 'head', parent: 'body', x: 0, y: 40, cX: 1, cY: 1, kX: 0, kY: 0, z: 1 },
+        { name: 'arm', parent: 'body', x: -30, y: 10, cX: 1, cY: 1, kX: 0, kY: 0, z: 0 },
+      ],
+    },
+  ],
   animation_data: [
     {
       name: 'demo_armature',
@@ -107,9 +120,11 @@ export const DEMO_SPRITE_ARMATURE = {
           lp: true,
           sc: 1,
           mov_bone_data: [
-            { name: 'head', frame_data: [kf(0, 0, 40), kf(20, 0, 55), kf(39, 0, 40)] },
+            // 轨道值是**相对父级**的：head 与 arm 在 idle 里几乎不动，
+            // 画面上的上下浮动全部来自 body——父级合成因此是肉眼可见的。
+            { name: 'head', frame_data: [kf(0, 0, 40), kf(20, 0, 43), kf(39, 0, 40)] },
             { name: 'body', frame_data: [kf(0, 0, 0), kf(20, 0, 6), kf(39, 0, 0)] },
-            { name: 'arm', frame_data: [kf(0, -30, 10), kf(20, -34, 16), kf(39, -30, 10)] },
+            { name: 'arm', frame_data: [kf(0, -30, 10), kf(20, -32, 12), kf(39, -30, 10)] },
           ],
         },
         {
