@@ -69,7 +69,8 @@ docs/AIO-ROADMAP.md         落地方案：七个阶段与验收判据
 docs/CONSTRAINTS.md         硬约束：发布禁令、许可义务、平台限额
 docs/reports/               上游仓库盘点
 contracts/                  每个上游仓库如何成为插件（或明确不接入）
-tools/check-sources.py      守卫：禁令、插件冲突、资源前缀、外置判据
+contracts/capabilities.json 横着记一遍：每个能力有几个实现、缺省装哪一个
+tools/check-sources.py      守卫：禁令、插件冲突、资源前缀、外置判据、能力表对账
 tools/check-assets.py       守卫：版权素材不得入库（铁律 9）
 tools/build-manifest.py     扫目录生成资源清单（不猜 ref，匹配不上就失败）
 ```

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MagirecoCN-Revival-Project/magireco-aio-tool-framework/contracts/capabilities.schema.json",
+  "title": "AIO 能力登记表",
+  "description": "横着记一遍：每个能力有几个实现、宿主缺省装哪一个。竖着的 *.source.json 按上游仓库分，两边由 tools/check-sources.py 对账。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["capabilities"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "note": {
+      "description": "写给人看的。数组是为了不在 JSON 里塞长行。",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "capabilities": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)+$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "default", "implementations"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "default": {
+            "description": "宿主未指定时装哪一个。必须是本仓库里真有代码的实现（own/wrapper）；一个能力若只有上游候选，这里写 null——写一个装不上的默认值等于宿主启动时才发现少一项能力。",
+            "type": ["string", "null"]
+          },
+          "implementations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "origin", "isolation", "note"],
+              "properties": {
+                "id": {
+                  "description": "就是 PluginManifest.id，内核按它注册。同一个实现提供多个能力时会在多处出现，各处属性必须一致。",
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9-]*$"
+                },
+                "origin": {
+                  "description": "own=本仓库从零写、不依赖上游代码；wrapper=本仓库的包但要注入上游运行时；upstream=实现主体在上游，本仓库只有契约",
+                  "enum": ["own", "wrapper", "upstream"]
+                },
+                "package": {
+                  "description": "origin=own/wrapper 必填：packages/ 下的包名",
+                  "type": "string",
+                  "pattern": "^@aio/[a-z0-9-]+$"
+                },
+                "source": {
+                  "description": "origin=wrapper/upstream 必填：对应 *.source.json 的 id",
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9-]*$"
+                },
+                "isolation": { "enum": ["inline", "iframe"] },
+                "usesWebGL": { "type": "boolean" },
+                "note": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

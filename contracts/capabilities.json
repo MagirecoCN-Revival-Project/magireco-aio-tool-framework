@@ -1,0 +1,156 @@
+{
+  "$schema": "./capabilities.schema.json",
+  "note": [
+    "能力登记表：每个能力有几个实现、宿主缺省装哪一个。",
+    "",
+    "ADR 0002 的一条后果：契约文件按上游仓库分（一个仓库一份），",
+    "但『某能力有几个实现』是横着切的——sprite.show 现在既有本仓库从零写的",
+    "实现，也有上游 cocos2d 那一个候选，两者分别登记在两份文件里，谁也看不出",
+    "全貌。看不出全貌的直接后果是那条判据没法查：",
+    "",
+    "  > 少装一个模块，宿主依然自洽，只是少一项能力。",
+    "",
+    "所以这份表横着记一遍，并由 tools/check-sources.py 与竖着的那些契约对账。",
+    "",
+    "origin 的三档不是分类癖，是许可证边界：",
+    "  own      本仓库从零写的，不依赖任何上游代码——这一档决定了",
+    "           『不碰上游也能用』是否成立（维护者的约束，见 ADR 0002）",
+    "  wrapper  本仓库的包，但运行时要把上游的类/运行时注入进来；上游一行未改",
+    "  upstream 实现主体在上游仓库，本仓库目前只有契约，尚未接线"
+  ],
+  "capabilities": {
+    "model3d.show": {
+      "title": "查看 3D 模型",
+      "default": "model3d-gltf",
+      "implementations": [
+        {
+          "id": "model3d-gltf",
+          "origin": "own",
+          "package": "@aio/plugin-gltf",
+          "isolation": "inline",
+          "usesWebGL": false,
+          "note": "从零实现：glTF 2.0 解析（动画清单、外部依赖、拒收 1.x 与 GLB），舞台注入。usesWebGL 由注入的舞台决定，缺省的无头舞台不占"
+        },
+        {
+          "id": "model-3d",
+          "origin": "wrapper",
+          "package": "@aio/plugin-model-3d",
+          "source": "example-model-viewer",
+          "isolation": "inline",
+          "usesWebGL": true,
+          "note": "上游那两个类注入进来，所以本仓库不依赖 three.js，判据也能在 node 上跑。尚未接进 apps/station——要等 upstream-three-subpackage 可安装"
+        }
+      ]
+    },
+    "sprite.show": {
+      "title": "显示战斗精灵",
+      "default": "sprite-play",
+      "implementations": [
+        {
+          "id": "sprite-play",
+          "origin": "own",
+          "package": "@aio/plugin-sprite",
+          "isolation": "inline",
+          "usesWebGL": false,
+          "note": "从零实现：ExportJson 骨骼 + plist 图集解析 + 渲染无关帧播放器，舞台注入。canvas2d 舞台不占 WebGL"
+        },
+        {
+          "id": "sprite-viewer",
+          "origin": "upstream",
+          "source": "kyu-sprite",
+          "isolation": "iframe",
+          "usesWebGL": true,
+          "note": "上游 cocos2d-html5 运行时。接进来时它是 Stage 的又一个实现，那 367 个引擎文件留在原地"
+        }
+      ]
+    },
+    "live2d.show": {
+      "title": "查看 Live2D",
+      "default": "live2d-show",
+      "implementations": [
+        {
+          "id": "live2d-show",
+          "origin": "own",
+          "package": "@aio/plugin-live2d",
+          "isolation": "inline",
+          "usesWebGL": false,
+          "note": "从零实现：Cubism model3.json 解析 + 渲染无关会话（动作/表情/口型同步），舞台注入"
+        },
+        {
+          "id": "adv-player",
+          "origin": "upstream",
+          "source": "example-adv-live2d",
+          "isolation": "iframe",
+          "usesWebGL": true,
+          "note": "同一个上游插件同时提供 adv.play 与 live2d.show"
+        },
+        {
+          "id": "viewer-sp",
+          "origin": "upstream",
+          "source": "viewer-sp",
+          "isolation": "iframe",
+          "usesWebGL": true,
+          "note": "自带 live2d 运行时"
+        }
+      ]
+    },
+    "adv.play": {
+      "title": "实机播放剧情",
+      "default": "adv-play",
+      "implementations": [
+        {
+          "id": "adv-play",
+          "origin": "own",
+          "package": "@aio/plugin-adv",
+          "isolation": "inline",
+          "usesWebGL": false,
+          "note": "从零实现：worksheet 解析器 + 渲染无关播放引擎，舞台注入。DOM 舞台不占 WebGL"
+        },
+        {
+          "id": "adv-player",
+          "origin": "upstream",
+          "source": "example-adv-live2d",
+          "isolation": "iframe",
+          "usesWebGL": true,
+          "note": "上游 Pixi + Cubism 的实机演出。example-reader 装它就是路线图 3.4 那一步"
+        }
+      ]
+    },
+    "search.query": {
+      "title": "检索角色/卡牌/剧情",
+      "default": "search-query",
+      "implementations": [
+        {
+          "id": "search-query",
+          "origin": "own",
+          "package": "@aio/plugin-search",
+          "isolation": "inline",
+          "usesWebGL": false,
+          "note": "从零实现：跨中/日/罗马字/假名匹配（片假名折叠），结果 ref 化"
+        },
+        {
+          "id": "call-search",
+          "origin": "upstream",
+          "source": "call-search",
+          "isolation": "inline",
+          "usesWebGL": false,
+          "note": "上游纯 DOM 实现，同时提供 chart.height"
+        }
+      ]
+    },
+    "chart.height": {
+      "title": "身高对比图",
+      "default": null,
+      "implementations": [
+        {
+          "id": "call-search",
+          "origin": "upstream",
+          "source": "call-search",
+          "isolation": "inline",
+          "usesWebGL": false,
+          "note": "只有上游那一个实现，本仓库没有对应契约，也没有自己的实现——守卫会为这两件事各报一条 ⚠️，那是有意留着的：它是这份表第一次真正查出来的东西"
+        }
+      ]
+    }
+  }
+}

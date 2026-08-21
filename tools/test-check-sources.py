@@ -28,11 +28,13 @@ def run(work: pathlib.Path) -> tuple[int, str]:
 
 def sandbox() -> pathlib.Path:
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="aio-guard-"))
-    for item in ("repository-policy.json", "contracts", "tools"):
+    # packages 也要复制：能力表的对账要查包是否真存在、能力契约里登记了哪些 id。
+    # 少复制它，那几条检查在沙箱里会静静跳过，于是坏样本「拦下来了」是假的。
+    for item in ("repository-policy.json", "contracts", "tools", "packages"):
         src = ROOT / item
         dst = tmp / item
         if src.is_dir():
-            shutil.copytree(src, dst)
+            shutil.copytree(src, dst, ignore=shutil.ignore_patterns("node_modules", "dist"))
         else:
             shutil.copy2(src, dst)
     return tmp
@@ -180,6 +182,100 @@ def _(work):
     c = load(work, "example-model-viewer.source.json")
     c["id"] = "some-other-id"
     save(work, "example-model-viewer.source.json", c)
+
+
+# ── 能力登记表（横着的那张）与契约（竖着的那些）对账 ─────────────────────
+
+
+def impl(work: pathlib.Path, cap: str, iid: str) -> tuple[dict, dict]:
+    """取出能力表与其中某个实现，供改坏后 save 回去。"""
+    table = load(work, "capabilities.json")
+    entry = table["capabilities"][cap]
+    for i in entry["implementations"]:
+        if i["id"] == iid:
+            return table, i
+    raise AssertionError(f"{cap} 里没有实现 {iid}")
+
+
+@case("default 指向一个装不上的实现", "不在本仓库可装的实现里")
+def _(work):
+    table = load(work, "capabilities.json")
+    # sprite-viewer 是上游候选，本仓库没有它的代码——写成缺省，宿主启动时才发现。
+    table["capabilities"]["sprite.show"]["default"] = "sprite-viewer"
+    save(work, "capabilities.json", table)
+
+
+@case("有可装的实现却把 default 写成 null", "宿主不知道该装哪个")
+def _(work):
+    table = load(work, "capabilities.json")
+    table["capabilities"]["adv.play"]["default"] = None
+    save(work, "capabilities.json", table)
+
+
+@case("上游契约声明的能力没登记进表", "没把它登记成")
+def _(work):
+    table = load(work, "capabilities.json")
+    caps = table["capabilities"]["sprite.show"]["implementations"]
+    table["capabilities"]["sprite.show"]["implementations"] = [
+        i for i in caps if i["id"] != "sprite-viewer"
+    ]
+    save(work, "capabilities.json", table)
+
+
+@case("有契约的能力一个实现都没有", "却没有任何实现登记在册")
+def _(work):
+    table = load(work, "capabilities.json")
+    del table["capabilities"]["model3d.show"]
+    save(work, "capabilities.json", table)
+
+
+@case("实现 id 与上游契约的 pluginId 对不上", "内核按这个 id 注册")
+def _(work):
+    table, i = impl(work, "sprite.show", "sprite-viewer")
+    i["id"] = "sprite-cocos"
+    save(work, "capabilities.json", table)
+
+
+@case("own 实现指向一个不存在的包", "package.json 不存在")
+def _(work):
+    table, i = impl(work, "sprite.show", "sprite-play")
+    i["package"] = "@aio/plugin-nope"
+    save(work, "capabilities.json", table)
+
+
+@case("实现 id 与包里 manifest 写的对不上", "manifest 里写的是")
+def _(work):
+    # 缺省的那个实现装上了却没人认得——宿主按 default 去找它，找不到。
+    table, i = impl(work, "sprite.show", "sprite-play")
+    i["id"] = "sprite-player"
+    table["capabilities"]["sprite.show"]["default"] = "sprite-player"
+    save(work, "capabilities.json", table)
+
+
+@case("能力实现指向禁发仓库", "publish=forbidden")
+def _(work):
+    table, i = impl(work, "sprite.show", "sprite-viewer")
+    i["source"] = "wiki-data"
+    save(work, "capabilities.json", table)
+
+
+@case("同一实现在两处属性不一致", "自相矛盾")
+def _(work):
+    table, i = impl(work, "live2d.show", "adv-player")
+    i["isolation"] = "inline"
+    save(work, "capabilities.json", table)
+
+
+@case("own 实现却指向上游契约", "不该指向任何上游契约")
+def _(work):
+    table, i = impl(work, "adv.play", "adv-play")
+    i["source"] = "example-adv-live2d"
+    save(work, "capabilities.json", table)
+
+
+@case("能力表整个没了", "「某能力有几个实现」就没有出处了")
+def _(work):
+    (work / "contracts" / "capabilities.json").unlink()
 
 
 def main() -> int:
