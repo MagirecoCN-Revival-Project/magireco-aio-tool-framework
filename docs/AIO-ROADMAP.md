@@ -30,19 +30,25 @@
 
 | 步骤 | 说明 |
 |---|---|
-| 1.1 | ✅ **已完成** `apps/station`：Next.js + React 19 宿主外壳，`output: 'export'` 静态导出到 EdgeOne Pages 单项目。含 React↔内核的 surface 桥、能力驱动的 UI、插件装卸后台。占位插件待换真查看器，见 [`apps/station/README.md`](../apps/station/README.md) |
+| 1.1 | ✅ **已完成** `apps/station`：Next.js + React 19 宿主外壳，`output: 'export'` 静态导出到 EdgeOne Pages 单项目。含 React↔内核的 surface 桥、能力驱动的 UI、插件装卸后台。现在装着四个真实现，一个占位都不剩，见 [`apps/station/README.md`](../apps/station/README.md) |
 | 1.2 | ✅ **已完成** `packages/plugin-model-3d`：把 example-model-viewer 包成插件，模型走资源面。上游一行未改（它的构造函数本来就是 `Record<路径, URL>` 注入式），10 个测试全在 node 上跑——上游两个类是注入的，不需要 three.js 与 GPU。**尚未接进 `apps/station`**：要等 `upstream-three-subpackage` 可安装（发包或 git 依赖） |
-| 1.3 | `plugins/sprite-viewer`：cocos2d 子帧 + `MessagePort` 传输实现 |
+| 1.3 | ✅ **已完成，但换了做法**：`sprite.show` 不再等 cocos2d 子帧，而是 `@aio/plugin-sprite` **从零实现**（骨骼 + 图集解析、父子合成、canvas2d 舞台），已装进 station。上游 cocos2d 那个候选仍登记在册（`contracts/capabilities.json` 的 `sprite-viewer`），接不接都不影响能用 |
 | 1.4 | 交叉表首批数据：先做 810 个精灵 unit ↔ charaId 的人工核对 |
-| 1.5 | 一个能演示的页面：角色档案 → 点一下出精灵、点一下出 3D |
+| 1.5 | ✅ **已完成** `apps/station` 的资料页：角色档案 → 点一下出精灵、出 3D、播剧情、看身高对比。每个按钮画不画都由 `kernel.can()` 决定 |
+
+> **为什么 1.3 换了做法**：维护者的约束是不改上游（开源仓库直接改别人的项目，
+> 既是越界也牵出许可证问题）。ADR 0002 因此把顺序倒过来——**先有不依赖任何
+> 上游的实现**，上游愿意接时它是同一契约的又一个实现。于是「接上游」从
+> 前置条件变成可选项，路线图上多个阶段的依赖关系随之松开。
 
 **验收**：
+- ✅ 拔掉一个插件，档案页对应的按钮消失，其余功能不受影响
+  （`apps/station/test/catalog.test.ts` 逐个插件钉住；这条是**框架是否成立的判据**）；
 - 同一个页面上先后打开 3D 与精灵，两个运行时互不干扰；
 - 开够 5 个 WebGL surface，最早的被 `suspend` 而不是变黑；
-- 断掉主 base，资源自动回退到备用 base；
-- 拔掉 `sprite-viewer` 插件，档案页的「显示精灵」按钮消失，其余功能不受影响。
+- 断掉主 base，资源自动回退到备用 base。
 
-最后一条是**框架是否成立的判据**。
+后三条要等真 WebGL 舞台与真资源面，本地判不了。
 
 **工作量**：6–9 人日。
 
@@ -56,7 +62,7 @@
 | 步骤 | 说明 |
 |---|---|
 | 2.1 | COS 桶 + EdgeOne 回源，绑 `assets.<域>` |
-| 2.2 | ✅ **已完成** `tools/build-manifest.py`：扫目录出 `{path, role, bytes, sha256}`。**不需要域名/账号/桶权限**，所以先做了——清单能离线生成、离线校验，等桶开好直接上传。13 条自测覆盖失败路径 |
+| 2.2 | ✅ **已完成** `tools/build-manifest.py`：扫目录出 `{path, role, bytes, sha256}`。**不需要域名/账号/桶权限**，所以先做了——清单能离线生成、离线校验，等桶开好直接上传。15 条自测覆盖失败路径与 `--role` 强制指定 |
 | 2.3 | `sprite/` 4,025 组 → 2.4 `sp/` 48,964 张 → 2.5 `live2d/` → 2.6 `3d/` |
 | 2.7 | 下架能力：清单去条目 → UI 降级提示，不白屏 |
 
@@ -72,16 +78,22 @@
 
 ## Phase 3 — 剩下三个插件 + Story 宿主
 
+> 与 Phase 1.3 同一个变化：这三个能力现在**各自已有不碰上游的实现**
+> （`plugin-adv` / `plugin-live2d` / `plugin-search` + `plugin-chart`），
+> 全部过一致性套件。所以 3.1–3.3 不再是「能不能用」，而是「要不要多一个实现」。
+> 全貌见 [`contracts/capabilities.json`](../contracts/capabilities.json)。
+
 | 步骤 | 说明 |
 |---|---|
-| 3.1 | `plugins/adv-player`：命名空间 b ADV 包成 iframe 插件，实现 `progress` 上报 |
-| 3.2 | `plugins/viewer-sp` |
-| 3.3 | `plugins/call-search` |
+| 3.1 | `adv.play` ✅ 已有从零实现（`@aio/plugin-adv`，含 `progress` 上报）装在 station 里。把上游 命名空间 b ADV 包成 iframe 插件仍是可选的第二个实现 |
+| 3.2 | `live2d.show` ✅ 已有从零实现（`@aio/plugin-live2d`）。`viewer-sp` 同上，可选 |
+| 3.3 | `search.query` 与 `chart.height` ✅ 均已有从零实现（`plugin-search` / `plugin-chart`）。`call-search` 同上，可选 |
 | 3.4 | **example-reader 装插件**：它作为独立宿主 `kernel.register(advPlayer)`，剧情页多出「实机播放」 |
 | 3.5 | `/story/` 反代进统一域名 |
 
-3.4 是本方案最有说服力的一步：**example-reader 不被吸收，主权不变，只是多了能力。**
-这同时绕开了它「未授予任何开源许可」的约束——我们不 vendor 它的代码。
+**3.4 现在是这个阶段唯一的硬骨头，也仍是最有说服力的一步**：example-reader
+不被吸收、主权不变，只是多了能力；它装的可以是我们那个从零实现，
+于是「未授予任何开源许可」这条约束连碰都不用碰。
 
 **验收**：在 example-reader 上读剧情，点「实机播放」，ADV 起播并把行号回传高亮。
 这正是你举的第一个例子。
@@ -136,9 +148,9 @@ Phase 1 只做了首批。这一步把 241 个角色、1,404 条卡牌、10,511 
 | 阶段 | 工作量 | 停在这里能交付吗 |
 |---|---|---|
 | 0 框架内核 | ✅ 已完成 | ✅ 五个包可独立发布使用 |
-| 1 首个插件 + 外壳 | 6–9 人日 | ✅ 可演示的整合站 |
+| 1 首个插件 + 外壳 | 只剩 1.4（交叉表首批） | ✅ 可演示的整合站已经跑起来了 |
 | 2 资源面搬迁 | 8–12 人日 | ✅ 四个查看器全上线 |
-| 3 剩余插件 + Story | 10–14 人日 | ✅ 你举的两个例子都成立 |
+| 3 剩余插件 + Story | 只剩 3.4 / 3.5 | ✅ 六个能力各有一个不碰上游的实现 |
 | 4 交叉表补全 | 3–5 人日 + 增量人工 | ✅ 可增量 |
 | 5 Client + 后台 | 5–8 人日 | ✅ |
 | 6 AI | 待估 | ✅ |
@@ -147,10 +159,15 @@ Phase 1 只做了首批。这一步把 241 个角色、1,404 条卡牌、10,511 
 2.2（清单工具）**已完成**——它不依赖任何凭据。剩下的 2.1（桶 + 回源）需要
 维护者的域名、账号与桶权限，见「先决条件」。
 
+> ADR 0002 之后，1 与 3 里「把上游包成插件」的那些步骤**不再是任何东西的前置
+> 条件**：六个能力各自已有从零写的实现并过一致性套件，接上游只是多一个可选
+> 实现。剩下的硬骨头是 1.4（交叉表人工核对）、2.1（桶）、3.4（example-reader 装
+> 插件）与 3.5（反代），前两个等凭据与人力，后两个要跨仓库协作。
+
 ## 先决条件
 
 - [ ] 一个可用域名（国内加速需 ICP 备案；Cloudflare 托管的根域名不支持绑定，用子域）
 - [ ] EdgeOne 账号与 Pages/Makers 开通
 - [ ] COS 桶与 EdgeOne 回源配置权限
-- [ ] 架构文档「待验证项」4 条的复核结论
+- [ ] 架构文档「待验证项」6 条的复核结论（其中 2 条只需一份真实素材即可定案）
 - [ ] 架构文档「待拍板事项」3 条的决定
