@@ -45,31 +45,42 @@ React 的渲染是异步的，容器要等下一次 commit 才存在。
 
 ```
 src/kernel/     内核接线：Station 单例、surface 桥、React context
-src/station/    骨架期数据与占位插件
+src/station/    骨架期数据与插件目录
 src/cms/        CmsStore 接口 + 内存实现
 src/app/        路由：/ 资料页、/admin 后台
 ```
 
-## 哪些是真的，哪些是占位的
+## 哪些是真的，哪些还缺
 
 **真的**：`Kernel`、`Registry`、`ResourceClient`、`OriginPool` 全部从 `packages/`
 原样 import；manifest、能力声明、生命周期、事件总线、多源选路、
 `can()` 决定按钮画不画、插件装卸——都是生产路径。
 
-**已经是真的**：三个插件全是真实现——`sprite-viewer` 装 `@aio/plugin-sprite` +
-`createCanvas2dStage`（骨骼真解析、帧真插值、canvas 上真画），`adv-player` 装
-`@aio/plugin-adv` + `createDomStage`（worksheet 真解析、时间轴真推进、
-对话框真渲染），`model-3d` 装 `@aio/plugin-gltf`（glTF 2.0 真解析）。骨骼数据是合成的（铁律 9：素材不进这棵树），
-经 `data:` URL 由 `StaticProvider` 送进来，所以整条链路（fetch → 解析 → 推帧 → 渲染）
-都是生产路径。资源提供者也从 `ManifestCdnProvider` 换成了 `StaticProvider`，
-**插件与宿主一行没改**——那是 ADR 0002 第一层判据的实际兑现。
+**四个插件全是真实现，一个占位都不剩**：
 
-**占位的**：
+| 目录 id | 装的是 | 真的做了什么 |
+|---|---|---|
+| `sprite-play` | `@aio/plugin-sprite` + `createCanvas2dStage` | 骨骼与图集真解析、父子变换真合成、帧真插值、canvas 上真画 |
+| `adv-play` | `@aio/plugin-adv` + `createDomStage` | worksheet 真解析、时间轴真推进、对话框真渲染 |
+| `model3d-gltf` | `@aio/plugin-gltf` | glTF 2.0 真解析（动画清单、外部依赖） |
+| `chart-height` | `@aio/plugin-chart` + `createDomStage` | 档案真解析、比例真算、没登记身高的真说出来 |
 
-- **一个占位都不剩了**：`model-3d` 也换成了 `@aio/plugin-gltf`。
-  缺的只是「画得多好看」——贴图与真渲染要等资源面（Phase 2）与各自的 WebGL 舞台。
-- 隔离级别：契约里 `sprite-viewer` / `adv-player` 是 `iframe`，占位版没有那些
-  全局运行时，所以按 inline 走。接真查看器时用 `createIframePlugin()` 包一层，
+数据是合成的（铁律 9：素材不进这棵树），经 `data:` URL 由 `StaticProvider` 送进来，
+所以整条链路（fetch → 解析 → 推进 → 渲染）都是生产路径。资源提供者也从
+`ManifestCdnProvider` 换成了 `StaticProvider`，**插件与宿主一行没改**——
+那是 ADR 0002 第一层判据的实际兑现。
+
+> **目录 id 必须等于插件 manifest 的 id。** `Station.disable()` 拿目录 id 去
+> `kernel.unregister()`，对不上时它会静静地什么都不做：后台开关看着关了，能力
+> 其实还在。`test/catalog.test.ts` 逐条钉住这件事，并验「拔掉之后 `can()` 变假、
+> 其余能力不受影响、装回来能力就回来」。
+
+**还缺的**：
+
+- 「画得多好看」——贴图与真渲染要等资源面（Phase 2）与各自的 WebGL 舞台。
+- 隔离级别：契约里 `sprite-viewer` / `adv-player` 那几个**上游**实现是 `iframe`，
+  因为它们靠 `window.cc` 这类全局活着。这里装的四个从零实现没有那些运行时，
+  所以按 inline 走。接真查看器时用 `createIframePlugin()` 包一层，
   **调用方一行不用改**。
 - CMS 的 2/3/4 块没有持久化，刷新即失忆。EdgeOne Pages 是静态托管，写入面要等
   Phase 5 的边缘函数 + KV；接口已经钉死在 `src/cms/store.ts`，换实现时上层不动。

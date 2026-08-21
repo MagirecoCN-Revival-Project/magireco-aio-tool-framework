@@ -19,7 +19,13 @@ import { SurfaceOutlet } from '../kernel/SurfaceOutlet';
 interface Entry {
   readonly ref: string;
   readonly label: string;
-  readonly actions: readonly { readonly capability: CapabilityId; readonly target: string; readonly label: string }[];
+  readonly actions: readonly {
+    readonly capability: CapabilityId;
+    readonly target: string;
+    readonly label: string;
+    /** 传给插件的意图参数。契约要求实现容忍未知参数，所以这里多传不会崩。 */
+    readonly params?: Record<string, unknown>;
+  }[];
 }
 
 const CODEX: readonly Entry[] = [
@@ -29,12 +35,29 @@ const CODEX: readonly Entry[] = [
     actions: [
       { capability: 'sprite.show', target: 'a:sprite/100100/d_r', label: '显示战斗精灵' },
       { capability: 'adv.play', target: 'a:scenario/310241@zh', label: '实机播放剧情' },
+      // 目标就是这个角色自己——身高对比图以他为主体，compare 由插件参数给。
+      {
+        capability: 'chart.height',
+        target: 'a:character/1001',
+        label: '身高对比',
+        // 名单里故意带一个没登记身高的（1002）与一个跨作品的：前者验「不画柱子
+        // 但说出来」，后者验 universe 前缀真的把两个作品分开（铁律 1）。
+        params: { compare: 'b:character/100101,a:character/1002' },
+      },
     ],
   },
   {
     ref: 'b:character/100101',
     label: '角色乙（示例作品 B）',
-    actions: [{ capability: 'model3d.show', target: 'b:model3d/100101', label: '查看 3D 模型' }],
+    actions: [
+      { capability: 'model3d.show', target: 'b:model3d/100101', label: '查看 3D 模型' },
+      {
+        capability: 'chart.height',
+        target: 'b:character/100101',
+        label: '身高对比',
+        params: { compare: 'a:character/1001' },
+      },
+    ],
   },
 ];
 
@@ -52,14 +75,23 @@ export default function CodexPage(): ReactNode {
     });
   }, [station]);
 
-  const open = (capability: CapabilityId, target: string): void => {
+  const open = (
+    capability: CapabilityId,
+    target: string,
+    params?: Record<string, unknown>,
+  ): void => {
     let ref: ResourceRef;
     try {
       ref = parseRef(target);
     } catch {
       return; // 裸 ID / 格式错一律不派发（铁律 1）
     }
-    void station.kernel.request({ capability, ref, surface: 'inline' });
+    void station.kernel.request({
+      capability,
+      ref,
+      surface: 'inline',
+      ...(params === undefined ? {} : { params }),
+    });
   };
 
   return (
@@ -85,7 +117,11 @@ export default function CodexPage(): ReactNode {
               }
               if (!ok) return null;
               return (
-                <button key={a.capability} type="button" onClick={() => open(a.capability, a.target)}>
+                <button
+                    key={a.capability}
+                    type="button"
+                    onClick={() => open(a.capability, a.target, a.params)}
+                  >
                   {a.label}
                 </button>
               );

@@ -119,6 +119,64 @@ button:hover { border-color: var(--accent); }
 .adv-text { margin: 0.3rem 0 0.6rem; line-height: 1.8; }
 .adv-meta { color: var(--muted); font-size: 0.8em; font-family: ui-monospace, monospace; }
 
+/* @aio/plugin-chart 的 DOM 舞台。柱子用 height:% ——比例由插件算好，
+   这里只负责把百分比画成高度，样式换了也不会改变数据。 */
+.chart-stage {
+  display: flex;
+  gap: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.8rem 0.9rem;
+  background: #0d1220;
+  flex-wrap: wrap;
+}
+.chart-scale {
+  position: relative;
+  width: 2.5rem;
+  height: 12rem;
+  border-right: 1px solid var(--line);
+  flex: 0 0 auto;
+}
+.chart-tick {
+  position: absolute;
+  right: 0.3rem;
+  transform: translateY(50%);
+  color: var(--muted);
+  font-size: 0.72em;
+  font-family: ui-monospace, monospace;
+}
+.chart-plot {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6rem;
+  height: 12rem;
+  flex: 1 1 12rem;
+}
+.chart-bar {
+  flex: 1 1 0;
+  min-width: 3.2rem;
+  border: 1px solid var(--line);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background: #1b2540;
+  color: inherit;
+  font: inherit;
+  font-size: 0.78em;
+  line-height: 1.25;
+  padding: 0.3rem 0.2rem;
+  cursor: pointer;
+  /* 柱子矮的时候文字要还在柱子里，所以贴底排。 */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  text-align: center;
+  word-break: break-word;
+}
+.chart-bar:hover { border-color: var(--accent); }
+.chart-bar-focus { background: #24345c; border-color: var(--accent); }
+.chart-note { flex: 1 0 100%; margin: 0.2rem 0 0; color: var(--muted); font-size: 0.8em; }
+.chart-note:empty { display: none; }
+
 table { width: 100%; border-collapse: collapse; margin-top: 0.6rem; }
 th, td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--muted); font-weight: 600; font-size: 0.88em; }
