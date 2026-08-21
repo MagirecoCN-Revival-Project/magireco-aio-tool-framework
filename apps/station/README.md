@@ -8,6 +8,12 @@ npm run -w @aio/station dev      # http://localhost:3000
 npm run -w @aio/station build    # 静态导出到 apps/station/out/
 ```
 
+> 两条命令都带 `--webpack`。Next 16 起 Turbopack 是缺省打包器，而
+> `packages/` 里的相对 import 带 `.js` 后缀（TS 写 ESM 的正确写法），
+> Turbopack 目前没有 webpack `extensionAlias` 的对应物——2026-08-21 实测
+> 拿掉之后 51 个 `Can't resolve './xxx.js'` 全部复现。理由与取舍写在
+> `next.config.mjs` 的注释里。
+
 ## 它和 `apps/demo` 的分工
 
 | | `apps/demo` | `apps/station` |

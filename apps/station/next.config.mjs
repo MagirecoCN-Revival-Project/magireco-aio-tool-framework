@@ -33,6 +33,13 @@ const config = {
    * 修 webpack，不修那些包——它们的写法没错，而且 demo 宿主（esbuild）与
    * 任何走标准 ESM 解析的宿主都吃这一套。为了迁就一个打包器去改五个包的
    * 导入风格，等于让「能被任何宿主直接 import」这条设计前提作废。
+   *
+   * > **Next 16 起 Turbopack 是缺省打包器**，所以 `package.json` 的 dev/build
+   * > 都显式加了 `--webpack`。这不是「懒得迁」：Turbopack 目前没有
+   * > `extensionAlias` 的对应物（`resolveExtensions` 是整份扩展名清单，
+   * > `resolveAlias` 针对模块名），2026-08-21 实测拿掉 webpack 后 51 个
+   * > `Can't resolve './xxx.js'` 全部复现。等 Turbopack 能表达这条解析规则
+   * > 再迁；在那之前显式声明用哪个打包器，比让构建在某次升级后突然红掉好。
    */
   webpack: (config) => {
     config.resolve.extensionAlias = {
