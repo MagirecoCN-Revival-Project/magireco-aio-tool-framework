@@ -25,10 +25,23 @@ npm run docs:preview
 `.github/workflows/docs.yml` 在 push 到 `main` 时构建并发布。
 `docs/public/CNAME` 里写着 `docs.example.com`，Pages 据此绑定自定义域名。
 
-Pages 本身由 workflow 里的 `configure-pages` 带 `enablement: true` 自动开启
-（`build_type=workflow`），不需要先去 Settings 里点一次。
+::: danger 上线前要人工做两件事，都自动不了
+**一、开 Pages。** 仓库 Settings → Pages → Source 选 **GitHub Actions**。
 
-::: warning DNS 还得手动配一次
+workflow 里带了 `enablement: true`，但 2026-08-21 实测在本组织下**不管用**：
+
+```
+不带 enablement    → Get Pages site failed … Not Found
+带 enablement:true → Create Pages site failed … Resource not accessible by integration
+```
+
+`GITHUB_TOKEN` 无权创建 Pages 站点。那一条留着是因为站点开好之后它是空操作，
+在权限更宽的 fork 里还能省掉这一步。
+
+**二、配 DNS。**
+:::
+
+::: warning DNS 那条记录
 在 `example.com` 的 DNS 上加一条：
 
 ```

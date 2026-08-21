@@ -49,9 +49,14 @@ jobs:
       - name: 构建文档站
         run: npm run docs:build
 
-      # enablement: true —— 让这个 action 自己去开 Pages（build_type=workflow），
-      # 而不是要求先有人去 Settings 里点一次。首推时实测：不带它会以
-      # 「Get Pages site failed … Not Found」失败，而那条错误看起来像配置写错了。
+      # 🔴 Pages 必须**先由人**在 Settings → Pages 把 Source 设成 GitHub Actions。
+      # 2026-08-21 两次实测：
+      #   不带 enablement → Get Pages site failed … Not Found
+      #   带 enablement:true → Create Pages site failed … Resource not accessible
+      #                        by integration
+      # 也就是说 GITHUB_TOKEN 在本组织下无权创建 Pages 站点，自动不了。
+      # enablement 留着不删：站点开好之后这一条是空操作（get 成功就不会去 create），
+      # 而在权限更宽的 fork 里它能省掉那一步。
       - uses: actions/configure-pages@v5
         with:
           enablement: true
