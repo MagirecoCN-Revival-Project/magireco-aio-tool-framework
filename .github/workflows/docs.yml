@@ -1,0 +1,66 @@
+name: docs
+
+# 文档站发布。**这是「发布类 workflow 一律手动」的一个有意的例外**
+# （分工见 checks.yml 的注释与 example-client CONTRIBUTING §四）。
+# 两条理由：
+#
+#   - 落后的文档比没有文档更糟——它会让人按一份不成立的描述去改代码；
+#   - 与 APK 发版不同，文档发布是**幂等且可逆**的：没有版本号，没有用户在
+#     安装什么东西，推错了改回来再推一次即可。
+#
+# 不接受这个判断的话，把下面的 `push:` 去掉就变回纯手动。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 只授出发布 Pages 所需的两项。默认的 contents: read 也一并写出来，
+# 免得以后加了别的步骤时以为它有写权限。
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 连着推两次时，让后一次取消前一次——但**不取消已经在发布的那一步**，
+# 否则站点可能停在半截状态。
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # lastUpdated 取自 git 提交时间，浅克隆会让每一页都显示同一个时间。
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # docs/public/CNAME 里写着 docs.example.com，VitePress 会把它原样
+      # 拷进产物；Pages 据此绑定自定义域名。DNS 那条 CNAME 记录要手动配一次，
+      # 见 docs/guide/deploy.md。
+      - name: 构建文档站
+        run: npm run docs:build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

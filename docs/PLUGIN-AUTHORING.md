@@ -10,11 +10,12 @@
 > 这是开源仓库，直接去改上游第一不合适、第二容易牵出许可证问题。
 
 `example-reader` 未授予任何开源许可，`example-live2d-viewer` 是他人仓库。所以
-「把上游改一改接进来」不能是这套系统能不能成立的前提。现在五个能力
-（`model3d.show` / `sprite.show` / `live2d.show` / `adv.play` / `search.query`）
-各有一个**不碰任何上游代码**的实现；上游若愿意接，它是同一契约的又一个实现。
+「把上游改一改接进来」不能是这套系统能不能成立的前提。现在六个能力
+（`model3d.show` / `sprite.show` / `live2d.show` / `adv.play` / `search.query` /
+`chart.height`）各有一个**不碰任何上游代码**的实现；上游若愿意接，
+它是同一契约的又一个实现。
 
-谁有几个实现，横着记在 [`contracts/capabilities.json`](../contracts/capabilities.json)，
+谁有几个实现，横着记在 [`contracts/capabilities.json`](https://github.com/MagirecoCN-Revival-Project/magireco-aio-tool-framework/blob/main/contracts/capabilities.json)，
 `tools/check-sources.py` 会与各仓库的竖表对账。**新插件要在那里登记**，
 否则守卫会红——一张对不上账的表比没有表更糟。
 
@@ -62,7 +63,7 @@ if (host.can('voice.play', voiceRef)) { /* 画按钮 */ }
 
 ## 从零写：核心与舞台分开
 
-现有五个实现是同一个切法，值得照抄：
+现有六个实现是同一个切法，值得照抄：
 
 ```
 解析器      把资源字节变成一份归一化的数据（纯函数，零 DOM）
@@ -258,8 +259,8 @@ runCapabilityConformance({
 | example-adv-live2d | `adv-player` | iframe | `adv.play`、`live2d.show` | 契约已写，尚未接线。Pixi 版本已 pin，不能被打破 |
 | example-sprite-mirror | `sprite-viewer` | iframe | `sprite.show` | 契约已写，尚未接线。cocos2d-html5 的 `window.cc` |
 | example-live2d-viewer | `viewer-sp` | iframe | `live2d.show` | 契约已写，尚未接线。自带 live2d 运行时 |
-| example-search-site | `call-search` | inline | `search.query`、`chart.height` | 契约已写，尚未接线。`chart.height` 目前只有它一个实现 |
+| example-search-site | `call-search` | inline | `search.query`、`chart.height` | 契约已写，尚未接线。两项能力本仓库都已有自有实现 |
 
-上面每一项都**已经有一个 `own` 实现在跑**（`chart.height` 除外），所以接线是
-「多一个可选实现」，不是「缺了就不能用」。逐条契约见 `contracts/*.source.json`，
+上面每一项都**已经有一个 `own` 实现在跑**，所以接线是「多一个可选实现」，
+不是「缺了就不能用」。逐条契约见 `contracts/*.source.json`，
 全貌见 `contracts/capabilities.json`。

@@ -27,11 +27,16 @@ jobs:
       - name: 单元与整合测试
         run: npm test
 
-      # 静态导出是这个仓库唯一的对外产物。typecheck 与单测都过、导出却坏掉是
+      # 静态导出是这个仓库两个对外产物之一（另一个是文档站）。typecheck 与单测都过、导出却坏掉是
       # 可能的：Next 的打包器解析规则与 tsc 不是一回事（Next 16 换成 Turbopack
       # 缺省时就一次撞上 51 个 Can't resolve）。所以这一步单独跑。
       - name: 静态导出（EdgeOne Pages 的交付产物）
         run: npm run build -w @aio/station
+
+      # 文档站的死链检查在构建期。放这里而不是只放 docs.yml，是为了让 PR 上
+      # 就红——docs.yml 只在 push 到 main 之后跑，那时坏链接已经进主线了。
+      - name: 文档站构建（死链在这一步暴露）
+        run: npm run docs:build
 
   contracts:
     runs-on: ubuntu-latest

@@ -30,7 +30,7 @@
 
 | 步骤 | 说明 |
 |---|---|
-| 1.1 | ✅ **已完成** `apps/station`：Next.js + React 19 宿主外壳，`output: 'export'` 静态导出到 EdgeOne Pages 单项目。含 React↔内核的 surface 桥、能力驱动的 UI、插件装卸后台。现在装着四个真实现，一个占位都不剩，见 [`apps/station/README.md`](../apps/station/README.md) |
+| 1.1 | ✅ **已完成** `apps/station`：Next.js + React 19 宿主外壳，`output: 'export'` 静态导出到 EdgeOne Pages 单项目。含 React↔内核的 surface 桥、能力驱动的 UI、插件装卸后台。现在装着四个真实现，一个占位都不剩，见 [`apps/station/README.md`](https://github.com/MagirecoCN-Revival-Project/magireco-aio-tool-framework/blob/main/apps/station/README.md) |
 | 1.2 | ✅ **已完成** `packages/plugin-model-3d`：把 example-model-viewer 包成插件，模型走资源面。上游一行未改（它的构造函数本来就是 `Record<路径, URL>` 注入式），10 个测试全在 node 上跑——上游两个类是注入的，不需要 three.js 与 GPU。**尚未接进 `apps/station`**：要等 `upstream-three-subpackage` 可安装（发包或 git 依赖） |
 | 1.3 | ✅ **已完成，但换了做法**：`sprite.show` 不再等 cocos2d 子帧，而是 `@aio/plugin-sprite` **从零实现**（骨骼 + 图集解析、父子合成、canvas2d 舞台），已装进 station。上游 cocos2d 那个候选仍登记在册（`contracts/capabilities.json` 的 `sprite-viewer`），接不接都不影响能用 |
 | 1.4 | 交叉表首批数据：先做 810 个精灵 unit ↔ charaId 的人工核对 |
@@ -81,7 +81,7 @@
 > 与 Phase 1.3 同一个变化：这三个能力现在**各自已有不碰上游的实现**
 > （`plugin-adv` / `plugin-live2d` / `plugin-search` + `plugin-chart`），
 > 全部过一致性套件。所以 3.1–3.3 不再是「能不能用」，而是「要不要多一个实现」。
-> 全貌见 [`contracts/capabilities.json`](../contracts/capabilities.json)。
+> 全貌见 [`contracts/capabilities.json`](https://github.com/MagirecoCN-Revival-Project/magireco-aio-tool-framework/blob/main/contracts/capabilities.json)。
 
 | 步骤 | 说明 |
 |---|---|
