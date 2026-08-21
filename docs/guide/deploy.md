@@ -17,8 +17,14 @@
 ```bash
 npm run docs:dev       # http://localhost:5173
 npm run docs:build
-npm run docs:preview
+npm run docs:preview   # 预览构建产物，**不要**去双击 dist/index.html
 ```
+
+::: warning 别双击 `dist/index.html`
+产物里的资源引用是绝对路径（`/assets/…`），因为站点跑在自定义域名的根上。
+用 `file://` 打开时浏览器会把 `/assets/…` 解析到**文件系统根目录**，
+于是 CSS 与 JS 全部 404，页面看起来像坏了。要看构建结果就用 `npm run docs:preview`。
+:::
 
 ### GitHub Pages（当前接线）
 
