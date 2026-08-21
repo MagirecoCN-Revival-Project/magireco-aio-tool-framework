@@ -1,0 +1,33 @@
+# EditorConfig —— 把编码与换行**声明**出来，别让编辑器按本地语言猜。
+#
+# 这棵树里几乎每个文件都有中文（提交信息、注释、文档、契约里的 note）。
+# 文件本身一律是**无 BOM 的 UTF-8**，但编辑器读到没有声明的文件时会按系统
+# 默认编码去猜——中文 Windows 上那是 GBK，于是整篇变成乱码。
+#
+# 不加 BOM 来解决：BOM 会让 sh 读 `#!/bin/sh` 时看到三个多余字节而报
+# `bad interpreter`，与 .gitattributes 里防 CRLF 那条是同一类事故。
+# 声明写在这里，文件保持干净。
+#
+# 生效范围：VS Code（装 EditorConfig 扩展）、JetBrains 全家桶（原生）、
+# Sublime、Vim/Neovim（插件）、Visual Studio。记事本不认——用别的。
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.py]
+indent_size = 4
+
+[*.md]
+# Markdown 里行尾两个空格是「换行」，剪掉会改变渲染结果。
+trim_trailing_whitespace = false
+
+# Windows 批处理必须是 CRLF，否则某些 cmd.exe 版本解析会出错。
+# 与 .gitattributes 里那条 `tools/*.cmd text eol=crlf` 是同一个决定的两面。
+[*.cmd]
+end_of_line = crlf

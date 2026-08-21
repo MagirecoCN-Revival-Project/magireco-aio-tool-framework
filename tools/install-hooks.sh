@@ -29,7 +29,17 @@ fi
 chmod +x tools/githooks/commit-msg tools/githooks/pre-push 2>/dev/null || true
 git config core.hooksPath tools/githooks
 
+# 顺手关掉路径转义。默认开着时，git 会把非 ASCII 文件名打成八进制转义：
+#
+#     M "docs/adr/0001-\350\207\252\347\240\224\345\206\205\346\240\270…"
+#
+# 而本仓库的 ADR 文件名就是中文。这看起来像编码坏了，其实只是 git 在给终端
+# 「转义」。与 hooksPath 一样，它是**每份克隆的本地配置**，入库文件管不着，
+# 所以搭在这里一起设。
+git config core.quotepath false
+
 printf '✔ 已装上 git 钩子（core.hooksPath → tools/githooks）。\n'
+printf '✔ 已关掉 core.quotepath（中文文件名不再显示成 \\350\\207\\252 这种转义）。\n'
 printf '  commit-msg  标题非中文 / 缺 Co-authored-by / 缺「文档:」交代 → 拦\n'
 printf '  pre-push    新增提交信息不合规、新建非白名单分支、删掉发布禁令 → 拦\n'
 printf '  规则见 CLAUDE.md 与 AGENTS.md。\n'
