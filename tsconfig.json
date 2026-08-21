@@ -44,6 +44,9 @@
       ],
       "@aio/plugin-gltf": [
         "./packages/plugin-gltf/src/index.ts"
+      ],
+      "@aio/site": [
+        "./packages/site/src/index.ts"
       ]
     },
     "baseUrl": ".",

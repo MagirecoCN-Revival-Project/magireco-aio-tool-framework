@@ -19,6 +19,7 @@
 | `@aio/registry` | 实体交叉表：角色 ↔ 精灵 / Live2D / 3D / 语音 |
 | `@aio/resource` | `ResourceProvider` 接口 + 两个实现：`ManifestCdnProvider`（清单、多源回退、https 强制、sha256）与 `StaticProvider`（离线包／本地目录）。一致性套件不 import 任何实现 |
 | `@aio/kernel` | 插件注册、意图派发、surface 生命周期、WebGL 上下文治理、iframe RPC 桥 |
+| `@aio/site` | **边缘半边**：路由、SSR 元信息、SEO、站点配置、下架 |
 | `@aio/plugin-sdk` | `definePlugin` + 无头测试宿主 |
 | `@aio/capability` | 能力契约：每个能力**能被怎么用**（接受的 kind、参数、必发的事件）。零依赖于任何实现 |
 | `@aio/conformance` | 一致性套件。不 import 任何具体实现——「换一个实现宿主零改动」因此可验证 |
@@ -64,6 +65,7 @@ sha256 校验、下架降级）全在 `@aio/resource` 里。换 CDN、加备份�
 ## 文档
 
 ```
+docs/CMS-ON-EDGEONE.md      CMS 形态：两半插件、静态导出与 KV 的矛盾、SEO、后台
 docs/AIO-ARCHITECTURE.md    架构：三个概念、隔离、资源面、宿主模型
 docs/PLUGIN-AUTHORING.md    怎么写插件：从零实现（核心 + 注入舞台）或包装既有查看器
 docs/AIO-ROADMAP.md         落地方案：七个阶段与验收判据
