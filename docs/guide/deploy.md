@@ -69,18 +69,56 @@ framework   CNAME   magirecocn-revival-project.github.io.
 不接受这个判断的话，把 `docs.yml` 的 `on.push` 去掉就变回纯手动。
 :::
 
-### EdgeOne Pages（备选）
+### EdgeOne Pages
 
-项目本体是奔着 EdgeOne 去的，文档站放过去也一样：
+::: danger 不要选任何框架预设
+预设会自作主张：**Next 预设在仓库根跑 `next build`**，而这里是 npm workspaces
+的 monorepo——根 `package.json` 里压根没有 `build` 脚本，`next` 也不装在根上，
+所以它必然失败。构建一失败，EdgeOne 没有产物可发，整站就是 404。
+
+两个产物都选 **无预设 / 静态站点**，把命令和输出目录明确填进去。
+:::
+
+项目根目录都填**仓库根**（`/`），因为依赖要靠 npm workspaces 一起装。
+
+**文档站（就是本站，VitePress）**
 
 | 字段 | 值 |
 |---|---|
-| 构建命令 | `npm install && npm run docs:build` |
+| 框架预设 | 无 / 静态站点 |
+| 根目录 | `/` |
+| 安装命令 | `npm install` |
+| 构建命令 | `npm run docs:build` |
 | 输出目录 | `docs/.vitepress/dist` |
-| Node 版本 | 22 |
 
-域名在控制台绑，`docs/public/CNAME` 对 EdgeOne 无效但也无害
-（它只是产物里多一个纯文本文件）。
+**工作站（`apps/station`，Next 静态导出）**
+
+| 字段 | 值 |
+|---|---|
+| 框架预设 | 无 / 静态站点（**不是 Next**） |
+| 根目录 | `/` |
+| 安装命令 | `npm install` |
+| 构建命令 | `npm run build -w @aio/station` |
+| 输出目录 | `apps/station/out` |
+
+它虽然是 Next，但走的是 `output: 'export'`——产物是纯静态的 `out/`，
+不是 `.next/`；而且构建必须带 `--webpack`（见上）。Next 预设两条都不满足。
+
+::: warning Node 必须是 22
+`package.json` 的 `engines` 写着 `>=22`。仓库里放了 `.node-version`（内容就是 `22`），
+EdgeOne 会读它；读不到就在环境变量里加 `NODE_VERSION=22`。
+用更低的版本，`npm install` 或构建会在半路上失败，而失败之后整站 404
+——跟编码没关系，是压根没有产物。
+:::
+
+域名在控制台绑。`docs/public/CNAME` 是给 GitHub Pages 用的，对 EdgeOne 无效
+但也无害（产物里多一个纯文本文件而已）。
+
+::: tip 如果页面出来了但中文是乱码
+那是**响应头**的问题，不是文档的问题：本站每一页都带 `<meta charset="utf-8">`，
+而 **HTTP 头里的 charset 会覆盖文档内的所有声明**。去控制台的规则引擎
+（或 `edgeone.json`）把 HTML 的响应头钉成 `Content-Type: text/html; charset=utf-8`。
+:::
 
 ::: warning 国内加速需要备案
 `example.com` 若要走 EdgeOne 的国内节点，域名需完成 ICP 备案。
