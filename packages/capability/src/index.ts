@@ -132,12 +132,30 @@ export const SEARCH_QUERY = contract({
   webglTypical: false,
 });
 
+export const CHART_HEIGHT = contract({
+  id: 'chart.height',
+  title: '身高对比',
+  accepts: ['character'],
+  params: [
+    {
+      name: 'compare',
+      type: 'string',
+      required: false,
+      note: '一并对比的角色 ref，逗号分隔。查不到的项**忽略**而不是崩——对比名单来自调用方，它不该知道清单里有谁',
+    },
+  ],
+  // 点某一条 → 聚焦那个角色。只能画、不能回话的东西是一张图片，不是插件。
+  emits: ['entity.focused'],
+  webglTypical: false,
+});
+
 export const CONTRACTS: readonly CapabilityContract[] = [
   MODEL3D_SHOW,
   SPRITE_SHOW,
   LIVE2D_SHOW,
   ADV_PLAY,
   SEARCH_QUERY,
+  CHART_HEIGHT,
 ];
 
 export function contractOf(id: CapabilityId): CapabilityContract | null {

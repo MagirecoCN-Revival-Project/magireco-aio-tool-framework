@@ -28,6 +28,7 @@
 | `@aio/plugin-search` | `search.query` 的实现：跨中/日/罗马字/假名/别名匹配（片假名折叠），结果 ref 化。**不碰上游** |
 | `@aio/plugin-live2d` | `live2d.show` 的实现：Cubism `model3.json` 解析器 + 渲染无关的会话（动作/表情/口型同步），舞台注入。**不碰上游** |
 | `@aio/plugin-gltf` | `model3d.show` 的实现：glTF 2.0 解析（动画清单、外部依赖、拒收 1.x 与 GLB），舞台注入。**不碰上游** |
+| `@aio/plugin-chart` | `chart.height` 的实现：角色档案解析 + 与渲染无关的布局算术（量程、刻度、缺数据），DOM 舞台注入。**不碰上游** |
 
 ```bash
 npm install

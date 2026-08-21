@@ -119,6 +119,14 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--out", type=pathlib.Path, help="输出文件，缺省打到标准输出")
     ap.add_argument("--prefix", default="", help="给每条 path 加的前缀，如 'sprite/'")
     ap.add_argument(
+        "--role",
+        help=(
+            "强制本次全部文件用这个 role，不按扩展名判。"
+            "用在「一个目录就是一种 role」的场合——角色档案是一堆 .json，"
+            "而按扩展名它们会被判成 script，插件按 profile 取就取不到。"
+        ),
+    )
+    ap.add_argument(
         "--allow-unmapped",
         action="store_true",
         help="允许匹配不上的文件（默认失败）。用它之前请先想清楚少的是哪些",
@@ -149,6 +157,9 @@ def main(argv: list[str]) -> int:
             continue
 
         role, encoding = role_of(rel)
+        if args.role is not None:
+            # 显式指定时只用它的 role，encoding 仍按 .gz 判——那一条与语义无关。
+            role = args.role
         if role is None:
             # 编一个 role 出来，插件按它取会拿到错的文件——宁可报出来。
             unknown_role.append(rel)

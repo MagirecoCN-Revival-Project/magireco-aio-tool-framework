@@ -20,6 +20,7 @@ const config = {
     '@aio/resource',
     '@aio/plugin-sprite',
     '@aio/plugin-adv',
+    '@aio/plugin-chart',
     '@aio/plugin-gltf',
   ],
   // 资源全部外置到资源面（铁律 9），所以这里没有图片需要优化。

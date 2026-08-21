@@ -1,5 +1,6 @@
 import type { Plugin } from '@aio/kernel';
 import { createAdvPlugin, createDomStage } from '@aio/plugin-adv';
+import { createChartPlugin, createDomStage as createChartStage } from '@aio/plugin-chart';
 import { createGltfPlugin } from '@aio/plugin-gltf';
 import {
   createCanvas2dStage,
@@ -11,15 +12,22 @@ import type { CatalogEntry } from '../kernel/station';
 /**
  * 工作站装的插件。
  *
- * **三个都是真实现，一个占位都不剩了。** 各自的解析、时间轴与生命周期都跑
+ * **四个都是真实现，一个占位都不剩了。** 各自的解析、时间轴与生命周期都跑
  * `packages/` 里那份生产代码；缺的只是「画得多好看」——贴图与真渲染要等
  * 资源面（Phase 2）与各自的 WebGL 舞台。
+ *
+ * ## 目录里的 id 必须等于插件 manifest 的 id
+ *
+ * `Station.disable()` 拿目录 id 去 `kernel.unregister()`，而内核按 manifest.id
+ * 存插件。两者不一致时 `unregister` 会**静静地什么都不做**：后台的开关看着关了，
+ * 能力其实还在，「拔掉一个模块，按钮就消失」那条判据当场失效。
+ * `test/catalog.test.ts` 逐条钉住这件事。
  *
  * ## 隔离级别为什么全是 inline
  *
  * 契约（`contracts/*.source.json`）里那几个上游查看器是 `iframe`，因为它们靠
  * `window.cc`、`window.Live2DCubismCore` 这类全局活着，必须独占 realm。
- * 而这里装的两个真实现**没有那些运行时**——它们从零写，只用平台原语，
+ * 而这里装的四个真实现**没有那些运行时**——它们从零写，只用平台原语，
  * 所以同 realm 共存没有问题。这正是「不碰上游」换来的额外好处：
  * 不继承别人的全局污染，也就不必付隔离的代价。
  *
@@ -30,7 +38,7 @@ import type { CatalogEntry } from '../kernel/station';
  * （`Cannot read properties of null`）——**渲染是可选的，契约行为不是**：
  * 资源解析、生命周期、进度回流在没有 DOM 的环境里同样必须成立，
  * 否则它们既不能在 node 上测，也过不了 SSR 预检。
- * 下面三个真实现的舞台工厂都遵循这条：拿不到 DOM 就返回 null，引擎照常跑。
+ * 下面四个真实现的舞台工厂都遵循这条：拿不到 DOM 就返回 null，引擎照常跑。
  */
 
 /**
@@ -92,23 +100,45 @@ function advPlayer(): Plugin {
   });
 }
 
+/**
+ * 身高对比图——**已经是真实现了**。
+ *
+ * 这一项是 `contracts/capabilities.json` 那张能力表第一次跑就查出来的缺口：
+ * 上游 `call-search` 提供 `chart.height`，本仓库既没有实现也没有契约。
+ * 现在两边都补上了，于是它不再是「离不开上游」的那一项。
+ *
+ * 用 DOM 而不是 canvas：一张身高图真正要传达的是数字与名字，DOM 才能让它们
+ * 可选中、可复制、被读屏念。
+ */
+function heightChart(): Plugin {
+  return createChartPlugin({
+    createStage: (container, onPick) => createChartStage(container, { onPick }),
+  });
+}
+
 export const PLUGIN_CATALOG: readonly CatalogEntry[] = [
   {
-    id: 'model-3d',
+    id: 'model3d-gltf',
     title: '3D 模型查看器',
     note: '真实现：@aio/plugin-gltf。glTF 2.0 真解析（动画清单、外部依赖）',
     create: model3d,
   },
   {
-    id: 'sprite-viewer',
+    id: 'sprite-play',
     title: '战斗精灵',
     note: '真实现：@aio/plugin-sprite + canvas2d 舞台。骨骼真解析、真插值、真画',
     create: spriteViewer,
   },
   {
-    id: 'adv-player',
+    id: 'adv-play',
     title: 'ADV 播放器',
     note: '真实现：@aio/plugin-adv + DOM 舞台。worksheet 真解析、时间轴真推进',
     create: advPlayer,
+  },
+  {
+    id: 'chart-height',
+    title: '身高对比',
+    note: '真实现：@aio/plugin-chart + DOM 舞台。档案真解析、比例真算、没数据的真说出来',
+    create: heightChart,
   },
 ];

@@ -187,6 +187,19 @@ export const DEMO_GLTF = {
   ],
 };
 
+/**
+ * 骨架期的合成角色档案——**不是游戏设定数据**（铁律 9）。
+ *
+ * 身高故意留一个 null：`chart.height` 的实现对「没登记身高」的处理是
+ * **不画柱子并列进 missing**，而不是当成 0——0 在图上读作「身高 0」，
+ * 那是一句数据没说过的话。骨架期就把这条路走通，免得等真数据来了才发现。
+ */
+export const DEMO_PROFILES: Record<string, unknown> = {
+  'a:character/1001': { name: '角色甲', heightCm: 158, aliases: ['角色甲'] },
+  'b:character/100101': { name: '角色乙', heightCm: 153, aliases: ['角色乙'] },
+  'a:character/1002': { name: '七海八千代', heightCm: null },
+};
+
 const dataUrl = (value: unknown): string =>
   `data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(value))}`;
 
@@ -216,6 +229,14 @@ export function createDemoResources(): StaticProvider {
         // 外部依赖按 uri 同名登记 role——插件据此解析，不去拼 URL（铁律 3）。
         { role: 'scene.bin', path: '3d/chara_100101/scene.bin', url: 'https://assets.example.invalid/3d/chara_100101/scene.bin' },
       ],
+      // 角色档案：身高是角色**自己的属性**，不是关联，所以它按 ref 存在资源面上，
+      // 与立绘、语音同一条路径取；交叉表（registry）只管实体之间的关系。
+      ...Object.fromEntries(
+        Object.entries(DEMO_PROFILES).map(([ref, profile]) => [
+          ref,
+          [{ role: 'profile', path: `profile/${ref.replace(':', '/')}.json`, url: dataUrl(profile) }],
+        ]),
+      ),
     },
   });
 }

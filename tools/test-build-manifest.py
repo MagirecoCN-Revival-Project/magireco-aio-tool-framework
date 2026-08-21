@@ -86,6 +86,24 @@ def main() -> int:
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
+    print("\n--role 强制指定：")
+    root = make({"100100/d_r.json": b"{}", "100101/m_l.json": b"{}"})
+    try:
+        code, out, err = run(root, "--role", "profile")
+        doc = json.loads(out) if code == 0 else {}
+        parts = doc.get("entries", {}).get("a:sprite/100100/d_r", {}).get("parts", [{}])
+        # 按扩展名 .json 会被判成 script，插件按 profile 取就取不到。
+        check("role 用指定的那个，不按扩展名判", parts[0].get("role") == "profile", err or str(parts))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+    root = make({"100100/d_r.xyz": b"x"})
+    try:
+        code, _, err = run(root, "--role", "profile")
+        check("--role 也能救认不出扩展名的文件", code == 0, err)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
     print("\n失败路径（都必须非零退出）：")
     root = make({"100100/d_r.png": b"x", "杂项/readme.txt": b"x"})
     try:

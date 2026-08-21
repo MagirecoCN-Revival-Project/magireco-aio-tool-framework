@@ -12,6 +12,7 @@
     "@aio/core": "0.1.0",
     "@aio/kernel": "0.1.0",
     "@aio/plugin-adv": "0.1.0",
+    "@aio/plugin-chart": "0.1.0",
     "@aio/plugin-gltf": "0.1.0",
     "@aio/plugin-sprite": "0.1.0",
     "@aio/registry": "0.1.0",
