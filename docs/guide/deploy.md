@@ -25,6 +25,9 @@ npm run docs:preview
 `.github/workflows/docs.yml` 在 push 到 `main` 时构建并发布。
 `docs/public/CNAME` 里写着 `docs.example.com`，Pages 据此绑定自定义域名。
 
+Pages 本身由 workflow 里的 `configure-pages` 带 `enablement: true` 自动开启
+（`build_type=workflow`），不需要先去 Settings 里点一次。
+
 ::: warning DNS 还得手动配一次
 在 `example.com` 的 DNS 上加一条：
 

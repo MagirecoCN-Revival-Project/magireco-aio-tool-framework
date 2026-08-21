@@ -49,7 +49,12 @@ jobs:
       - name: 构建文档站
         run: npm run docs:build
 
+      # enablement: true —— 让这个 action 自己去开 Pages（build_type=workflow），
+      # 而不是要求先有人去 Settings 里点一次。首推时实测：不带它会以
+      # 「Get Pages site failed … Not Found」失败，而那条错误看起来像配置写错了。
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
