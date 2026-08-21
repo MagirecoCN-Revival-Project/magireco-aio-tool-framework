@@ -1,37 +1,33 @@
 import { formatRef } from '@aio/core';
 import type { Intent } from '@aio/core';
 import type { Plugin, PluginHost, PluginInstance, SurfaceTarget } from '@aio/kernel';
+import { createAdvPlugin, createDomStage } from '@aio/plugin-adv';
 import { createCanvas2dStage, createSpritePlugin } from '@aio/plugin-sprite';
 import type { CatalogEntry } from '../kernel/station';
 
 /**
  * 工作站装的插件。
  *
- * **`sprite-viewer` 已经是真实现**（`@aio/plugin-sprite` + canvas2d 舞台）：
- * 骨骼真解析、帧真插值、画面真画。另两个仍是占位。
+ * **`sprite-viewer` 与 `adv-player` 已经是真实现**（`@aio/plugin-sprite` +
+ * canvas2d 舞台、`@aio/plugin-adv` + DOM 舞台）。只剩 `model-3d` 是占位，
+ * 因为它唯一的真实现还依赖一个装不上的上游包（见 ACTIVE.md 阻塞项）。
  *
- * **真的**：manifest、能力声明、生命周期、事件总线、资源解析——全部走
- * `packages/` 里那份生产代码，与 demo 宿主用的是同一条路径。
+ * ## 隔离级别为什么全是 inline
  *
- * **占位的**：`mount()` 里的渲染。它们画的是占位面板，不真的跑 three.js /
- * cocos2d / Cubism。把 `mount()` 换成真正的查看器，这些就是成品——
- * 怎么换见 `docs/VIEWER-REFACTOR.md`（结论是四个查看器一个都不用重写）。
+ * 契约（`contracts/*.source.json`）里那几个上游查看器是 `iframe`，因为它们靠
+ * `window.cc`、`window.Live2DCubismCore` 这类全局活着，必须独占 realm。
+ * 而这里装的两个真实现**没有那些运行时**——它们从零写，只用平台原语，
+ * 所以同 realm 共存没有问题。这正是「不碰上游」换来的额外好处：
+ * 不继承别人的全局污染，也就不必付隔离的代价。
  *
- * ## 隔离级别为什么这里全是 inline
- *
- * 契约（`contracts/*.source.json`）里 `sprite-viewer` / `adv-player` /
- * `viewer-sp` 都是 `iframe`——它们靠 `window.cc`、`window.Live2DCubismCore`
- * 这类全局活着，必须独占 realm。占位版没有那些运行时，也就没有隔离的理由，
- * 所以按 inline 走。接真查看器时改用 `createIframePlugin()` 包一层，
- * **调用方一行都不用改**（demo 宿主里有一个跑通的 iframe RPC 例子）。
- *
- * ## 为什么每处都要判断有没有 DOM
+ * ## 为什么下面还留着 DOM 判定
  *
  * `SurfaceTarget.container` 的类型是 `unknown`，约定写明「测试环境可为 null」。
- * 这三个插件最初直接当 `HTMLElement` 用，被能力一致性套件一次抓出 13 处失败
+ * 占位插件最初直接当 `HTMLElement` 用，被能力一致性套件一次抓出 13 处失败
  * （`Cannot read properties of null`）——**渲染是可选的，契约行为不是**：
  * 资源解析、生命周期、进度回流在没有 DOM 的环境里同样必须成立，
  * 否则它们既不能在 node 上测，也过不了 SSR 预检。
+ * 两个真实现的舞台工厂遵循同一条约定：拿不到 DOM 就返回 null。
  */
 
 /** 鸭子判定，不依赖 DOM 全局——node 环境下 `HTMLElement` 根本不存在。 */
@@ -153,63 +149,22 @@ function spriteViewer(): Plugin {
   });
 }
 
+/**
+ * ADV 播放器——**已经是真实现了，不是占位**。
+ *
+ * `@aio/plugin-adv` 负责解析 worksheet 与推进时间轴，`createDomStage` 把
+ * 说话人与台词真的画成对话框。剧本是合成的（铁律 9），但解析、推进、进度回流
+ * 走的都是生产路径。
+ *
+ * DOM 舞台不占 WebGL 上下文，所以 `usesWebGL: false`。用 DOM 而不是 canvas 是
+ * 因为 ADV 的主体是文本：文字要可选中、可复制、能被读屏念、跟随系统字号。
+ */
 function advPlayer(): Plugin {
-  return {
-    manifest: {
-      id: 'adv-player',
-      version: '0.1.0',
-      title: 'ADV 播放器',
-      isolation: 'inline',
-      usesWebGL: true,
-      provides: [{ id: 'adv.play', accepts: ['scenario'], title: '实机播放剧情' }],
-      needs: ['scenario'],
-    },
-    async mount(target, intent, host) {
-      const body = panel(target, 'ADV 播放器', formatRef(intent.ref));
-      showParts(body, host, intent);
-
-      const total = 120;
-      let line = typeof intent.params?.['line'] === 'number' ? intent.params['line'] : 0;
-
-      // 有 DOM 就画字幕；没有也照样发进度——回流是契约行为，不是渲染的副产品。
-      let caption: HTMLElement | null = null;
-      if (body !== null) {
-        caption = document.createElement('p');
-        caption.className = 'adv-caption';
-        body.append(caption);
-      }
-
-      let paused = false;
-      const timer = setInterval(() => {
-        if (paused) return;
-        line = line >= total ? 0 : line + 1;
-        if (caption !== null) caption.textContent = `第 ${line} / ${total} 行`;
-        host.events.emit('progress', {
-          surfaceId: host.surfaceId,
-          ref: intent.ref,
-          position: line,
-          total,
-        });
-      }, 900);
-
-      return {
-        suspend() {
-          paused = true;
-        },
-        resume() {
-          paused = false;
-        },
-        dispose() {
-          // 漏掉这一行，套件的「关闭之后不再发事件」当场变红。
-          clearInterval(timer);
-        },
-        update(next) {
-          const l = next.params?.['line'];
-          if (typeof l === 'number') line = l;
-        },
-      };
-    },
-  };
+  return createAdvPlugin({
+    createStage: (container) => createDomStage(container),
+    usesWebGL: false,
+    autoAdvanceMs: 1800,
+  });
 }
 
 export const PLUGIN_CATALOG: readonly CatalogEntry[] = [
@@ -228,7 +183,7 @@ export const PLUGIN_CATALOG: readonly CatalogEntry[] = [
   {
     id: 'adv-player',
     title: 'ADV 播放器',
-    note: 'ExampleAdv：Cubism 挂 window.Live2DCubismCore 且 Pixi 已 pin，接真查看器时必须换成 iframe',
+    note: '真实现：@aio/plugin-adv + DOM 舞台。worksheet 真解析、时间轴真推进',
     create: advPlayer,
   },
 ];

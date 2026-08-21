@@ -38,7 +38,7 @@ runCapabilityConformance({
 });
 
 runCapabilityConformance({
-  name: 'station 占位 adv-player',
+  name: 'station 真实现 adv（plugin-adv + DOM 舞台）',
   contract: ADV_PLAY,
   createPlugin: create('adv-player'),
   createResources: resources,

@@ -106,6 +106,19 @@ button:hover { border-color: var(--accent); }
 
 .adv-caption { color: var(--accent); margin: 0.6rem 0 0; }
 
+/* @aio/plugin-adv 的 DOM 舞台。用 DOM 而非 canvas，所以台词可选中、
+   可复制、能被读屏念、跟随系统字号。 */
+.adv-stage {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.8rem 0.9rem;
+  background: #0d1220;
+  min-height: 6rem;
+}
+.adv-speaker { color: var(--accent); font-weight: 600; min-height: 1.4em; }
+.adv-text { margin: 0.3rem 0 0.6rem; line-height: 1.8; }
+.adv-meta { color: var(--muted); font-size: 0.8em; font-family: ui-monospace, monospace; }
+
 table { width: 100%; border-collapse: collapse; margin-top: 0.6rem; }
 th, td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--muted); font-weight: 600; font-size: 0.88em; }

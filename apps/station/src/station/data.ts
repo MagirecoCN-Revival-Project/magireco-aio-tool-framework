@@ -129,6 +129,29 @@ export const DEMO_SPRITE_ARMATURE = {
   texture_data: [],
 };
 
+/**
+ * 骨架期的合成剧本——**不是游戏原文**（铁律 9）。
+ *
+ * 表头照真实格式（`ActionType / Name / Comment / AssetID`），并且**故意打乱列序**
+ * 又插了一行注释：解析器是按表头名建索引的，这两样正是它该扛住的东西。
+ */
+export const DEMO_SCENARIO_WORKSHEET = {
+  sheetList: [
+    {
+      // 列序与常见顺序不同，用来证明「按表头名解析，不依赖列序」不是空话。
+      headerRow: { cellList: ['Name', 'AssetID', 'ActionType', 'Comment'] },
+      contentRowList: [
+        { cellList: ['', 'bg_demo', 'BgChange', ''] },
+        { cellList: ['甲', 'chara_a', 'Talk', '这是合成台词，不是游戏原文。'] },
+        { cellList: ['', '', '// 注释行，应当被跳过', ''] },
+        { cellList: ['乙', 'chara_b', 'Talk', '解析器按表头名取字段，所以列序换了也认得。'] },
+        { cellList: ['甲', 'chara_a', 'Talk', '注释行不会变成一句台词。'] },
+        { cellList: ['', '', 'FadeOut', ''] },
+      ],
+    },
+  ],
+};
+
 const dataUrl = (value: unknown): string =>
   `data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(value))}`;
 
@@ -151,7 +174,7 @@ export function createDemoResources(): StaticProvider {
         { role: 'definition', path: 'sprite/100100/d_r.ExportJson', url: dataUrl(DEMO_SPRITE_ARMATURE) },
       ],
       'a:scenario/310241@zh': [
-        { role: 'script', path: 'scenario/310241.zh.json', url: 'https://assets.example.invalid/scenario/310241.zh.json' },
+        { role: 'script', path: 'scenario/310241.zh.json', url: dataUrl(DEMO_SCENARIO_WORKSHEET) },
       ],
       'b:model3d/100101': [
         { role: 'model', path: '3d/chara_100101/model.fbx.gz', url: 'https://assets.example.invalid/3d/chara_100101/model.fbx.gz' },

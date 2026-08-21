@@ -27,6 +27,9 @@
       ],
       "@aio/plugin-sprite": [
         "../../packages/plugin-sprite/src/index.ts"
+      ],
+      "@aio/plugin-adv": [
+        "../../packages/plugin-adv/src/index.ts"
       ]
     },
     "esModuleInterop": true

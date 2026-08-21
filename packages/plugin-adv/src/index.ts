@@ -5,6 +5,7 @@ import { parseWorksheet, type ScenarioCommand } from './scenario.js';
 
 export * from './scenario.js';
 export * from './engine.js';
+export * from './stage-dom.js';
 
 /**
  * `adv.play` 的一个实现——**从零写的，不碰任何上游代码**。
