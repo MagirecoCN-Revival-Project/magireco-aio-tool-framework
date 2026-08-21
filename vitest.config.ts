@@ -14,6 +14,7 @@ export default defineConfig({
       '@aio/plugin-sdk': new URL('./packages/plugin-sdk/src/index.ts', import.meta.url).pathname,
       '@aio/capability': new URL('./packages/capability/src/index.ts', import.meta.url).pathname,
       '@aio/conformance': new URL('./packages/conformance/src/index.ts', import.meta.url).pathname,
+      '@aio/plugin-gltf': new URL('./packages/plugin-gltf/src/index.ts', import.meta.url).pathname,
       '@aio/plugin-live2d': new URL('./packages/plugin-live2d/src/index.ts', import.meta.url).pathname,
       '@aio/plugin-search': new URL('./packages/plugin-search/src/index.ts', import.meta.url).pathname,
       '@aio/plugin-sprite': new URL('./packages/plugin-sprite/src/index.ts', import.meta.url).pathname,

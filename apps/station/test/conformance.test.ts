@@ -20,7 +20,7 @@ const resources = createDemoResources;
 const create = (id: string) => () => PLUGIN_CATALOG.find((e) => e.id === id)!.create();
 
 runCapabilityConformance({
-  name: 'station 占位 model-3d',
+  name: 'station 真实现 model3d（plugin-gltf）',
   contract: MODEL3D_SHOW,
   createPlugin: create('model-3d'),
   createResources: resources,

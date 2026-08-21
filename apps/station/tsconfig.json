@@ -30,6 +30,9 @@
       ],
       "@aio/plugin-adv": [
         "../../packages/plugin-adv/src/index.ts"
+      ],
+      "@aio/plugin-gltf": [
+        "../../packages/plugin-gltf/src/index.ts"
       ]
     },
     "esModuleInterop": true

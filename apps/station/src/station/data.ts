@@ -152,6 +152,26 @@ export const DEMO_SCENARIO_WORKSHEET = {
   ],
 };
 
+/**
+ * 骨架期的合成 glTF——**不是游戏模型**（铁律 9）。
+ *
+ * 一个节点、一个网格、两条动画（其中一条**故意不给 name**，用来验
+ * 「规范允许无名动画」那条路径），外加一份外部 buffer——它在下面的清单里
+ * 按 uri 同名登记了 role，所以插件能解析到它而不必去拼 URL。
+ */
+export const DEMO_GLTF = {
+  asset: { version: '2.0', generator: 'AIO 合成' },
+  scene: 0,
+  scenes: [{ nodes: [0] }],
+  nodes: [{ name: 'root', mesh: 0 }],
+  meshes: [{ name: 'body', primitives: [{ attributes: { POSITION: 0 } }] }],
+  buffers: [{ uri: 'scene.bin', byteLength: 4 }],
+  animations: [
+    { name: 'idle', channels: [{ sampler: 0, target: { node: 0, path: 'rotation' } }], samplers: [] },
+    { channels: [{ sampler: 0, target: { node: 0, path: 'translation' } }], samplers: [] },
+  ],
+};
+
 const dataUrl = (value: unknown): string =>
   `data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(value))}`;
 
@@ -177,8 +197,9 @@ export function createDemoResources(): StaticProvider {
         { role: 'script', path: 'scenario/310241.zh.json', url: dataUrl(DEMO_SCENARIO_WORKSHEET) },
       ],
       'b:model3d/100101': [
-        { role: 'model', path: '3d/chara_100101/model.fbx.gz', url: 'https://assets.example.invalid/3d/chara_100101/model.fbx.gz' },
-        { role: 'texture', path: '3d/chara_100101/ctrl.png', url: 'https://assets.example.invalid/3d/chara_100101/ctrl.png' },
+        { role: 'model', path: '3d/chara_100101/scene.gltf', url: dataUrl(DEMO_GLTF) },
+        // 外部依赖按 uri 同名登记 role——插件据此解析，不去拼 URL（铁律 3）。
+        { role: 'scene.bin', path: '3d/chara_100101/scene.bin', url: 'https://assets.example.invalid/3d/chara_100101/scene.bin' },
       ],
     },
   });

@@ -41,6 +41,9 @@
       ],
       "@aio/plugin-live2d": [
         "./packages/plugin-live2d/src/index.ts"
+      ],
+      "@aio/plugin-gltf": [
+        "./packages/plugin-gltf/src/index.ts"
       ]
     },
     "baseUrl": ".",
