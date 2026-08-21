@@ -27,6 +27,12 @@ jobs:
       - name: 单元与整合测试
         run: npm test
 
+      # 静态导出是这个仓库唯一的对外产物。typecheck 与单测都过、导出却坏掉是
+      # 可能的：Next 的打包器解析规则与 tsc 不是一回事（Next 16 换成 Turbopack
+      # 缺省时就一次撞上 51 个 Can't resolve）。所以这一步单独跑。
+      - name: 静态导出（EdgeOne Pages 的交付产物）
+        run: npm run build -w @aio/station
+
   contracts:
     runs-on: ubuntu-latest
     steps:
