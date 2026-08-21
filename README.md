@@ -70,6 +70,8 @@ docs/CONSTRAINTS.md         硬约束：发布禁令、许可义务、平台限�
 docs/reports/               上游仓库盘点
 contracts/                  每个上游仓库如何成为插件（或明确不接入）
 tools/check-sources.py      守卫：禁令、插件冲突、资源前缀、外置判据
+tools/check-assets.py       守卫：版权素材不得入库（铁律 9）
+tools/build-manifest.py     扫目录生成资源清单（不猜 ref，匹配不上就失败）
 ```
 
 ## 两条禁令

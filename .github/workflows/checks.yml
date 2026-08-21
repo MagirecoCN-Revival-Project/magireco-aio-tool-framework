@@ -86,5 +86,8 @@ jobs:
       - name: 资源分离守卫自测（坏样本必须被拦下）
         run: python3 tools/test-check-assets.py
 
+      - name: 清单生成器自测（失败路径必须真的失败）
+        run: python3 tools/test-build-manifest.py
+
       - name: 资源与代码分离守卫（铁律 9）
         run: python3 tools/check-assets.py
