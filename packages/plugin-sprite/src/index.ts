@@ -4,7 +4,9 @@ import { parseArmature } from './armature.js';
 import { SpritePlayer, type Stage } from './player.js';
 
 export * from './armature.js';
+export * from './atlas.js';
 export * from './player.js';
+export * from './plist.js';
 export * from './pose.js';
 export * from './stage-canvas2d.js';
 
