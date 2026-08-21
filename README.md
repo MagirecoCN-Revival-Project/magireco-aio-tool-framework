@@ -64,7 +64,7 @@ sha256 校验、下架降级）全在 `@aio/resource` 里。换 CDN、加备份�
 
 ```
 docs/AIO-ARCHITECTURE.md    架构：三个概念、隔离、资源面、宿主模型
-docs/PLUGIN-AUTHORING.md    怎么写插件 / 怎么包装一个既有查看器
+docs/PLUGIN-AUTHORING.md    怎么写插件：从零实现（核心 + 注入舞台）或包装既有查看器
 docs/AIO-ROADMAP.md         落地方案：七个阶段与验收判据
 docs/CONSTRAINTS.md         硬约束：发布禁令、许可义务、平台限额
 docs/reports/               上游仓库盘点
