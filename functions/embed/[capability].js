@@ -130,6 +130,17 @@ export async function onRequest(context) {
     policy: policyFrom(env),
     takedown,
     capabilityProviders: PROVIDERS,
+    // 🔴 这个数字**就是下架暴露窗口**，同时也是这条路径唯一有效的省配额手段。
+    //
+    // 嵌入 URL 长在别人的页面上，流量不由我们控制：一个 wiki 页上了热门，
+    // 或者有人对着嵌入 URL 打，烧的都是我们的函数调用与 CPU 时间。
+    // 命中边缘缓存的请求根本不会触发这个函数——没有别的省法。
+    //
+    // 不设 = no-store = 每个请求都进来判（铁律 11 成立，配额全暴露）。
+    // 设了 = 拿 N 秒的暴露窗口换掉大部分调用。
+    //
+    // **缺省不设**，因为削弱铁律 11 必须是有人明确写下这个数字。
+    cacheSeconds: Number(env.AIO_EMBED_CACHE_SECONDS) || 0,
   });
 
   if (decision.status !== 200) {

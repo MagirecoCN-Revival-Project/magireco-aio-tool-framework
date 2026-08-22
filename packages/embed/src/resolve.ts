@@ -13,6 +13,30 @@ export interface EmbedOptions {
   readonly takedown?: TakedownList;
   /** 能力 → 提供它的插件 id。与 `@aio/site` 用的是**同一张表**（铁律 10）。 */
   readonly capabilityProviders: Readonly<Record<CapabilityId, readonly string[]>>;
+  /**
+   * 放行的响应可以被边缘缓存多少秒。**缺省 0 = 不缓存。**
+   *
+   * ## 这个数字就是你的下架暴露窗口
+   *
+   * 缓存住的响应**不会再经过这里**——不重新读下架清单、不重新看插件开关。
+   * 所以 `cacheSeconds: 300` 的意思是「收到下架通知后，最坏还要 300 秒
+   * 才对所有人生效」（外加一次 purge 能不能追上）。
+   *
+   * 缺省取 0 而不是某个「合理值」：铁律 11 要的是请求期每次都判，
+   * 而任何非 0 值都是对它的**削弱**。削弱可以，但必须是有人明确写下这个
+   * 数字、并知道自己在拿什么换什么——不能是缺省值悄悄替他做了决定。
+   *
+   * ## 拿什么换
+   *
+   * 换的是**函数调用次数与 CPU 时间**。嵌入 URL 长在别人的页面上，
+   * 流量不由我们控制：一个页面上了热门，或者有人对着嵌入 URL 打，
+   * 烧的都是我们的配额。缓存是这条路径上唯一真正有效的省法——
+   * 命中缓存的请求根本不会触发函数。
+   *
+   * 所以这是个**成本与合规的直接对赌**，没有两全的选项。
+   * 部署侧怎么定，见 `docs/guide/edge.md`。
+   */
+  readonly cacheSeconds?: number;
 }
 
 export interface EmbedAllowed {
@@ -35,6 +59,22 @@ export interface EmbedRejected {
 }
 
 export type EmbedDecision = EmbedAllowed | EmbedRejected;
+
+/**
+ * 缓存指令。缺省（0 或没写）一律 `no-store`。
+ *
+ * 非整数、负数、NaN 都当成 0——**坏输入落到最安全的那一侧**。
+ * 反过来（当成「很大的值」或直接抛）都更糟：前者悄悄开了个长暴露窗口，
+ * 后者让一个手滑的配置把整个嵌入面打成 500。
+ */
+function cacheControl(seconds: number | undefined): string {
+  if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds <= 0) {
+    return 'no-store';
+  }
+  const n = Math.floor(seconds);
+  // s-maxage 单独写：共享缓存（边缘）与浏览器可以不同，而省配额靠的是前者。
+  return `public, max-age=${n}, s-maxage=${n}`;
+}
 
 /**
  * 嵌入面的**唯一**准入判定。
@@ -107,7 +147,12 @@ export function resolveEmbed(
       // 被索引会与真正的资料页构成重复内容，而且用户从搜索点进来看到的是
       // 一个没有导航、没有上下文的裸组件。
       'X-Robots-Tag': 'noindex, nofollow',
+      // 缓存策略是**显式**的。不写的话由平台默认决定，而平台默认是我们
+      // 不知道、也不该赌的东西——同一份产物换个托管就换个行为。
+      'Cache-Control': cacheControl(options.cacheSeconds),
       // 配置改了要让边缘缓存失效，与 @aio/site 的 cacheTags 同源。
+      // ref 单独成一个 tag：下架时要能只 purge 掉那一条，
+      // 而不是把整个嵌入面的缓存都清了。
       'Cache-Tag': `embed,rev:${options.config.revision},${ref}`,
       Vary: 'Origin',
     },

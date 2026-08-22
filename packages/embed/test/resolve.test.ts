@@ -99,3 +99,36 @@ describe('嵌入准入判定', () => {
     expect(d.headers['Cache-Tag']).toContain(`rev:${DEFAULT_CONFIG.revision}`);
   });
 });
+
+describe('缓存策略：成本与合规的直接对赌', () => {
+  const head = (o: Partial<EmbedOptions> = {}) => {
+    const d = go(o);
+    if (d.status !== 200) throw new Error('应当放行');
+    return d.headers;
+  };
+
+  it('🔴 缺省不缓存——任何非 0 值都是对铁律 11 的削弱，不能由缺省值替人决定', () => {
+    expect(head()['Cache-Control']).toBe('no-store');
+  });
+
+  it('设了秒数就明确写进指令，这个数字就是下架暴露窗口', () => {
+    // 缓存住的响应不会再经过 resolveEmbed——不重读下架清单、不看插件开关。
+    expect(head({ cacheSeconds: 300 })['Cache-Control']).toBe(
+      'public, max-age=300, s-maxage=300',
+    );
+  });
+
+  it('坏输入落到最安全的那一侧，而不是抛或当成很大的值', () => {
+    for (const bad of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect(head({ cacheSeconds: bad })['Cache-Control'], String(bad)).toBe('no-store');
+    }
+    // 小数向下取整，不四舍五入——宁可短一秒也不长一秒。
+    expect(head({ cacheSeconds: 9.9 })['Cache-Control']).toContain('max-age=9');
+  });
+
+  it('ref 单独成一个 cache tag——下架时只 purge 那一条', () => {
+    // 整个嵌入面一起清的话，一次下架会把所有人的缓存打穿，
+    // 那阵回源正是配额最吃紧的时候。
+    expect(head()['Cache-Tag']).toContain('a:sprite/100100/d_r');
+  });
+});
