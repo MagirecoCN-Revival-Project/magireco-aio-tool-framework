@@ -63,10 +63,36 @@ async function readConfig(env) {
 }
 
 async function readTakedown(env) {
-  // 下架单独走强一致读（Blob），不跟配置一起放 KV：
-  // KV 最终一致、边缘缓存最长 60 秒，而下架那一分钟是实打实的暴露。
+  // 下架单独走强一致读（Blob），不跟配置一起放 KV。
+  //
+  // 官方文档（2026-08-22 核实）：
+  //   - KV 最终一致，**边缘缓存最长 60 秒**——那一分钟是实打实的暴露；
+  //   - Blob 默认也是最终一致，但**可对单次读切到强一致**，立即读到最新值。
+  //     官方同时写明这会增加读延迟，「should be used only when absolutely
+  //     necessary」——所以只有下架清单这一处用它，站点配置照旧走 KV。
+  //
+  // 🚧 **速率/次数配额没查到**：官方限额页在当前环境取不到，未经复核不写数字
+  //    （见 repository-policy.json 的 platform_limits.storage.rate_limits）。
+  //    这条路径每个请求做一次强一致读，配额若紧，热门嵌入会打满。
+  //    打满后走下面的 fail-closed：503，而不是放行。
+  //
+  //    真上线前必须拿到那两个数字。要是紧到扛不住，可选的缓解是给这份清单
+  //    加一个**很短**的进程内缓存（几秒），用一个**明确写出来的**暴露窗口
+  //    换掉大部分读——但那是要拍板的取舍，不是实现顺手加的。
   try {
-    const raw = await env.AIO_BLOB.get('takedown.json', { type: 'json' });
+    // 🚧🔴 `consistency: 'strong'` 这个**选项名尚未核实**（官方限额/存储文档
+    //     在当前环境取不到）。这不是小事：选项名写错的话，SDK 多半**静默忽略**
+    //     它，于是这里退回最终一致读——看起来一切正常，而下架的生效窗口
+    //     悄悄变回分钟级。正是铁律 11 要防的那种失效。
+    //
+    //     上线前必须核实两件事，并把结论写回 repository-policy.json：
+    //       1. 请求单次强一致读的确切写法；
+    //       2. 怎么**验证**它真的生效了（能观测到就写个探针，观测不到就
+    //          用一次真实下架去实测传播延迟）。
+    const raw = await env.AIO_BLOB.get('takedown.json', {
+      type: 'json',
+      consistency: 'strong',
+    });
     if (raw && Array.isArray(raw.refPrefixes) && Array.isArray(raw.pathPrefixes)) {
       return raw;
     }

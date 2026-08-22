@@ -9,6 +9,26 @@
       "max_files": 20000,
       "max_bytes": 5368709120,
       "max_file_bytes": 26214400
+    },
+    "storage": {
+      "note": "2026-08-22 查官方文档摘要所得。速率/次数配额那一项**没查到**——官方限额页 pages.edgeone.ai/document/limits-and-quotas 在本环境被出口代理拦下，未经复核不填数字。",
+      "kv": {
+        "consistency": "eventual",
+        "edge_cache_seconds": 60,
+        "free_tier_bytes": 1073741824,
+        "detail": "中心存储 + 边缘缓存。读先命中最近边缘节点的本地缓存，未命中或过期（最长 60 秒）才回中心取。"
+      },
+      "blob": {
+        "consistency": "eventual by default",
+        "strong_read_mode": true,
+        "strong_read_note": "可对**单次读**切到强一致模式，立即读到最新值；官方明说这会增加读延迟，「should be used only when absolutely necessary」。",
+        "free_tier_bytes": 1073741824
+      },
+      "rate_limits": {
+        "verified": false,
+        "values": null,
+        "why_it_matters": "嵌入面每个请求做一次 Blob 强一致读。配额若紧，热门嵌入会打满；打满后函数按 fail-closed 返回 503（宁可暂时打不开，也不放出本该下架的东西）。在拿到真实数字之前，不要假设这条路径能承受任意流量。"
+      }
     }
   },
   "repositories": {
