@@ -64,4 +64,7 @@ export type {
 } from './protocol.js';
 
 export { resolveEmbed } from './resolve.js';
+
+export { EMBED_CORPUS, corpusCapabilities, runCorpus } from './corpus.js';
+export type { CorpusCase, CorpusFailure, CorpusRunner } from './corpus.js';
 export type { EmbedAllowed, EmbedDecision, EmbedOptions, EmbedRejected } from './resolve.js';

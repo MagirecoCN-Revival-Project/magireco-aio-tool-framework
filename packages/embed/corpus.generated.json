@@ -1,0 +1,372 @@
+[
+  {
+    "name": "正常放行",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=a:sprite/100100/d_r",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 200
+    }
+  },
+  {
+    "name": "铁律 1：裸 ID 拒收",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=100101",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 400,
+      "reason": "bad-ref"
+    }
+  },
+  {
+    "name": "铁律 1：没有 kind 段也算裸 ID",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=sprite/100100",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 400,
+      "reason": "bad-ref"
+    }
+  },
+  {
+    "name": "路径穿越的形状必须拒收",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=a:sprite/../etc",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 400,
+      "reason": "bad-ref"
+    }
+  },
+  {
+    "name": "没登记的 kind 拒收",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=a:nope/1",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 400,
+      "reason": "bad-ref"
+    }
+  },
+  {
+    "name": "大写 universe 拒收——形状要管，否则不同来源对不上",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=A:sprite/1",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 400,
+      "reason": "bad-ref"
+    }
+  },
+  {
+    "name": "没见过的 universe 照常放行——成员资格是数据，不是解析器该知道的",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=zz:sprite/1",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 200
+    }
+  },
+  {
+    "name": "能力接不了这个 kind",
+    "pathname": "/embed/adv.play",
+    "search": "ref=a:character/1001",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 400,
+      "reason": "kind-mismatch"
+    }
+  },
+  {
+    "name": "没登记的能力是 404 不是 400——请求没写错，是这东西不存在",
+    "pathname": "/embed/nope.thing",
+    "search": "ref=a:character/1",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 404,
+      "reason": "unknown-capability"
+    }
+  },
+  {
+    "name": "缺 ref",
+    "pathname": "/embed/sprite.show",
+    "search": "",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 400,
+      "reason": "bad-ref"
+    }
+  },
+  {
+    "name": "契约没登记的参数丢掉，不报错——契约会长出新参数",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=a:sprite/1&utm_source=wiki&futureParam=9",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 200
+    }
+  },
+  {
+    "name": "登记了但值不合法要报错：布尔只认 1/0/true/false",
+    "pathname": "/embed/adv.play",
+    "search": "ref=a:scenario/1&auto=no",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 400,
+      "reason": "bad-param"
+    }
+  },
+  {
+    "name": "登记了但值不合法要报错：空串不是数字",
+    "pathname": "/embed/adv.play",
+    "search": "ref=a:scenario/1&line=",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 400,
+      "reason": "bad-param"
+    }
+  },
+  {
+    "name": "铁律 11：下架的 ref 拒收",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=a:sprite/100100/d_r",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [
+      "a:sprite/100100"
+    ],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 404,
+      "reason": "taken-down"
+    }
+  },
+  {
+    "name": "铁律 11：下架是前缀匹配，不是整串相等",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=a:sprite/100100/d_r",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [
+      "a:sprite/"
+    ],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 404,
+      "reason": "taken-down"
+    }
+  },
+  {
+    "name": "🔴 下架判定排在能力判定之前——否则分不清是真下架还是没装插件",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=a:sprite/100100",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [
+      "a:sprite/"
+    ],
+    "providers": {},
+    "expect": {
+      "status": 404,
+      "reason": "taken-down"
+    }
+  },
+  {
+    "name": "铁律 10：插件关掉，嵌在别人页面上的当场 404",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=a:sprite/100100/d_r",
+    "disabledPlugins": [
+      "sprite-play"
+    ],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 404,
+      "reason": "plugin-disabled"
+    }
+  },
+  {
+    "name": "这个部署没装实现，与「被关掉」分开报",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=a:sprite/1",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {},
+    "expect": {
+      "status": 404,
+      "reason": "no-provider"
+    }
+  },
+  {
+    "name": "多个提供者时只要还有一个开着就放行",
+    "pathname": "/embed/sprite.show",
+    "search": "ref=a:sprite/1",
+    "disabledPlugins": [
+      "off-one"
+    ],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "off-one",
+        "sprite-play"
+      ]
+    },
+    "expect": {
+      "status": 200
+    }
+  },
+  {
+    "name": "路径形状不对",
+    "pathname": "/embed/a/b",
+    "search": "ref=a:sprite/1",
+    "disabledPlugins": [],
+    "takedownRefPrefixes": [],
+    "providers": {
+      "sprite.show": [
+        "sprite-play"
+      ],
+      "adv.play": [
+        "adv-play"
+      ]
+    },
+    "expect": {
+      "status": 400,
+      "reason": "bad-path"
+    }
+  }
+]
