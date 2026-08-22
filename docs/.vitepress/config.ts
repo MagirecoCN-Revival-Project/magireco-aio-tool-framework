@@ -78,6 +78,7 @@ export default defineConfig({
           { text: '契约与一致性套件', link: '/guide/contracts' },
           { text: '内核：注册、派发、治理', link: '/guide/kernel' },
           { text: '边缘半边：路由、SEO、下架', link: '/guide/edge' },
+          { text: '嵌出去：给别的站用', link: '/guide/embed' },
         ],
       },
       {

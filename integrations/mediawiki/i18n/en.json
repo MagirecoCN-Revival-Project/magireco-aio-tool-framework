@@ -1,0 +1,7 @@
+{
+	"@metadata": { "authors": ["AIO Framework contributors"] },
+	"aioembed-desc": "Embeds AIO framework viewers into wiki pages via an <code>&lt;aio-embed&gt;</code> tag.",
+	"aioembed-error-no-origin": "AioEmbed: $wgAioEmbedOrigin is not configured.",
+	"aioembed-error-capability": "AioEmbed: unknown capability \"$1\".",
+	"aioembed-error-ref": "AioEmbed: \"$1\" is not a valid ref. A ref must carry its namespace prefix, e.g. a:sprite/100100/d_r — a bare ID is rejected because the same ID in a different namespace can mean a different entity."
+}

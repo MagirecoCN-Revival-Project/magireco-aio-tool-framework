@@ -47,7 +47,8 @@
       ],
       "@aio/site": [
         "./packages/site/src/index.ts"
-      ]
+      ],
+      "@aio/embed": ["./packages/embed/src/index.ts"]
     },
     "baseUrl": ".",
     "jsx": "preserve"

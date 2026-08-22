@@ -1,0 +1,41 @@
+{
+  "name": "AioEmbed",
+  "version": "0.1.0",
+  "author": ["AIO Framework contributors"],
+  "descriptionmsg": "aioembed-desc",
+  "license-name": "GPL-3.0-or-later",
+  "type": "parserhook",
+  "requires": {
+    "MediaWiki": ">= 1.39.0"
+  },
+  "AutoloadNamespaces": {
+    "MediaWiki\\Extension\\AioEmbed\\": "src/"
+  },
+  "Hooks": {
+    "ParserFirstCallInit": "MediaWiki\\Extension\\AioEmbed\\Hooks::onParserFirstCallInit"
+  },
+  "MessagesDirs": {
+    "AioEmbed": ["i18n"]
+  },
+  "ResourceModules": {
+    "ext.aioEmbed": {
+      "packageFiles": ["resources/ext.aioEmbed.js"],
+      "styles": ["resources/ext.aioEmbed.css"]
+    }
+  },
+  "ResourceFileModulePaths": {
+    "localBasePath": "",
+    "remoteExtPath": "AioEmbed"
+  },
+  "config": {
+    "AioEmbedOrigin": {
+      "description": "嵌入面的来源，形如 https://host。没有默认值——留空则扩展整个停用，绝不猜一个域名。",
+      "value": ""
+    },
+    "AioEmbedDefaultHeight": {
+      "description": "iframe 初始高度（px）。子页起来后会用 postMessage 报真实高度。",
+      "value": 420
+    }
+  },
+  "manifest_version": 2
+}

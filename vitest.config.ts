@@ -13,6 +13,7 @@ export default defineConfig({
       '@aio/kernel': new URL('./packages/kernel/src/index.ts', import.meta.url).pathname,
       '@aio/plugin-sdk': new URL('./packages/plugin-sdk/src/index.ts', import.meta.url).pathname,
       '@aio/site': new URL('./packages/site/src/index.ts', import.meta.url).pathname,
+      '@aio/embed': new URL('./packages/embed/src/index.ts', import.meta.url).pathname,
       '@aio/capability': new URL('./packages/capability/src/index.ts', import.meta.url).pathname,
       '@aio/conformance': new URL('./packages/conformance/src/index.ts', import.meta.url).pathname,
       '@aio/plugin-gltf': new URL('./packages/plugin-gltf/src/index.ts', import.meta.url).pathname,

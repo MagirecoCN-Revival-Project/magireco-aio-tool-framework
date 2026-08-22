@@ -1,0 +1,22 @@
+/* iframe 默认是 inline，底下会多出一条基线间隙；display:block 去掉它。 */
+.aio-embed-wrap {
+	margin: 0.8em 0;
+}
+
+.aio-embed {
+	display: block;
+	width: 100%;
+	border: 1px solid #c8ccd1;
+	border-radius: 4px;
+	background: transparent;
+	/* 高度由子页 postMessage 报上来后覆盖，这里只给个不跳动的初值。 */
+	transition: height 120ms ease-out;
+}
+
+.aio-embed-error {
+	margin: 0.8em 0;
+	padding: 0.6em 0.8em;
+	border-left: 4px solid #d33;
+	background: #fee7e6;
+	color: #202122;
+}
