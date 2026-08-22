@@ -112,7 +112,8 @@ def role_of(rel: str) -> tuple[str | None, str | None]:
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="生成资源清单")
     ap.add_argument("root", type=pathlib.Path, help="素材目录")
-    ap.add_argument("--universe", required=True, choices=["a", "b"])
+    ap.add_argument("--universe", required=True,
+                    help="命名空间（小写字母开头，如 a）。框架不校验成员——哪些存在是数据")
     ap.add_argument("--kind", required=True)
     ap.add_argument("--pattern", required=True, help="带命名组的正则，用来从相对路径抓 ref 的段")
     ap.add_argument("--ref", required=True, help="ref 模板，如 '{id}/{variant}'")

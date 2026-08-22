@@ -70,7 +70,7 @@ export function createSearchPlugin(deps: SearchDeps): Plugin {
        * 选中一条结果 → 发 `entity.focused`，宿主据此打开档案。
        *
        * **没有 ref 的条目不发事件。** 那份目录按显示名索引、根本没有 ID，
-       * 而显示名跨数据源对不上（「环角色甲」vs「角色甲」）。按名字凑一个 ref
+       * 而显示名跨数据源对不上（「角色甲（另一种译名）」vs「角色甲」）。按名字凑一个 ref
        * 会把人配错且不报错——宁可点不动（铁律 2）。
        */
       const select = (raw: unknown): void => {

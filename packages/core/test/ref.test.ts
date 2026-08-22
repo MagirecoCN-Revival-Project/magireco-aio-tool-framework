@@ -37,8 +37,21 @@ describe('ResourceRef', () => {
     expect(refEquals(parseRef('a:scenario/310241@zh'), parseRef('a:scenario/310241@zh'))).toBe(true);
   });
 
-  it('拒绝未知 universe / kind / 非法段', () => {
-    expect(() => parseRef('zz:character/1')).toThrow(/universe/);
+  it('universe 只校验形状，不校验成员', () => {
+    // 「哪些命名空间存在」是数据（清单与交叉表说了算），不是解析器该知道的事。
+    // 没见过的命名空间照常解析，随后在 resolve() 查不到——那正是铁律 2 要的：
+    // 查不到返回空，不猜。写死一张白名单只会让框架知道你的作品叫什么。
+    expect(parseRef('zz:character/1').universe).toBe('zz');
+    expect(parseRef('anything9:character/1').universe).toBe('anything9');
+
+    // 形状还是要管：大写、数字开头、带连字符都拒收——它们会让 ref 在不同来源
+    // 之间对不上（`A:` 与 `a:` 是同一个命名空间吗？没人说得准）。
+    for (const bad of ['A:character/1', '1x:character/1', 'my-ns:character/1']) {
+      expect(() => parseRef(bad), bad).toThrow(/universe/);
+    }
+  });
+
+  it('拒绝未知 kind 与非法段', () => {
     expect(() => parseRef('a:nope/1')).toThrow(/kind/);
     expect(() => parseRef('a:character/')).toThrow();
     expect(() => parseRef('a:character/../etc')).toThrow(/非法/);

@@ -3,30 +3,42 @@
  *
  * 语法：`<universe>:<kind>/<segment>[/<segment>…][@<variant>]`
  *
- *   a:character/1001            命名空间 a · 角色甲
- *   a:sprite/100100/d_r         命名空间 a · 精灵（unit / 变体）
- *   a:voice/vo_char_1001_00_01  命名空间 a · 语音
+ *   a:character/1001            命名空间 a · 某个角色
+ *   a:sprite/100100/d_r         命名空间 a · 精灵（主标识 / 变体）
  *   a:scenario/310241@zh        命名空间 a · 剧情（中文）
- *   b:character/100101          示例作品 B · 角色乙
- *   b:model3d/100101            示例作品 B · 3D 模型
+ *   b:character/100101          命名空间 b · **另一个**角色
+ *   b:model3d/100101            命名空间 b · 3D 模型
  *
  * ## 为什么 universe 前缀不能省
  *
- * 两个游戏的 ID 空间**长得一模一样但含义完全不同**：
+ * **不同命名空间下的同一个 ID 可能指向完全不同的实体。** 两个各自用连续编号
+ * 的数据源，在编号区间重叠处就会撞车——`100101` 在一边是甲、在另一边是乙。
  *
- *   b:model3d/100101  →  角色乙/角色（命名空间 b `style3dCharacterMstId`）
- *   a:sprite/100100   →  角色甲（命名空间 a charaId 1001 + 服装 00）
+ * 一旦允许裸 ID 在系统里流动，「点角色简介看模型」这类跨模块调用迟早会把甲的
+ * 档案配上乙的模型，而且**不报错**——只是显示了错的人。所以 ref 在**语法层面**
+ * 就强制携带 universe，解析器拒绝没有前缀的字符串。
  *
- * 一旦允许裸数字在系统里流动，"点角色简介看精灵"这类跨模块调用迟早会把
- * 角色甲的档案配上角色乙的模型，而且不报错——只是显示了错的人。
- * 所以 ref 在**语法层面**就强制携带 universe，解析器拒绝没有前缀的字符串。
+ * > 这不是推演出来的，是实测撞上之后加的。
  */
 
-/** 已知的作品域。新增作品要同时在这里和 registry 的 schema 里登记。 */
-export const UNIVERSES = ['a', 'b'] as const;
-export type Universe = (typeof UNIVERSES)[number];
+/**
+ * universe 只校验**形状**，不校验成员。
+ *
+ * 「哪些命名空间存在」是**数据**（清单与交叉表说了算），不是框架该知道的事——
+ * 一个通用框架不该在类型里写死你的作品叫什么。写错的 universe 不会被这里拦，
+ * 而是在 `resolve()` 时查不到，那正是铁律 2 要的行为：查不到返回空，不猜。
+ *
+ * 拦的是真正危险的那件事：**没有前缀**。
+ */
+export const UNIVERSE_RE = /^[a-z][a-z0-9]*$/;
+export type Universe = string;
 
-/** 已知的资源种类。插件按 kind 声明自己能处理什么。 */
+/**
+ * 资源种类。插件按 kind 声明自己能处理什么。
+ *
+ * 这是**领域词汇**，改这一处即可增删——它闭合成联合类型是有意的：
+ * `accepts: ['sprite']` 因此能在编译期查错，而 kind 的集合在一个部署里是稳定的。
+ */
 export const REF_KINDS = [
   'character',
   'sprite',
@@ -63,11 +75,11 @@ export class RefParseError extends Error {
 const SEGMENT_RE = /^[A-Za-z0-9][A-Za-z0-9_.-]*$/;
 const VARIANT_RE = /^[a-z0-9][a-z0-9-]*$/;
 
-const UNIVERSE_SET: ReadonlySet<string> = new Set(UNIVERSES);
 const KIND_SET: ReadonlySet<string> = new Set(REF_KINDS);
 
+/** 形状合法即可——成员由数据决定，见 `UNIVERSE_RE` 上面那段。 */
 export function isUniverse(value: string): value is Universe {
-  return UNIVERSE_SET.has(value);
+  return UNIVERSE_RE.test(value);
 }
 
 export function isRefKind(value: string): value is RefKind {
@@ -84,13 +96,13 @@ export function parseRef(input: string): ResourceRef {
   if (colon <= 0) {
     throw new RefParseError(
       input,
-      '缺少 universe 前缀。裸 ID 在本框架里没有意义——mr 与 ex 的编号会撞',
+      '缺少 universe 前缀。裸 ID 在本框架里没有意义——不同命名空间的编号会撞',
     );
   }
 
   const universe = input.slice(0, colon);
   if (!isUniverse(universe)) {
-    throw new RefParseError(input, `未知 universe ${JSON.stringify(universe)}`);
+    throw new RefParseError(input, `universe ${JSON.stringify(universe)} 格式非法`);
   }
 
   let rest = input.slice(colon + 1);
