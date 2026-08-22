@@ -94,17 +94,25 @@ def _(work):
     save(work, "example-restricted-data.source.json", c)
 
 
-@case("无许可仓库被包装成插件", "vendor=forbidden")
+@case("不得 vendor 的仓库被包装成插件", "vendor=forbidden")
 def _(work):
-    c = load(work, "example-reader.source.json")
+    # 这个样本必须挑一个**当前**标着 vendor=forbidden 的源。
+    #
+    # 早先挑的是 example-reader。后来它的所有者授权了、vendor 改成 allowed，
+    # 这条用例当场失真：守卫仍然拦下了（能力没登记进表），但拦的理由变了，
+    # 于是自测报「拦下了，但提示里没有 vendor=forbidden」。
+    #
+    # 教训是判据层面的：**自测样本不能挂在一条会变的策略上**。
+    # example-client 是「可发布、但不得复制代码」那一类的代表
+    # （许可带附加条款与第三方声明义务），正是这条用例要验的形状。
+    c = load(work, "example-client.source.json")
     c["integration"] = "plugin"
-    c.pop("mount", None)
     c["plugin"] = {
-        "pluginId": "story-reader",
+        "pluginId": "client-embed",
         "isolation": "inline",
-        "capabilities": [{"id": "story.read", "accepts": ["scenario"]}],
+        "capabilities": [{"id": "sprite.show", "accepts": ["sprite"]}],
     }
-    save(work, "example-reader.source.json", c)
+    save(work, "example-client.source.json", c)
 
 
 @case("pluginId 重复", "内核会拒绝注册")
