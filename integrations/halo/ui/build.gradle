@@ -1,0 +1,44 @@
+/**
+ * 把 pnpm 接进 Gradle。
+ *
+ * `ui/` 不是 Java 项目，但 Halo 的打包流程要求它有一个 `assemble` 任务，
+ * 好让上层的 `processUiResources` 依赖它。`base` 插件提供 `assemble` 的空壳，
+ * `node-gradle` 提供 `PnpmTask`，两者一接就成。
+ */
+plugins {
+    id 'base'
+    id 'com.github.node-gradle.node' version '7.1.0'
+}
+
+group 'run.halo.aio.viewer.ui'
+
+tasks.register('pnpmBuild', PnpmTask) {
+    group = 'build'
+    description = 'Build the UI bundle with pnpm'
+    args = ['build']
+    dependsOn tasks.named('pnpmInstall')
+    inputs.dir(layout.projectDirectory.dir('src'))
+    inputs.files(fileTree(
+        dir: layout.projectDirectory,
+        includes: ['*.ts', '*.json', '*.yaml']))
+    // 🔴 `packages/` 也是输入：alias 指向那边的 TS 源码，改了那边而这里
+    // 不重建的话，产物会悄悄停在旧版本上。Gradle 的增量构建看不到它，
+    // 除非在这里显式声明。
+    inputs.dir(layout.projectDirectory.dir('../../../packages'))
+    outputs.dir(layout.buildDirectory.dir('dist'))
+}
+
+tasks.register('pnpmCheck', PnpmTask) {
+    group = 'verification'
+    description = 'Type-check the UI project'
+    args = ['type-check']
+    dependsOn tasks.named('pnpmInstall')
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('pnpmCheck')
+}
+
+tasks.named('assemble') {
+    dependsOn tasks.named('pnpmBuild')
+}

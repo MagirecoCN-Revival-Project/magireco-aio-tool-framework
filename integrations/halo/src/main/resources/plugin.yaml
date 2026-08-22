@@ -1,0 +1,14 @@
+apiVersion: plugin.halo.run/v1alpha1
+kind: Plugin
+metadata:
+  name: aio-viewer
+spec:
+  enabled: true
+  requires: ">=2.26.0"
+  author:
+    name: AIO Framework contributors
+  displayName: "AIO 查看器（身高对比 / 称呼检索）"
+  description: "把 AIO 框架的能力插件装进 Halo。当前装了 chart.height 与 search.query 两个，用来验证方案是否可行。"
+  license:
+    - name: "GPL-3.0-or-later"
+  version: 0.1.0

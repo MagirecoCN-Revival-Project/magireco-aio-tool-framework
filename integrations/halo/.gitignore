@@ -1,0 +1,6 @@
+build/
+.gradle/
+ui/node_modules/
+ui/build/
+node_modules/
+*.tsbuildinfo

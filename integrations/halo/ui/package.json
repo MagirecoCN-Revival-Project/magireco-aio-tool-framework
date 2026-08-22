@@ -1,0 +1,24 @@
+{
+  "name": "aio-viewer-ui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rsbuild build",
+    "dev": "rsbuild build --watch --env-mode=development",
+    "type-check": "vue-tsc --build"
+  },
+  "dependencies": {
+    "@halo-dev/components": "^2.26.0",
+    "@halo-dev/ui-shared": "^2.26.0",
+    "vue": "^3.5.40"
+  },
+  "devDependencies": {
+    "@halo-dev/ui-plugin-bundler-kit": "^2.26.0",
+    "@rsbuild/core": "^2.1.11",
+    "@rsbuild/plugin-vue": "^2.0.1",
+    "@types/node": "^24.13.3",
+    "@vue/tsconfig": "^0.9.1",
+    "typescript": "~6.0.0",
+    "vue-tsc": "^3.3.7"
+  }
+}

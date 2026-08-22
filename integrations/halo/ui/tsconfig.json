@@ -1,0 +1,19 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "paths": {
+      "@aio/core": ["../../../packages/core/src/index.ts"],
+      "@aio/kernel": ["../../../packages/kernel/src/index.ts"],
+      "@aio/registry": ["../../../packages/registry/src/index.ts"],
+      "@aio/resource": ["../../../packages/resource/src/index.ts"],
+      "@aio/plugin-chart": ["../../../packages/plugin-chart/src/index.ts"],
+      "@aio/plugin-search": ["../../../packages/plugin-search/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.vue", "rsbuild.config.ts"]
+}
