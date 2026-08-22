@@ -1,7 +1,7 @@
 import { definePlugin } from '@halo-dev/ui-shared';
 import { markRaw } from 'vue';
 import { IconPlug } from '@halo-dev/components';
-import ViewerPage from './ViewerPage.vue';
+import ViewerPage from '../../shared/ViewerPage.vue';
 
 /**
  * Halo 控制台入口。

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title th:text="${title}">AIO 查看器</title>
+  <link rel="stylesheet" href="/aio/assets/viewer.css" />
+  <style>
+    /* 回落模板的最小外壳。
+       只做三件事：给个版心、跟随系统亮暗、别让字号在手机上被缩。
+       真正的样式在 viewer.css 里，那份是跟着组件走的。
+
+       主题一旦提供自己的 aio-viewer.html，这整段就不会被用到——
+       那时页面长成站点该有的样子，而查看器本身一行不用改。 */
+    :root { color-scheme: light dark; }
+    body {
+      margin: 0;
+      font: 15px/1.7 system-ui, -apple-system, "Noto Sans SC", sans-serif;
+      background: Canvas;
+      color: CanvasText;
+      -webkit-text-size-adjust: 100%;
+    }
+    .aio-fallback-note {
+      max-width: 52rem; margin: 0 auto; padding: 0.9rem 1.1rem 0;
+      font-size: 0.84em; opacity: 0.55;
+    }
+  </style>
+</head>
+<body>
+  <p class="aio-fallback-note">
+    当前主题没有提供 <code>aio-viewer</code> 模板，这是插件自带的回落页面。
+  </p>
+
+  <!-- 挂载点。前台 bundle 找不到它就什么都不做，不去猜位置插进去。 -->
+  <div id="aio-viewer-root"></div>
+
+  <script src="/aio/assets/viewer.js" defer></script>
+</body>
+</html>

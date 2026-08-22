@@ -1,0 +1,44 @@
+/**
+ * 前台 bundle 的 Gradle 包装。
+ *
+ * 与 `ui/` 的差别：产物**不在自己的 `build/` 里**，而是直接写进上层的
+ * `src/main/resources/web/`——因为它由 Java 路由从 classpath 读出来返回，
+ * 得跟着 jar 走。
+ */
+plugins {
+    id 'base'
+    id 'com.github.node-gradle.node' version '7.1.0'
+}
+
+group 'run.halo.aio.viewer.web'
+
+tasks.register('pnpmBuild', PnpmTask) {
+    group = 'build'
+    description = 'Build the frontend bundle with pnpm'
+    args = ['build']
+    dependsOn tasks.named('pnpmInstall')
+    inputs.dir(layout.projectDirectory.dir('src'))
+    inputs.dir(layout.projectDirectory.dir('../shared'))
+    inputs.files(fileTree(
+        dir: layout.projectDirectory,
+        includes: ['*.ts', '*.json']))
+    // 🔴 `packages/` 也是输入：alias 指向那边的 TS 源码，改了那边而这里
+    // 不重建的话，产物会悄悄停在旧版本上。Gradle 看不到它，除非显式声明。
+    inputs.dir(layout.projectDirectory.dir('../../../packages'))
+    outputs.dir(layout.projectDirectory.dir('../src/main/resources/web'))
+}
+
+tasks.register('pnpmCheck', PnpmTask) {
+    group = 'verification'
+    description = 'Type-check the frontend project'
+    args = ['type-check']
+    dependsOn tasks.named('pnpmInstall')
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('pnpmCheck')
+}
+
+tasks.named('assemble') {
+    dependsOn tasks.named('pnpmBuild')
+}

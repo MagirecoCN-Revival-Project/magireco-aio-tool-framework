@@ -18,6 +18,7 @@ tasks.register('pnpmBuild', PnpmTask) {
     args = ['build']
     dependsOn tasks.named('pnpmInstall')
     inputs.dir(layout.projectDirectory.dir('src'))
+    inputs.dir(layout.projectDirectory.dir('../shared'))
     inputs.files(fileTree(
         dir: layout.projectDirectory,
         includes: ['*.ts', '*.json', '*.yaml']))
@@ -26,6 +27,12 @@ tasks.register('pnpmBuild', PnpmTask) {
     // 除非在这里显式声明。
     inputs.dir(layout.projectDirectory.dir('../../../packages'))
     outputs.dir(layout.buildDirectory.dir('dist'))
+
+    // 🔴 产物文件名带内容哈希，而打包器只写不删：换一版代码就多一份旧产物，
+    // 全都会被 `processUiResources` 收进 jar。实测一次构建后 jar 里同时躺着
+    // 两代 bundle（多出 53 KB 死代码），`ui-plugin.json` 指着新的那份，
+    // 所以功能正常、没人会发现。自己清一次，别指望打包器。
+    doFirst { delete layout.buildDirectory.dir('dist') }
 }
 
 tasks.register('pnpmCheck', PnpmTask) {

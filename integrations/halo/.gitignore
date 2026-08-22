@@ -2,5 +2,11 @@ build/
 .gradle/
 ui/node_modules/
 ui/build/
+web/node_modules/
 node_modules/
 *.tsbuildinfo
+
+# 🔴 前台 bundle 的产物**写在源码树里**（`resources/web/`），因为它得跟着 jar 走，
+# 由 `ViewerRouter` 从 classpath 读出来返回。位置在 `src/` 下不代表它是源码——
+# 它由 `:web:pnpmBuild` 生成，入库只会带来「仓库里那份和代码对不上」的旧产物。
+src/main/resources/web/

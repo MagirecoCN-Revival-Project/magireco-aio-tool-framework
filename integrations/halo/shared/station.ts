@@ -156,9 +156,15 @@ function createSearchStage(
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'aio-hit';
-        const zh = hit.record.zh ?? '(无中文名)';
-        const jp = hit.record.jp === undefined ? '' : ` / ${hit.record.jp}`;
-        btn.textContent = `${zh}${jp}`;
+        const zh = document.createElement('span');
+        zh.textContent = (hit.record.zh as string | undefined) ?? '(无中文名)';
+        btn.append(zh);
+        if (typeof hit.record.jp === 'string') {
+          const jp = document.createElement('span');
+          jp.className = 'aio-hit-jp';
+          jp.textContent = hit.record.jp;
+          btn.append(jp);
+        }
 
         // ref 可能没有——交叉表没登记就是没登记，**不按名字推一个出来**。
         // 这时按钮画出来但点不动，比「点了打开另一个人」诚实得多。

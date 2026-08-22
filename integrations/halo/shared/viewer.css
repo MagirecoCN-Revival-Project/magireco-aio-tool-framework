@@ -1,0 +1,220 @@
+/**
+ * 查看器样式。**不引任何第三方样式库。**
+ *
+ * 配色全部从 `--aio-*` 变量走，而变量本身用 `color-mix(in srgb, currentColor …)`
+ * 与一个可覆盖的强调色定义——这样：
+ *
+ * - 亮/暗主题不用各写一套（跟着宿主的 `color` 走）；
+ * - 主题想换配色，只要覆盖 `--aio-accent` 一个变量。
+ */
+.aio-page {
+  --aio-accent: #6366f1;
+  --aio-line: color-mix(in srgb, currentColor 14%, transparent);
+  --aio-line-strong: color-mix(in srgb, currentColor 26%, transparent);
+  --aio-fill: color-mix(in srgb, currentColor 5%, transparent);
+  --aio-fill-hover: color-mix(in srgb, currentColor 10%, transparent);
+  --aio-dim: color-mix(in srgb, currentColor 62%, transparent);
+
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.1rem 4rem;
+  line-height: 1.7;
+}
+
+/* ── 页头 ───────────────────────────────────────── */
+.aio-head {
+  margin-bottom: 1.6rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--aio-line);
+}
+.aio-head h1 {
+  font-size: 1.5rem;
+  line-height: 1.3;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.01em;
+}
+.aio-lead { margin: 0; color: var(--aio-dim); font-size: 0.94em; }
+
+/* ── 卡片 ───────────────────────────────────────── */
+.aio-card {
+  border: 1px solid var(--aio-line);
+  border-radius: 12px;
+  padding: 1.1rem 1.2rem;
+  margin: 0 0 1rem;
+  background: var(--aio-fill);
+}
+.aio-card h2 {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--aio-dim);
+  margin: 0 0 0.8rem;
+}
+.aio-card h2 code {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+/* ── 控件 ───────────────────────────────────────── */
+.aio-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+
+.aio-input {
+  flex: 1 1 14rem;
+  min-width: 9rem;
+  padding: 0.5rem 0.8rem;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--aio-line-strong);
+  border-radius: 8px;
+  transition: border-color 0.15s;
+}
+.aio-input:focus {
+  outline: none;
+  border-color: var(--aio-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--aio-accent) 18%, transparent);
+}
+
+.aio-btn {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  background: var(--aio-fill);
+  border: 1px solid var(--aio-line-strong);
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.aio-btn:hover:not(:disabled) { background: var(--aio-fill-hover); border-color: var(--aio-accent); }
+.aio-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.aio-btn-primary {
+  background: var(--aio-accent);
+  border-color: var(--aio-accent);
+  color: #fff;
+}
+.aio-btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+
+/* 角色按钮：名字是主角，ref 退成小字 */
+.aio-chip { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; line-height: 1.35; }
+.aio-chip-name { font-weight: 500; }
+.aio-chip-ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72em;
+  color: var(--aio-dim);
+}
+
+.aio-muted { color: var(--aio-dim); font-size: 0.87em; margin: 0.7rem 0 0; }
+.aio-note {
+  margin: 1rem 0;
+  padding: 0.65rem 0.9rem;
+  border-radius: 10px;
+  border-left: 3px solid var(--aio-accent);
+  background: color-mix(in srgb, var(--aio-accent) 8%, transparent);
+  font-size: 0.92em;
+}
+
+/* ── 插件装卸 ───────────────────────────────────── */
+.aio-plugins { list-style: none; padding: 0; margin: 0; }
+.aio-plugins li {
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--aio-line);
+}
+.aio-plugins li:last-child { border-bottom: none; }
+.aio-plugins code { font-size: 0.8em; color: var(--aio-dim); }
+
+/* ── surface ────────────────────────────────────── */
+.aio-surfaces { display: grid; gap: 0.9rem; margin-top: 1.2rem; }
+/* 一个 surface 都没开的时候不要留一条 1.2rem 的空带——那看起来像出了错。 */
+.aio-surfaces:empty { display: none; }
+.aio-surface {
+  border: 1px solid var(--aio-line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--aio-fill);
+}
+.aio-surface-chrome {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid var(--aio-line);
+}
+.aio-surface-chrome button {
+  font: inherit; color: var(--aio-dim); cursor: pointer;
+  background: none; border: none; padding: 0.2rem 0.4rem; border-radius: 6px;
+}
+.aio-surface-chrome button:hover { background: var(--aio-fill-hover); color: inherit; }
+.aio-surface-slot { padding: 1rem; }
+.aio-pill {
+  font-size: 0.75em;
+  color: var(--aio-dim);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ── 检索结果 ───────────────────────────────────── */
+.aio-hits { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.35rem; }
+.aio-hit {
+  font: inherit; color: inherit; cursor: pointer; text-align: left; width: 100%;
+  padding: 0.5rem 0.75rem; border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--aio-line);
+  transition: background 0.15s, border-color 0.15s;
+}
+.aio-hit:hover:not(:disabled) { background: var(--aio-fill-hover); border-color: var(--aio-accent); }
+.aio-hit:disabled { opacity: 0.5; cursor: not-allowed; }
+.aio-hit-jp { color: var(--aio-dim); font-size: 0.86em; margin-left: 0.4rem; }
+.aio-hit-empty { color: var(--aio-dim); padding: 0.5rem 0.15rem; }
+
+/* ── plugin-chart 的 DOM 舞台 ────────────────────
+   柱子高度由插件算好的百分比决定，这里只把百分比画成高度。
+   改样式不会改变数据——这是 DOM 舞台相对 canvas 的好处之一。 */
+.chart-stage { display: flex; gap: 0.9rem; flex-wrap: wrap; align-items: flex-end; }
+.chart-scale {
+  position: relative; width: 2.6rem; height: 13rem; flex: 0 0 auto;
+  border-right: 1px solid var(--aio-line);
+}
+.chart-tick {
+  position: absolute; right: 0.45rem; transform: translateY(50%);
+  font-size: 0.7em; color: var(--aio-dim);
+  font-family: ui-monospace, monospace;
+}
+.chart-plot { display: flex; align-items: flex-end; gap: 0.7rem; height: 13rem; flex: 1 1 12rem; }
+
+.chart-bar {
+  /* 上限是必须的：三根柱子平分 52rem 会各占 240px，看起来像三块色板而不是图。
+     柱子宽了不会更好读——身高图要读的是**高度差**，宽度只是噪声。 */
+  flex: 1 1 0; min-width: 3.4rem; max-width: 5.5rem;
+  font: inherit; font-size: 0.78em; color: inherit;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  /* 渐变让柱子有方向感，纯色块在浅色主题下会糊成一片 */
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--aio-accent) 34%, transparent),
+    color-mix(in srgb, var(--aio-accent) 16%, transparent)
+  );
+  border-top: 2px solid var(--aio-accent);
+  cursor: pointer;
+  padding: 0.4rem 0.25rem;
+  /* 柱子矮的时候文字要还在柱子里，所以贴底排 */
+  display: flex; align-items: flex-end; justify-content: center;
+  text-align: center; word-break: break-word;
+  transition: filter 0.15s;
+}
+.chart-bar:hover { filter: brightness(1.15); }
+.chart-bar-focus {
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--aio-accent) 62%, transparent),
+    color-mix(in srgb, var(--aio-accent) 34%, transparent)
+  );
+  font-weight: 600;
+}
+.chart-note {
+  flex: 1 0 100%; margin: 0.5rem 0 0;
+  color: var(--aio-dim); font-size: 0.82em;
+}
+.chart-note:empty { display: none; }

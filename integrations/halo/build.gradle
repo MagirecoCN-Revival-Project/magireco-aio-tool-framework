@@ -39,6 +39,11 @@ tasks.register('processUiResources', Copy) {
     shouldRunAfter tasks.named('processResources')
 }
 
+// 前台 bundle 直接写进 src/main/resources/web/，所以只要保证它先跑完。
+tasks.named('processResources') {
+    dependsOn project(':web').tasks.named('assemble')
+}
+
 tasks.named('classes') {
     dependsOn tasks.named('processUiResources')
 }
