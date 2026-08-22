@@ -1,8 +1,8 @@
 {
   "id": "example-user-archive",
-  "repo": "MagirecoCN-Revival-Project/example-user-archive",
+  "repo": "example-org/example-user-archive",
   "publish": "forbidden",
   "integration": "none",
   "phase": 5,
-  "license_note": "🔴 私有仓库，190 名真实玩家的流量归档。不进公开面。"
+  "license_note": "含真实用户数据的归档，不得公开。"
 }

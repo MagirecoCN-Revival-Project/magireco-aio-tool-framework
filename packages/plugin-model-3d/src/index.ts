@@ -12,7 +12,7 @@ export * from './files.js';
  * 三条理由，任何一条单独成立：
  *
  * 1. **本仓库不装上游查看器的源码**（CLAUDE.md 开头）。直接 import 会把
- *    `upstream-three-subpackage` 与 three.js 拖进控制面的依赖树。
+ *    上游那个 three.js 子包连同 three 本身拖进控制面的依赖树。
  * 2. **`three` 是 peerDependency。** 宿主可能已经有一份 three，装两份会得到
  *    两个互不相认的 `THREE` 命名空间——那是这类库最经典的坑。
  * 3. **注入才能在 node 上测。** 下面那些判据（清单路径合规、角色号对得上、
@@ -21,11 +21,11 @@ export * from './files.js';
  * 宿主侧长这样：
  *
  * ```ts
- * import CharacterManager, { Scene3D } from 'upstream-three-subpackage';
- * import { setRenderPaused } from 'upstream-three-subpackage/renderer';
+ * import CharacterThree, { Scene3D } from '<上游的 three.js 子包>';
+ * import { setRenderPaused } from '<上游的 three.js 子包>/renderer';
  *
  * kernel.register(createModel3dPlugin({
- *   CharacterManager: CharacterManager,
+ *   CharacterManager: CharacterThree,
  *   Scene: Scene3D,
  *   setRenderPaused,
  * }));
@@ -39,12 +39,12 @@ export * from './files.js';
  * 上游照旧 `npm run dev` 独立可跑。
  */
 
-/** 上游 `CharacterManager` 里本插件用到的部分。 */
+/** 上游角色管理器里本插件用到的部分。 */
 export interface CharacterManagerLike {
   loadCharacterById(id: number | string): Promise<unknown>;
 }
 
-/** 上游 `Scene3D` 里本插件用到的部分。 */
+/** 上游场景类里本插件用到的部分。 */
 export interface SceneLike {
   addCharacter(id: number | string): Promise<SceneCharacterLike>;
   removeCharacter(sceneCharacter: SceneCharacterLike): void;

@@ -1,6 +1,6 @@
 {
   "id": "example-adv-live2d",
-  "repo": "CyberNova2333/example-adv-live2d",
+  "repo": "example-org/example-adv-live2d",
   "publish": "allowed",
   "integration": "plugin",
   "phase": 2,
@@ -31,7 +31,7 @@
     "prefix": "live2d/",
     "approx_files": 12000,
     "approx_bytes": 7386169344,
-    "note": "Cubism 模型、HCA/OGG、WebM"
+    "note": "示例：一个上游同时提供两项能力。"
   },
-  "license_note": "代码可用；Live2D 模型与音视频归版权方。"
+  "license_note": "运行时版本已 pin，不得被打破。"
 }

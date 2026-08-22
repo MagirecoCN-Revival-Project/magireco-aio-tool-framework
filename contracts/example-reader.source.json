@@ -1,9 +1,9 @@
 {
   "id": "example-reader",
-  "repo": "CyberNova2333/example-reader",
+  "repo": "example-org/example-reader",
   "publish": "allowed",
   "integration": "proxy",
   "mount": "/story/",
   "phase": 3,
-  "license_note": "🔴 明确未授予任何开源许可：不得 vendor 其代码。它作为**独立宿主**接入——安装框架插件后自己获得 adv.play 等能力，而不是被框架吸收。反代仅为统一域名。"
+  "license_note": "**未授予任何开源许可**，不得 vendor；只能反代其既有部署，或由它作为独立宿主装插件。"
 }

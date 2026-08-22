@@ -1,11 +1,11 @@
 {
-  "id": "viewer-sp",
+  "id": "example-live2d-viewer",
   "repo": "another-org/example-live2d-viewer",
   "publish": "allowed",
   "integration": "plugin",
   "phase": 3,
   "plugin": {
-    "pluginId": "viewer-sp",
+    "pluginId": "live2d-viewer",
     "isolation": "iframe",
     "isolation_reason": "自带 live2d 运行时与全局状态，且是无构建的纯静态站",
     "usesWebGL": true,
@@ -24,7 +24,7 @@
     "prefix": "sp/",
     "approx_files": 48964,
     "approx_bytes": 6207569920,
-    "note": "48,964 张图必须全部外置——留在部署产物里是 Pages 文件数上限的 2.4 倍"
+    "note": "示例：他人仓库——正因为如此，本项目的实现不能依赖它存在。"
   },
-  "license_note": "图片素材归版权方。"
+  "license_note": "他人仓库，只作为可选的第二实现。"
 }

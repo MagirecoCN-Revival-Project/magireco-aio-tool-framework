@@ -1,6 +1,6 @@
 {
-  "id": "kyu-sprite",
-  "repo": "MagirecoCN-Revival-Project/example-sprite-mirror",
+  "id": "example-sprite-mirror",
+  "repo": "example-org/example-sprite-mirror",
   "publish": "allowed",
   "integration": "plugin",
   "phase": 1,
@@ -24,7 +24,7 @@
     "prefix": "sprite/",
     "approx_files": 8100,
     "approx_bytes": 3326083072,
-    "note": "810 个 unit 的 ExportJson/plist/png 三件套"
+    "note": "示例：老引擎靠全局变量活着，必须独占 realm。"
   },
-  "license_note": "精灵素材归版权方，全部外置到资源面。"
+  "license_note": "素材归各自版权方，全部外置到资源面。"
 }

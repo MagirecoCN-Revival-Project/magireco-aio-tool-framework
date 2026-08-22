@@ -1,6 +1,6 @@
 {
   "id": "example-model-viewer",
-  "repo": "CyberNova2333/example-model-viewer",
+  "repo": "example-org/example-model-viewer",
   "publish": "allowed",
   "integration": "plugin",
   "phase": 1,
@@ -24,7 +24,7 @@
     "prefix": "3d/",
     "approx_files": 1200,
     "approx_bytes": 734003200,
-    "note": "沿用其 compress_fbx_gzip 与 *.gz 的 Content-Encoding 约定"
+    "note": "示例：一个 ESM 的 3D 查看器，inline 即可，wrapper 模式的样板。"
   },
-  "license_note": "代码可用；模型素材归版权方，进资源面并支持整片下架。"
+  "license_note": "构造函数本来就是注入式（Record<路径, URL>），所以包装它不需要改上游一行。"
 }

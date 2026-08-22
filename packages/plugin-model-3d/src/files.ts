@@ -5,7 +5,7 @@ import type { ResourceProvider } from '@aio/resource';
 /**
  * 「把一个既有查看器接进来」实际要写的那**一个函数**（docs/VIEWER-REFACTOR.md 的结论）。
  *
- * 上游 `CharacterManager` 的构造函数签名本来就是注入式的：
+ * 上游那个角色管理器的构造函数签名本来就是注入式的：
  *
  *     new CharacterManager(files: Record<string, string>)   // 路径 → URL
  *
@@ -34,7 +34,7 @@ export class Model3dFilesError extends Error {
 }
 
 export interface BuiltFiles {
-  /** 直接喂给 `new CharacterManager(...)`。 */
+  /** 直接喂给上游的 `new CharacterManager(...)`。 */
   readonly files: Record<string, string>;
   /** 从 fbx 路径里抠出来的角色号，喂给 `loadCharacterById`。 */
   readonly characterId: string;

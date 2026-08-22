@@ -1,7 +1,7 @@
 {
   "version": 1,
   "updated": "2026-08-20",
-  "note": "公开面策略。人类可读版本见 docs/CONSTRAINTS.md；两者不一致时以本文件为准。分类由人写死，不由脚本推断。",
+  "note": "示例数据。真实部署把这里换成自己的源——判据与守卫不依赖具体是谁，只依赖 publish/vendor 这两个标记。",
   "platform_limits": {
     "source": "第三方技术文章，待官方文档与控制台复核",
     "verified": false,
@@ -12,15 +12,55 @@
     }
   },
   "repositories": {
-    "MagirecoCN-Revival-Project/example-client": { "publish": "allowed", "vendor": "forbidden", "reason": "GPLv3 + 附加条款 + 第三方声明义务，只链接产物" },
-    "MagirecoCN-Revival-Project/example-restricted-data":        { "publish": "forbidden", "vendor": "forbidden", "reason": "上游 repository-policy.json + CI 明令禁止公开托管；2026-08-15 公开站已退役" },
-    "MagirecoCN-Revival-Project/example-user-archive":           { "publish": "forbidden", "vendor": "forbidden", "reason": "私有仓库，190 名真实玩家的流量归档" },
-    "MagirecoCN-Revival-Project/magireco-aio-tool-framework": { "publish": "allowed", "vendor": "allowed", "reason": "本仓库" },
-    "CyberNova2333/example-model-viewer":                    { "publish": "allowed", "vendor": "allowed", "reason": "代码可用；模型素材归版权方，进资产面并支持下架" },
-    "CyberNova2333/example-adv-live2d": { "publish": "allowed", "vendor": "allowed", "reason": "同上" },
-    "CyberNova2333/example-reader":                     { "publish": "allowed", "vendor": "forbidden", "reason": "明确未授予任何开源许可，只能挂载/反代，不得再分发其内容" },
-    "CyberNova2333/example-search-site":         { "publish": "allowed", "vendor": "allowed", "reason": "fork 自 third-party-author 开源项目，需保留原作者署名" },
-    "MagirecoCN-Revival-Project/example-sprite-mirror":     { "publish": "allowed", "vendor": "allowed", "reason": "公开镜像；精灵素材归版权方，进资产面" },
-    "another-org/example-live2d-viewer":                 { "publish": "allowed", "vendor": "allowed", "reason": "已有公开预览；图片素材归版权方，进资产面" }
+    "example-org/example-client": {
+      "publish": "allowed",
+      "vendor": "forbidden",
+      "reason": "GPLv3 + 附加条款 + 第三方声明义务，只链接产物"
+    },
+    "example-org/example-restricted-data": {
+      "publish": "forbidden",
+      "vendor": "forbidden",
+      "reason": "上游自带的策略文件 + CI 明令禁止公开托管"
+    },
+    "example-org/example-user-archive": {
+      "publish": "forbidden",
+      "vendor": "forbidden",
+      "reason": "含真实用户数据的归档，不得公开"
+    },
+    "example-org/aio-tool-framework": {
+      "publish": "allowed",
+      "vendor": "allowed",
+      "reason": "本仓库"
+    },
+    "example-org/example-model-viewer": {
+      "publish": "allowed",
+      "vendor": "allowed",
+      "reason": "常规上游，可包装可链接"
+    },
+    "example-org/example-adv-live2d": {
+      "publish": "allowed",
+      "vendor": "allowed",
+      "reason": "常规上游"
+    },
+    "example-org/example-reader": {
+      "publish": "allowed",
+      "vendor": "forbidden",
+      "reason": "未授予任何开源许可，不得 vendor"
+    },
+    "example-org/example-search-site": {
+      "publish": "allowed",
+      "vendor": "allowed",
+      "reason": "常规上游"
+    },
+    "example-org/example-sprite-mirror": {
+      "publish": "allowed",
+      "vendor": "allowed",
+      "reason": "常规上游"
+    },
+    "another-org/example-live2d-viewer": {
+      "publish": "allowed",
+      "vendor": "allowed",
+      "reason": "他人仓库"
+    }
   }
 }

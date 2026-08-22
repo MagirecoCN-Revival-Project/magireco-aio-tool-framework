@@ -38,7 +38,7 @@
           "source": "example-model-viewer",
           "isolation": "inline",
           "usesWebGL": true,
-          "note": "上游那两个类注入进来，所以本仓库不依赖 three.js，判据也能在 node 上跑。尚未接进 apps/station——要等 upstream-three-subpackage 可安装"
+          "note": "上游的类注入进来，所以本仓库不依赖 three.js，判据也能在 node 上跑。尚未接进 apps/station——要等上游那个子包可安装"
         }
       ]
     },
@@ -57,10 +57,10 @@
         {
           "id": "sprite-viewer",
           "origin": "upstream",
-          "source": "kyu-sprite",
+          "source": "example-sprite-mirror",
           "isolation": "iframe",
           "usesWebGL": true,
-          "note": "上游 cocos2d-html5 运行时。接进来时它是 Stage 的又一个实现，那 367 个引擎文件留在原地"
+          "note": "上游 cocos2d-html5 运行时。接进来时它是 Stage 的又一个实现，那几百个引擎文件留在原地"
         }
       ]
     },
@@ -85,9 +85,9 @@
           "note": "同一个上游插件同时提供 adv.play 与 live2d.show"
         },
         {
-          "id": "viewer-sp",
+          "id": "live2d-viewer",
           "origin": "upstream",
-          "source": "viewer-sp",
+          "source": "example-live2d-viewer",
           "isolation": "iframe",
           "usesWebGL": true,
           "note": "自带 live2d 运行时"
@@ -112,7 +112,7 @@
           "source": "example-adv-live2d",
           "isolation": "iframe",
           "usesWebGL": true,
-          "note": "上游 Pixi + Cubism 的实机演出。example-reader 装它就是路线图 3.4 那一步"
+          "note": "上游 Pixi + Cubism 的实机演出。让一个独立的阅读器宿主装上它，就是路线图 3.4 那一步"
         }
       ]
     },
@@ -129,9 +129,9 @@
           "note": "从零实现：跨中/日/罗马字/假名匹配（片假名折叠），结果 ref 化"
         },
         {
-          "id": "call-search",
+          "id": "search-site",
           "origin": "upstream",
-          "source": "call-search",
+          "source": "example-search-site",
           "isolation": "inline",
           "usesWebGL": false,
           "note": "上游纯 DOM 实现，同时提供 chart.height"
@@ -151,9 +151,9 @@
           "note": "从零实现：角色档案解析 + 与渲染无关的布局算术，DOM 舞台注入。这一项是这张表第一次跑就查出来的缺口——上游提供它，本仓库既没实现也没契约，两边都补上了"
         },
         {
-          "id": "call-search",
+          "id": "search-site",
           "origin": "upstream",
-          "source": "call-search",
+          "source": "example-search-site",
           "isolation": "inline",
           "usesWebGL": false,
           "note": "上游纯 DOM 实现，同时提供 search.query"

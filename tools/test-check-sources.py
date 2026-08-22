@@ -64,9 +64,9 @@ def case(name: str, needle: str):
 
 @case("禁发仓库被接进运行时", "必须是 none")
 def _(work):
-    c = load(work, "wiki-data.source.json")
+    c = load(work, "example-restricted-data.source.json")
     c["integration"] = "plugin"
-    save(work, "wiki-data.source.json", c)
+    save(work, "example-restricted-data.source.json", c)
 
 
 @case("禁发仓库被配了插件段", "却有 plugin")
@@ -82,16 +82,16 @@ def _(work):
 
 @case("禁发仓库被挂上反代路由", "却有 mount")
 def _(work):
-    c = load(work, "wiki-data.source.json")
+    c = load(work, "example-restricted-data.source.json")
     c["mount"] = "/codex/"
-    save(work, "wiki-data.source.json", c)
+    save(work, "example-restricted-data.source.json", c)
 
 
 @case("契约 publish 与策略不符", "publish 与策略不符")
 def _(work):
-    c = load(work, "wiki-data.source.json")
+    c = load(work, "example-restricted-data.source.json")
     c["publish"] = "allowed"
-    save(work, "wiki-data.source.json", c)
+    save(work, "example-restricted-data.source.json", c)
 
 
 @case("无许可仓库被包装成插件", "vendor=forbidden")
@@ -109,16 +109,16 @@ def _(work):
 
 @case("pluginId 重复", "内核会拒绝注册")
 def _(work):
-    c = load(work, "call-search.source.json")
+    c = load(work, "example-search-site.source.json")
     c["plugin"]["pluginId"] = "model-3d"
-    save(work, "call-search.source.json", c)
+    save(work, "example-search-site.source.json", c)
 
 
 @case("资源前缀重复", "清单会互相覆盖")
 def _(work):
-    c = load(work, "kyu-sprite.source.json")
+    c = load(work, "example-sprite-mirror.source.json")
     c["assets"]["prefix"] = "3d/"
-    save(work, "kyu-sprite.source.json", c)
+    save(work, "example-sprite-mirror.source.json", c)
 
 
 @case("能力标识不合约定", "不合约定")
@@ -144,9 +144,9 @@ def _(work):
 
 @case("iframe 隔离没写理由", "必须写 isolation_reason")
 def _(work):
-    c = load(work, "kyu-sprite.source.json")
+    c = load(work, "example-sprite-mirror.source.json")
     del c["plugin"]["isolation_reason"]
-    save(work, "kyu-sprite.source.json", c)
+    save(work, "example-sprite-mirror.source.json", c)
 
 
 @case("integration=plugin 却没有 plugin 段", "却没有 plugin 段")
@@ -255,7 +255,7 @@ def _(work):
 @case("能力实现指向禁发仓库", "publish=forbidden")
 def _(work):
     table, i = impl(work, "sprite.show", "sprite-viewer")
-    i["source"] = "wiki-data"
+    i["source"] = "example-restricted-data"
     save(work, "capabilities.json", table)
 
 

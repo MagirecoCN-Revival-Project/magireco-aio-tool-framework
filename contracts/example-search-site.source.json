@@ -1,11 +1,11 @@
 {
-  "id": "call-search",
-  "repo": "CyberNova2333/example-search-site",
+  "id": "example-search-site",
+  "repo": "example-org/example-search-site",
   "publish": "allowed",
   "integration": "plugin",
   "phase": 4,
   "plugin": {
-    "pluginId": "call-search",
+    "pluginId": "search-site",
     "isolation": "inline",
     "isolation_reason": "纯 DOM 与图表，无全局运行时",
     "capabilities": [
@@ -25,5 +25,5 @@
       }
     ]
   },
-  "license_note": "fork 自 third-party-author/character-story-search，须保留原作者署名与原始项目链接。"
+  "license_note": "fork 自第三方项目，须保留原作者署名与原始项目链接。"
 }

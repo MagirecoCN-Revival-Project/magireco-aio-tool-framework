@@ -7,7 +7,7 @@ Claude Code 与 Codex CLI 都支持项目内的 PreToolUse 钩子，且都是「
 **没法从入库文件里设**——这是 git 有意为之的安全设计（否则 clone 一个仓库就等于
 执行任意代码）。所以才有 tools/install-hooks.sh 那个手动步骤。
 
-本脚本把那个手动步骤消掉（与兄弟仓库 example-client 同一份机制，
+本脚本把那个手动步骤消掉（与兄弟仓库同一份机制，
 判定逻辑逐字沿用——那套已经在生产里跑过，重写只会引入新的漏与误伤）：
 
     .claude/settings.json  →  PreToolUse(Bash)  ┐

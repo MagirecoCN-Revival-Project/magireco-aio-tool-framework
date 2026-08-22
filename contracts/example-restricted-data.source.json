@@ -1,8 +1,8 @@
 {
-  "id": "wiki-data",
-  "repo": "MagirecoCN-Revival-Project/example-restricted-data",
+  "id": "example-restricted-data",
+  "repo": "example-org/example-restricted-data",
   "publish": "forbidden",
   "integration": "none",
   "phase": 5,
-  "license_note": "🔴 上游自带 repository-policy.json + CI 禁止任何公开托管。它是交叉表最重要的素材来源（charaId / costumeIds / voice_index），但**派生出的交叉表能否公开需维护者拍板**——见 docs/AIO-ARCHITECTURE.md 待拍板事项。"
+  "license_note": "上游自带的策略文件与 CI 明令禁止任何公开托管。"
 }
