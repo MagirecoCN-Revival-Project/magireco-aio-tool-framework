@@ -29,13 +29,17 @@ run-id）一律拦——见 AGENTS.md §2。日期后缀 -YYYYMMDD 是 8 位，�
 
 逃生口：`SKIP_BRANCH_HOOK=1 git push ...`
 
-### 三、两条发布禁令被删（§4，本仓库版的「禁止更改」）
+### 三、发布禁令被单方面解除（§4，本仓库版的「禁止更改」）
 
-`example-restricted-data`（上游 CI 强制的公开部署禁令）与 `example-user-archive`
-（190 名真实玩家的流量归档）**不得进入任何公开面**。这两条不是本项目的判断，
-是既有约束；把它们从 repository-policy.json 里改成 allowed，
-`tools/check-sources.py` 的守卫就整个失效了，而且**不会报错**——
+`repository-policy.json` 里标 `publish: forbidden` 的源**不得进入任何公开面**。
+这类约束通常**不是本项目做出的判断**（典型来源：上游 CI 强制的部署禁令、
+含真实用户数据的归档），本项目只是执行方。把某一条改成 allowed，
+`tools/check-sources.py` 的守卫对它就整个失效了，而且**不会报错**——
 契约会变得「自洽」，只是自洽在错误的前提上。
+
+判据不写死是哪几个源：**逐提交比对前后两版**，凡是先前为 forbidden 的条目
+被删掉或被改成 allowed，就拦。这样新加的禁令自动受保护，
+而不必记得回来改这个钩子。
 
 所以：凡本次推送新增的提交动了 repository-policy.json 或 docs/CONSTRAINTS.md，
 改动后两条禁令必须仍在，否则拦。判据是「禁令还在」而不是「文件不许动」——
@@ -92,11 +96,6 @@ REDLIGHT_API = ("https://api.github.com/repos/{slug}/actions/workflows/"
                 "checks.yml/runs?branch=main&status=completed&per_page=1")
 REDLIGHT_TIMEOUT = 15
 
-# 两条禁令的主体。改成 allowed 就是把守卫的前提抽掉。
-BANNED_REPOS = (
-    "MagirecoCN-Revival-Project/example-restricted-data",
-    "MagirecoCN-Revival-Project/example-user-archive",
-)
 POLICY_JSON = "repository-policy.json"
 POLICY_DOC = "docs/CONSTRAINTS.md"
 # 文档侧的双条件标记：防只留标题、正文被掏空。
@@ -205,22 +204,34 @@ def file_at(sha, path):
     return None if r.returncode != 0 else r.stdout
 
 
-def bans_intact_json(content):
-    """repository-policy.json 里两条禁令是否都还在。
+def forbidden_set(content):
+    """这一版策略文件里，哪些源标着 publish=forbidden。
 
-    解析 JSON 而不是搜字符串：重排字段、改缩进、加注释键都不该误报，
-    而把 forbidden 改成 allowed 必须报。
+    解析 JSON 而不是搜字符串：重排字段、改缩进、加键都不该误报，
+    而把 forbidden 改成 allowed 必须报。解析不了返回 None（交给 CI，不在这拦）。
     """
+    if content is None:
+        return None
     try:
         data = json.loads(content)
     except Exception:
-        return None                                  # 解析不了，交给 CI，不在这拦
+        return None
     repos = data.get("repositories") or {}
-    for name in BANNED_REPOS:
-        entry = repos.get(name)
-        if not isinstance(entry, dict) or entry.get("publish") != "forbidden":
-            return False
-    return True
+    return {name for name, e in repos.items()
+            if isinstance(e, dict) and e.get("publish") == "forbidden"}
+
+
+def bans_weakened(sha, path):
+    """与父提交比，有没有哪条 forbidden 被删掉或改成了 allowed。
+
+    **不写死是哪几个源**——写死的话，以后新加的禁令不会被保护，
+    而加禁令的人不会想到回来改这个钩子。返回被削弱的源名，没有就是空集。
+    """
+    before = forbidden_set(file_at("%s^" % sha, path))
+    after = forbidden_set(file_at(sha, path))
+    if before is None or after is None:
+        return set()                                 # 任一版解析不了就不拦
+    return before - after
 
 
 def check_policy(refs):
@@ -236,10 +247,10 @@ def check_policy(refs):
                 bad.append((sha[:8], branch, path, "文件被删除"))
                 continue
             if path == POLICY_JSON:
-                ok = bans_intact_json(after)
-                if ok is False:
+                lost = bans_weakened(sha, path)
+                if lost:
                     bad.append((sha[:8], branch, path,
-                                "两条 publish=forbidden 禁令不完整了"))
+                                "publish=forbidden 被解除：" + "、".join(sorted(lost))))
             else:
                 if not all(m in after for m in DOC_MARKERS):
                     bad.append((sha[:8], branch, path, "公开面禁令段落标记不在了"))
@@ -251,12 +262,10 @@ def report_policy(bad):
                      % len(bad))
     for sha, branch, path, why in bad:
         sys.stderr.write("  %s (%s)  %s：%s\n" % (sha, branch, path, why))
-    sys.stderr.write("\n  被保护的禁令：\n"
-                     "    example-restricted-data —— 上游自带 repository-policy.json + CI\n"
-                     "      强制禁止任何公开托管，2026-08-15 公开站已退役；\n"
-                     "    example-user-archive    —— 私有仓库，190 名真实玩家的流量归档。\n\n"
-                     "  这两条不是本项目的判断，是既有约束。把它们改成 allowed，\n"
-                     "  tools/check-sources.py 的守卫就整个失效——而且不报错，\n"
+    sys.stderr.write("\n  被保护的是 repository-policy.json 里所有 publish=forbidden 的条目。\n"
+                     "  这类约束通常不是本项目的判断，是既有约束（上游 CI 强制的部署禁令、\n"
+                     "  含真实用户数据的归档等），本项目只是执行方。把某条改成 allowed，\n"
+                     "  tools/check-sources.py 对它的守卫就整个失效——而且不报错，\n"
                      "  契约只是变得「自洽」在错误的前提上。\n\n")
     sys.stderr.write("  规则出处: AGENTS.md §4 / docs/CONSTRAINTS.md 一\n"
                      "  确需跳过: SKIP_POLICY_HOOK=1 git push ...\n\n")
