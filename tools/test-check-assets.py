@@ -32,9 +32,10 @@ def sandbox() -> pathlib.Path:
 
 def run(work: pathlib.Path) -> tuple[int, str]:
     proc = subprocess.run(
-        [sys.executable, str(work / "tools" / "check-assets.py")],
+        [sys.executable, "-X", "utf8", str(work / "tools" / "check-assets.py")],
         capture_output=True,
         text=True,
+        encoding="utf-8",
     )
     return proc.returncode, proc.stdout + proc.stderr
 
@@ -102,6 +103,10 @@ def main() -> int:
     expect_pass(
         "ALLOW 登记的锁文件即使很大",
         lambda w: write(w, "package-lock.json", "{}" + " " * (300 * 1024)),
+    )
+    expect_pass(
+        "ALLOW 登记的 Story Router 纯文本交叉表即使很大",
+        lambda w: write(w, "story-router/story-routes.json", "{}" + " " * (300 * 1024)),
     )
     expect_pass("契约 JSON", lambda w: write(w, "contracts/foo.source.json", "{}"))
     expect_pass("文档与 Markdown", lambda w: write(w, "docs/AIO-ARCHITECTURE.md", "# 架构"))

@@ -48,7 +48,10 @@
       "@aio/site": [
         "./packages/site/src/index.ts"
       ],
-      "@aio/embed": ["./packages/embed/src/index.ts"]
+      "@aio/embed": ["./packages/embed/src/index.ts"],
+      "@aio/story-router": [
+        "./packages/story-router/src/index.ts"
+      ]
     },
     "baseUrl": ".",
     "jsx": "preserve"

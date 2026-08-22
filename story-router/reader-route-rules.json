@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "characterAliases": {
+    "Ashley Taylor": "アシュリー・テイラー",
+    "かずみ(旧)": "かずみ",
+    "かずみ(新)": "昴 かずみ",
+    "御崎海香(旧)": "御崎 海香",
+    "御崎海香(新)": "御崎 海香",
+    "牧カオル(旧)": "牧 カオル",
+    "牧カオル(新)": "牧 カオル",
+    "加賀美まさら": "加賀見 まさら",
+    "フェイト・T・ハラオウン": "フェイト"
+  },
+  "exactRoutes": [
+    {
+      "slug": "character",
+      "title": "暁美ほむら(水着ver) 4話",
+      "readerId": "323004",
+      "advSection": "first"
+    },
+    {
+      "slug": "main-1",
+      "title": "10章5話",
+      "readerId": "102005",
+      "advSection": "first"
+    }
+  ],
+  "groupedMain": [
+    { "slug": "main-1", "chapter": 8, "arc": "全体編", "readerId": "101801" },
+    { "slug": "main-1", "chapter": 8, "arc": "やちよ編", "readerId": "101802" },
+    { "slug": "main-1", "chapter": 8, "arc": "いろは・さな編", "readerId": "101803" },
+    { "slug": "main-1", "chapter": 8, "arc": "かえで編", "readerId": "101804" },
+    { "slug": "main-1", "chapter": 8, "arc": "レナ編", "readerId": "101805" },
+    { "slug": "main-1", "chapter": 8, "arc": "ももこ編", "readerId": "101806" },
+    { "slug": "main-1", "chapter": 8, "arc": "みたま編", "readerId": "101807" },
+    { "slug": "main-1", "chapter": 8, "arc": "鶴乃編", "readerId": "101808" },
+    { "slug": "main-1", "chapter": 8, "arc": "フェリシア編", "readerId": "101809" },
+    { "slug": "main-1", "chapter": 8, "arc": "十七夜編", "readerId": "101810" },
+
+    { "slug": "main-1", "chapter": 9, "arc": "いろは編", "episodeMin": 1, "episodeMax": 1, "readerId": "101901" },
+    { "slug": "main-1", "chapter": 9, "arc": "いろは編", "episodeMin": 2, "episodeMax": 4, "readerId": "101905" },
+    { "slug": "main-1", "chapter": 9, "arc": "さな編", "readerId": "101902" },
+    { "slug": "main-1", "chapter": 9, "arc": "やちよ編", "readerId": "101903" },
+    { "slug": "main-1", "chapter": 9, "arc": "ももこ編", "readerId": "101904" },
+    { "slug": "main-1", "chapter": 9, "arc": "合流編", "readerId": "101906" },
+    { "slug": "main-1", "chapter": 9, "arc": "みふゆ編", "readerId": "101907" },
+    { "slug": "main-1", "chapter": 9, "arc": "チームみかづき荘編", "readerId": "101908" },
+
+    { "slug": "main-2", "chapter": 8, "arc": "ユニオン編", "readerId": "102902", "advSection": "episode" },
+    { "slug": "main-2", "chapter": 8, "arc": "プロミストブラッド編", "readerId": "102903", "advSection": "episode" },
+    { "slug": "main-2", "chapter": 8, "arc": "時女一族編", "readerId": "102904", "advSection": "episode" },
+    { "slug": "main-2", "chapter": 8, "arc": "フォークロア編", "readerId": "102905", "advSection": "episode" },
+    { "slug": "main-2", "chapter": 8, "arc": "ネオマギウス編", "readerId": "102906", "advSection": "episode" },
+    { "slug": "main-2", "chapter": 8, "arc": "みかげ編", "readerId": "102907", "advSection": "episode" },
+    { "slug": "main-2", "chapter": 8, "arc": "アリナ編", "readerId": "102908", "advSection": "episode" },
+    { "slug": "main-2", "chapter": 8, "arc": "全体編", "readerId": "102909", "advSection": "episode" }
+  ],
+  "specialMain": [
+    {
+      "slug": "main-2",
+      "chapter": 8,
+      "label": "プロローグ",
+      "readerId": "main_story_102901_1-1_0ea2b2893c",
+      "advSection": "first"
+    },
+    {
+      "slug": "main-2",
+      "chapter": 8,
+      "label": "インターミッション",
+      "readerId": "102909",
+      "advSection": "zero"
+    }
+  ]
+}

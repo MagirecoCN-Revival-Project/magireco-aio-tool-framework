@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "routes": {
+    "story-v6:20260816t013548z:main-1:0": {
+      "readerId": "000001",
+      "section": "000001-1 Section 1"
+    },
+    "story-v6:20260816t013548z:main-1:1": {
+      "readerId": "000003",
+      "section": "000003-4 Section 4"
+    }
+  }
+}

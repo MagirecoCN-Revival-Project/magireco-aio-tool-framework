@@ -64,6 +64,9 @@ ASSET_DIRS = {
 ALLOW: dict[str, str] = {
     # 锁文件天生会长，且是纯文本依赖图，不含任何版权素材。
     "package-lock.json": "npm 锁文件：纯文本依赖图，体积随依赖数增长",
+    # 该文件是 sourceKey 到 Reader/ADV 标识的压缩 JSON 交叉表，不含剧情或媒体内容；
+    # EdgeOne 与搜索站需要读取完整表，体积随可路由搜索行数量增长。
+    "story-router/story-routes.json": "Story Router 纯文本路由交叉表：只含来源键、目标标识和版本元数据",
     # GPLv3 全文约 35 KiB，本来就该原样入库。
     "LICENSE": "GPLv3 许可证全文，必须逐字保留",
 }

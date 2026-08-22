@@ -1,142 +1,149 @@
 # magireco-aio-tool-framework
 
-**一个把散落在 10 个仓库里的能力缝成一套系统的开源框架**，外加它的控制面。
+## 目标生产形态：Story Router
 
-📖 **文档站**：`npm run docs:dev` 本地看，或见 [部署与域名](docs/guide/deploy.md)。
+AIO **不是另一个剧情网站，也不把搜索、Reader、L2D/ADV、3D 或战斗精灵塞进
+同一个页面**。当前唯一主链是：
 
-不是把几个网站放进一个域名。判据只有一条：
-
-> 模块之间**不互相 import、不知道对方存在**，却能互相调用并回话。
-> 少装一个模块，宿主依然自洽，只是少一项能力。
-
-看剧情时点一下，ADV 插件就地实机播放，并把行号回传给阅读器高亮；
-看角色档案时点一下，精灵查看器（跑在自己的 iframe 里，因为 cocos2d 靠
-`window.cc` 活着）就地显示——而档案页从未 import 过它。
-
-```bash
-npm install
-npm run check                       # typecheck + 407 个测试 + 守卫
-npm run -w @aio/station dev    # 带插件的 CMS 宿主，:3000
-npm run docs:dev                    # 本文档站
+```text
+角色剧情搜索结果
+      │ sourceKey + target
+      ▼
+EdgeOne /open（AIO Story Router）
+      ├── 302 → 独立 Reader：/reader/{storyId}
+      └── 302 → 独立 ADV：?advRenderer=pixi-v2&bridge=1&story={storyId}&section={scenarioSectionId}&readerRevision={revision}
 ```
 
-## 现在能用什么
+AIO 只负责三件事：
 
-**六个能力，每一个都有从零写、一行上游代码都不碰的实现**：
+1. 给搜索数据中的每一行一个版本绑定来源键，例如
+   `story-v6:20260816t013548z:character:0`。
+2. 维护来源键到 Reader 剧情编号、ADV 起始章节的**显式交叉表**。
+3. 在 EdgeOne 边缘函数上把 `/open` 请求 302 转发到独立站点。
 
-| 能力 | 干什么 | 自有实现 |
+搜索站不 import Reader 或 ADV；Reader 与 ADV 也不需要知道搜索站存在。换域名时只
+改 EdgeOne 环境变量，不需要改搜索数据或交叉表。
+
+## 已确认的真实入口
+
+| 系统 | 当前契约 | 状态 |
 |---|---|---|
-| `sprite.show` | CocosStudio 骨骼 + plist 图集，父子变换合成，canvas2d 画真图 | `@aio/plugin-sprite` |
-| `adv.play` | worksheet 解析（按表头名，不依赖列序）+ 时间轴 + 行号回流 | `@aio/plugin-adv` |
-| `live2d.show` | Cubism `model3.json` + 动作/表情/口型同步会话 | `@aio/plugin-live2d` |
-| `model3d.show` | glTF 2.0（动画清单、外部依赖、拒收 1.x 与 GLB） | `@aio/plugin-gltf` |
-| `search.query` | 跨中/日/罗马字/假名/别名匹配，片假名折叠 | `@aio/plugin-search` |
-| `chart.height` | 角色档案解析 + 与渲染无关的布局算术 | `@aio/plugin-chart` |
+| 搜索站 `story-v6` | 目录版本 + 分类 slug + 原始行号 | 已用于 `sourceKey`；目录更新时旧键失效而不是误跳 |
+| MagiReader | `/reader/{id}` | 已存在，可直接跳转 |
+| L2D/ADV | 当前公开 URL 只接受 `advRenderer=pixi-v2`；未来接收器解析参数后调用内部 `loadChapterById(id, section)` | AIO 已按固定 Reader revision 过滤兼容条目；稳定剧情 deep-link 尚未公开，接收器完成前保持关闭 |
 
-**`apps/station` 装着其中四个，一个占位都不剩。** 去 `/admin` 拔掉一个插件，
-资料页上对应的按钮当场消失，其余功能一点没受影响——那条判据就是这么验的
-（`apps/station/test/catalog.test.ts`）。
+ADV 不是复用 Reader 页面查询参数，而是直接读取固定 MagiReader revision 的
+`story_index.json` 与剧情 JSON。AIO 因此以 Reader 的 `id + section` 为共同契约：
+Reader 使用当前索引，ADV 只保留其固定 revision 中仍存在的章节。AIO 从 Reader
+section 显示标签中提取稳定 scenario section id（如 `101102-1`），并在 URL 中携带
+`readerRevision`。未来如有经过验证的精确落点，可再附加 group key 与 zero-based
+turn index；接收器仍应先走现有 picker/AdvEngine 会话，不另建播放路径。AIO 不复制
+剧情，也不改动 Reader/ADV 工程。
 
-`model3d.show` 目前有**三个实现**同时过同一套一致性判据（自有的 glTF 解析、
-包装一个既有查看器的适配器、以及套件自带的参考实现）。「换一个实现宿主零改动」
-因此是能被验证的事，而不是靠读代码相信。
+## 当前映射结果
 
-## 包
+从搜索站当前 `story-v6` 14,466 行与 Reader 当前 3,012 条索引中，生成器只对
+“角色个人剧情、主线、支线”执行可证明的精确匹配：
 
-| 包 | 干什么 |
-|---|---|
-| `@aio/core` | 资源引用语法、能力/意图类型、事件总线。**零依赖** |
-| `@aio/registry` | 实体交叉表：角色 ↔ 精灵 / Live2D / 3D / 语音 |
-| `@aio/resource` | `ResourceProvider` 接口 + 两个实现：`ManifestCdnProvider`（清单、多源回退、https 强制、sha256）与 `StaticProvider`（离线包／本地目录）。一致性套件不 import 任何实现 |
-| `@aio/kernel` | **浏览器半边**：插件注册、意图派发、surface 生命周期、WebGL 上下文治理、iframe RPC 桥 |
-| `@aio/site` | **边缘半边**：路由、SSR 元信息、SEO、站点配置、下架 |
-| `@aio/plugin-sdk` | `definePlugin` + 无头测试宿主 |
-| `@aio/capability` | 能力契约：每个能力**能被怎么用**（接受的 kind、参数、必发的事件）。零依赖于任何实现 |
-| `@aio/conformance` | 一致性套件。不 import 任何具体实现——「换一个实现宿主零改动」因此可验证 |
-| `@aio/plugin-sprite` | `sprite.show`：骨骼与图集（plist）解析、父子变换合成、渲染无关的帧播放器，canvas2d 舞台按图集画真图 |
-| `@aio/plugin-adv` | `adv.play`：worksheet 解析器 + 渲染无关的播放引擎，舞台注入 |
-| `@aio/plugin-live2d` | `live2d.show`：Cubism `model3.json` 解析器 + 渲染无关的会话，舞台注入 |
-| `@aio/plugin-gltf` | `model3d.show`：glTF 2.0 解析，舞台注入 |
-| `@aio/plugin-search` | `search.query`：跨中/日/罗马字/假名/别名匹配，结果 ref 化 |
-| `@aio/plugin-chart` | `chart.height`：角色档案解析 + 布局算术（量程、刻度、缺数据），DOM 舞台注入 |
-| `@aio/plugin-model-3d` | 一个既有 3D 查看器的插件封装，**wrapper 模式样例**。上游的类**注入**进来，所以本仓库不依赖 three.js，判据也能在 node 上跑 |
+- 可播放范围：5,337 行，其中 10 行是无演员、简介和来源的空白坏记录。
+- 有效路由候选：5,327 行；Reader 已登记 5,327 行。两个同名序章结果已按
+  实际台词边界分别落到 `000001` 开场与 `000003` 第 4 节。
+- 角色个人剧情有效行：2,799 / 2,799；第二部主线：1,497 / 1,497。
+- ADV 固定 Reader revision 数据兼容：5,036 行；启动接收器完成前不向正式搜索站开放 ADV 按钮。
+- 其余 291 行保持 Reader-only：218 行是旧主线分篇视频尚缺逐行 section 边界，
+  73 行的 Reader id 尚未进入 ADV 当前固定 revision；两类都不会伪造 ADV 跳转。
+- 活动、服装、镜层、scene0、动画、记忆结晶等未纳入本轮主链；不会按标题模糊猜测。
 
-除最后一个外全部**不碰上游**。包的 `main` 直接指向 TS 源码，没有构建产物
-——它们要能被任何宿主直接 import。
+完整机器可读结果在：
 
-## 三个设计决定，都是被证据逼出来的
+- `story-router/story-routes.json`
+- `story-router/story-routes.report.json`
+- `story-router/story-route-overrides.json`
 
-**1. 资源引用必须带作品前缀。** 实测：命名空间 b 的 `100101` 是角色乙，
-命名空间 a的 `100100` 是角色甲——**同号不同人**。裸数字在系统里流动，
-迟早把一个角色的档案配上另一个角色的模型，而且不报错。所以
-`parseRef('100101')` 直接抛错。
-
-**2. 交叉表是数据，不是公式。** 看着有规律（charaId + 服装号 = 精灵 unit），
-但 wiki 给 `1001` 登记的服装是 `03/04/50/53`，镜像里实际存在的是
-`00/01/09`——规律不成立。查不到就返回空，**绝不猜**：猜错的代价是显示了
-另一个角色，而没人会立刻发现。
-
-**3. 老库跑在 iframe 里，但调用方不知道。** cocos2d-html5 挂 `window.cc`，
-Cubism Core 挂 `window.Live2DCubismCore`，同 realm 会互相覆盖。框架把 realm
-隔离藏进内核——`host.request(...)` 的写法与调用 inline 插件一模一样。
-
-## 资源与网站分离
-
-判据：**网站源码里 grep 不到任何资源路径。**
-
-插件只说「给我这条 ref 的 texture」，剩下的（清单查表、按权重选路、失败冷却、
-sha256 校验、下架降级）全在 `@aio/resource` 里。换 CDN、加备份源、
-下架某批素材，都不需要动插件。
-
-选路语义照抄兄弟仓库客户端里的多镜像实现——那套被真实网络环境验证过。
-
-## 判据写成守卫，不靠自觉
+## 本地验证
 
 ```bash
-python3 tools/check-sources.py          # 契约 + 能力表对账（六件事）
-python3 tools/check-assets.py           # 版权素材不得入库（铁律 9）
-python3 tools/test-check-sources.py     # 27 个坏样本必须全被拦下
+npm ci --ignore-scripts
+npm run check
+npm run -w @aio/story-router-edge preview
 ```
 
-一个拦不下任何东西的检查比没有检查更糟——它会让人以为有人在看着。
-所以每加一条规则，就在自测里加一个会触发它的坏样本。
-同一套判据另有一份跑在 CI 里，**不依赖任何本地配置**。
+预览地址默认是 `http://127.0.0.1:4173/`。本地 Reader 夹具验证精确 302；ADV 在
+`handoffReady: false` 时验证 `409 target_not_ready` 门控，稳定 scenario section id
+与 renderer 参数由适配器测试覆盖。预览不会启动或修改 Reader/ADV。
 
-## 文档
+## EdgeOne 部署
 
-完整文档由 `docs/` 构建成站（`npm run docs:dev`）。源文件：
+根目录 `edgeone.json` 已把生产输出切到 `apps/router/dist`，构建命令是
+`npm run edgeone:build`。`edge-functions/open.js` 自动成为 `/open`。
 
+在 EdgeOne 项目中设置：
+
+| 环境变量 | 含义 |
+|---|---|
+| `AIO_READER_BASE_URL` | 独立 Reader 根地址 |
+| `AIO_ADV_BASE_URL` | 独立 ADV 入口地址（不含查询参数） |
+| `AIO_ADV_RENDERER` | ADV renderer；当前默认并已确认的是 `pixi-v2` |
+| `AIO_ADV_HANDOFF_ENABLED` | 目标站接收器验收后设为 `1`；它还必须与清单中的 `handoffReady: true` 同时成立 |
+
+`/story-routes.json` 带跨域读取响应头。搜索站对所有已登记结果显示 Reader 按钮；
+只有 `route.adv` 存在且 `targets.adv.handoffReady` 为真时才显示 ADV 按钮。按钮链接到：
+
+```text
+https://AIO_HOST/open?source=story-v6:20260816t013548z:character:0&target=reader
+https://AIO_HOST/open?source=story-v6:20260816t013548z:character:0&target=adv
 ```
-docs/guide/                 上手、六个能力、三层、守卫、部署
-docs/AIO-ARCHITECTURE.md    架构：三个概念、隔离、资源面、宿主模型
-docs/CMS-ON-EDGEONE.md      CMS 形态：两半插件、静态导出与 KV 的矛盾、SEO、后台
-docs/PLUGIN-AUTHORING.md    怎么写插件：从零实现（核心 + 注入舞台）或包装既有查看器
-docs/AIO-ROADMAP.md         落地方案：七个阶段与验收判据
-docs/CONSTRAINTS.md         硬约束：发布禁令、许可义务、平台限额
-docs/adr/                   决策记录
-docs/reports/               上游仓库盘点（不进文档站）
-contracts/                  每个上游仓库如何成为插件（或明确不接入）
-contracts/capabilities.json 横着记一遍：每个能力有几个实现、缺省装哪一个
-tools/build-manifest.py     扫目录生成资源清单（不猜 ref，匹配不上就失败）
+
+EdgeOne 同时发布 `/story-router-client.js`；搜索站保留原始行号并接入两个按钮的
+完整代码见 `docs/story-router-search-integration.md`。
+
+## 更新交叉表
+
+生成器需要搜索数据目录、搜索本地化表与 Reader 索引；它们只是输入，不会被修改：
+
+```bash
+python3 tools/build-story-routes.py \
+  --search-root PATH_TO_SEARCH/public/data/story-v6 \
+  --localization PATH_TO_SEARCH/public/data/story-v7/localization.json \
+  --reader-index PATH_TO_READER/website/public/story_index.json \
+  --overrides story-router/story-route-overrides.json \
+  --rules story-router/reader-route-rules.json \
+  --adv-reader-index PATH_TO_ADV_PINNED_READER/story_index.json \
+  --adv-target story-router/adv-target.json \
+  --output story-router/story-routes.json \
+  --report story-router/story-routes.report.json
 ```
 
-## 两条禁令
+自动匹配只接受两类证据：
 
-`repository-policy.json` 里标 `publish: forbidden` 的源**不进入任何公开面**
-（典型来源：上游 CI 强制的部署禁令、含真实用户数据的归档）。守卫会拦下绕过
-尝试，自测里有对应的坏样本。
+- 角色：权威角色名/显式别名 + 话数，在 Reader 中唯一命中。
+- 主线/支线：部、章、话，在 Reader 中唯一命中；分篇主线使用已登记的 Reader 分组规则。
+- Reader 深链：有精确 section 时沿用 Reader 首页既有的
+  `?section=<anchor>#<anchor>` 参数；只有分组证据时仍跳到剧情首页。
+- ADV：Reader id 与 section 还必须同时存在于目标站固定的 Reader revision。
 
-## 🔴 这里没有游戏素材
+活动名、剧情概要、出场角色和相似标题都不参与猜测。复杂条目通过 overrides 指向
+真实 Reader id，可选指定真实 section；生成器会确认两者确实存在。
 
-本仓库以 GPLv3 公开分发，而立绘、语音、BGM、模型、剧情文本的版权在
-各自的版权方手里——我们没有任何权利去授予。所以**一个版权文件
-都不进这棵树**：它会让整份 GPLv3 分发变成一个我们无权做出的授权声明，而且
-**git 历史不可逆**——删掉它只让当前 HEAD 干净，历史里那份仍在被分发。
+## 排除项
 
-素材的去处是资源面（COS + EdgeOne CDN），经 `@aio/resource` 的清单按 ref 取用。
+- `Magius3Dviewer-JP`：属于独立 3D 工作目录，不在剧情搜索跳转主链。
+- `kyu.gay-mirror`：是独立战斗精灵/Cocos2d 查看器来源，不在剧情搜索跳转主链。
+- `apps/station` 与原有 capability/plugin 包：保留为框架实验与兼容代码，EdgeOne
+  默认部署不再构建 Station，也不把这些 surface 接入 Story Router。
 
-## 许可
+## 可选 Halo 管理端桥
 
-本仓库 **GPLv3**（见 `LICENSE`）。上游各仓库的许可各归各的，逐条登记在
-`docs/CONSTRAINTS.md`。特别地：标 `vendor: forbidden` 的源（如未授予任何开源
-许可的上游）**不得 vendor**——它作为独立宿主安装插件，主权不变，能力增加。
+`integrations/halo-aioviewer` 可以把旧版 `aioviewer0.1.0` Halo 插件壳重新封装为
+`0.2.0` 接线检查器。旧包中的合成称呼搜索、身高对比和 `/aio-viewer` 页面不会
+进入新包；新页面 `/aio-story-router` 只读取 EdgeOne 路由清单并打开固定的
+`/open` Reader/ADV 链接。
+
+它是可选的 Halo 管理工具，不参与 `edgeone:build`，也不改变搜索站 → EdgeOne →
+Reader/ADV 这条生产主链。构建与安装边界见
+`integrations/halo-aioviewer/README.md`。
+
+## 许可与数据边界
+
+本仓库为 GPLv3。路由清单只包含来源键、剧情编号和章节标签，不包含剧情文本、
+语音、模型、贴图或其他游戏资源。

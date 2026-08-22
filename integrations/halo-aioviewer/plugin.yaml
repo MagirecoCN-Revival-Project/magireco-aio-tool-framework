@@ -1,0 +1,14 @@
+apiVersion: plugin.halo.run/v1alpha1
+kind: Plugin
+metadata:
+  name: aio-viewer
+spec:
+  enabled: true
+  requires: ">=2.26.0"
+  author:
+    name: AIO Framework contributors
+  displayName: AIO 剧情路由桥
+  description: Halo 管理端中的 EdgeOne Story Router 接线检查器；只验证搜索结果到 Reader 或 ADV 的跳转。
+  license:
+    - name: GPL-3.0-or-later
+  version: 0.2.0

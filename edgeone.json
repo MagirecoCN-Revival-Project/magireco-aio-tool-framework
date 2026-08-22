@@ -1,0 +1,34 @@
+{
+  "installCommand": "npm ci --ignore-scripts",
+  "buildCommand": "npm run edgeone:build",
+  "outputDirectory": "apps/router/dist",
+  "nodeVersion": "22.11.0",
+  "headers": [
+    {
+      "source": "/story-routes.json",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300"
+        }
+      ]
+    },
+    {
+      "source": "/story-router-client.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300"
+        }
+      ]
+    }
+  ]
+}

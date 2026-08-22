@@ -32,11 +32,11 @@ def make(files: dict[str, bytes]) -> pathlib.Path:
 
 def run(root: pathlib.Path, *extra: str) -> tuple[int, str, str]:
     proc = subprocess.run(
-        [sys.executable, str(TOOL), str(root),
+        [sys.executable, "-X", "utf8", str(TOOL), str(root),
          "--universe", "a", "--kind", "sprite",
          "--pattern", r"(?P<id>\d+)/(?P<variant>[a-z_]+)\.",
          "--ref", "{id}/{variant}", *extra],
-        capture_output=True, text=True,
+        capture_output=True, text=True, encoding="utf-8",
     )
     return proc.returncode, proc.stdout, proc.stderr
 

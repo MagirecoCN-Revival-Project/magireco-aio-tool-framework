@@ -11,5 +11,9 @@ tools/githooks/*  text eol=lf
 tools/*.sh        text eol=lf
 tools/*.py        text eol=lf
 
+# 跨语言契约快照按字节比对；固定 LF，避免 Windows 检出后产生伪漂移
+packages/embed/corpus.generated.json       text eol=lf
+functions/embed/providers.generated.json   text eol=lf
+
 # .cmd 反过来：Windows 的批处理必须是 CRLF，否则某些 cmd.exe 版本解析会出错
 tools/*.cmd       text eol=crlf

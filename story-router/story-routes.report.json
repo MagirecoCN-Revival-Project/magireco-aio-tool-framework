@@ -1,0 +1,219 @@
+{
+  "version": 1,
+  "sourceCatalog": "story-v6",
+  "catalogRevision": "20260816t013548z",
+  "catalogGeneratedAt": "2026-08-16T01:35:48Z",
+  "totalRows": 14466,
+  "playableRows": 5337,
+  "routingCandidateRows": 5327,
+  "invalidPlayableRows": 10,
+  "mappedRows": 5327,
+  "readerMappedPlayableRows": 5327,
+  "advMappedPlayableRows": 5036,
+  "advUnavailable": {
+    "readerIdAbsentFromPinnedRevision": 73,
+    "exactSectionUnresolved": 218,
+    "sectionAbsentFromPinnedRevision": 0,
+    "total": 291
+  },
+  "advReaderRevision": "65f221f2aaa5a9fe161ed32e03e4dfbb93d4746d",
+  "advHandoffReady": false,
+  "unmappedPlayableRows": 10,
+  "unmappedCandidateRows": 0,
+  "notTargetedRows": 9129,
+  "readerIndexEntries": 3012,
+  "playableReaderEntries": 3010,
+  "manualRoutes": 2,
+  "categories": [
+    {
+      "slug": "puella-historia",
+      "rows": 283,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    },
+    {
+      "slug": "event",
+      "rows": 5537,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    },
+    {
+      "slug": "main-2",
+      "rows": 1497,
+      "candidateRows": 1497,
+      "mapped": 1497,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 1469,
+      "routingScope": "playable"
+    },
+    {
+      "slug": "another-2",
+      "rows": 174,
+      "candidateRows": 174,
+      "mapped": 174,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 174,
+      "routingScope": "playable"
+    },
+    {
+      "slug": "character",
+      "rows": 2809,
+      "candidateRows": 2799,
+      "mapped": 2799,
+      "unmapped": 10,
+      "invalid": 10,
+      "advMapped": 2765,
+      "routingScope": "playable"
+    },
+    {
+      "slug": "special",
+      "rows": 411,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    },
+    {
+      "slug": "costume",
+      "rows": 447,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    },
+    {
+      "slug": "mirrors",
+      "rows": 67,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    },
+    {
+      "slug": "battle-museum",
+      "rows": 44,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    },
+    {
+      "slug": "scene0",
+      "rows": 475,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    },
+    {
+      "slug": "memoria",
+      "rows": 1038,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    },
+    {
+      "slug": "sticker",
+      "rows": 228,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    },
+    {
+      "slug": "main-1",
+      "rows": 731,
+      "candidateRows": 731,
+      "mapped": 731,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 502,
+      "routingScope": "playable"
+    },
+    {
+      "slug": "another-1",
+      "rows": 126,
+      "candidateRows": 126,
+      "mapped": 126,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 126,
+      "routingScope": "playable"
+    },
+    {
+      "slug": "ed-1",
+      "rows": 34,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    },
+    {
+      "slug": "ed-2",
+      "rows": 90,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    },
+    {
+      "slug": "anime-1",
+      "rows": 169,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    },
+    {
+      "slug": "anime-2",
+      "rows": 165,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    },
+    {
+      "slug": "anime-final",
+      "rows": 141,
+      "candidateRows": 0,
+      "mapped": 0,
+      "unmapped": 0,
+      "invalid": 0,
+      "advMapped": 0,
+      "routingScope": "not-targeted"
+    }
+  ]
+}

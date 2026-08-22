@@ -22,6 +22,7 @@ export default defineConfig({
       '@aio/plugin-sprite': new URL('./packages/plugin-sprite/src/index.ts', import.meta.url).pathname,
       '@aio/plugin-adv': new URL('./packages/plugin-adv/src/index.ts', import.meta.url).pathname,
       '@aio/plugin-model-3d': new URL('./packages/plugin-model-3d/src/index.ts', import.meta.url).pathname,
+      '@aio/story-router': new URL('./packages/story-router/src/index.ts', import.meta.url).pathname,
     },
   },
 });

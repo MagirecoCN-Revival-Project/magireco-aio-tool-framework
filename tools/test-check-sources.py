@@ -19,9 +19,10 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 def run(work: pathlib.Path) -> tuple[int, str]:
     proc = subprocess.run(
-        [sys.executable, str(work / "tools" / "check-sources.py")],
+        [sys.executable, "-X", "utf8", str(work / "tools" / "check-sources.py")],
         capture_output=True,
         text=True,
+        encoding="utf-8",
     )
     return proc.returncode, proc.stdout + proc.stderr
 

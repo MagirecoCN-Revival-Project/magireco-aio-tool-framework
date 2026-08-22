@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "target": "magiaexedralive2dviewer",
+  "baseUrl": "https://magiaexedralive2dviewer.pages.dev/",
+  "readerRepository": "HiiragiNemu/magi-reader",
+  "readerRevision": "65f221f2aaa5a9fe161ed32e03e4dfbb93d4746d",
+  "readerIndexPath": "website/public/story_index.json",
+  "handoffReady": false,
+  "publicQueryContract": {
+    "advRenderer": "pixi-v2"
+  },
+  "queryContract": {
+    "bridge": "1",
+    "story": "reader.id",
+    "section": "scenarioSectionId(reader.sections[])",
+    "group": "optional confirmed group key",
+    "turn": "optional confirmed zero-based turn index",
+    "readerRevision": "readerRevision"
+  }
+}

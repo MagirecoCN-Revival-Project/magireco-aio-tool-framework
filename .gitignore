@@ -11,5 +11,6 @@ apps/demo/dist/
 apps/station/.next/
 apps/station/out/
 apps/station/next-env.d.ts
+edge-functions/_generated/
 # 文档站产物。`dist/` 那条已经覆盖了 .vitepress/dist，这里补上缓存。
 docs/.vitepress/cache/

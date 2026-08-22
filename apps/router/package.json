@@ -1,0 +1,10 @@
+{
+  "name": "@aio/story-router-edge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "python3 -X utf8 ../../tools/build-story-router-app.py",
+    "preview": "node ../../tools/preview-story-router.mjs"
+  }
+}
