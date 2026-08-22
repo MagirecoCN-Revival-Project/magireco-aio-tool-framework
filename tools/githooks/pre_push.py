@@ -103,7 +103,14 @@ DOC_MARKERS = ("## 一、公开面许可", "❌ **禁止**")
 
 
 def sh(*a):
-    return subprocess.run(a, capture_output=True, text=True, timeout=120)
+    return subprocess.run(
+        a,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="surrogateescape",
+        timeout=120,
+    )
 
 
 def allowed(name):

@@ -46,8 +46,14 @@ MAX_COMMITS = 200
 
 
 def sh(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(["git", "-C", str(ROOT), *args],
-                          capture_output=True, text=True, timeout=120)
+    return subprocess.run(
+        ["git", "-C", str(ROOT), *args],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="surrogateescape",
+        timeout=120,
+    )
 
 
 def commits(base: str | None, head: str) -> list[str]:
