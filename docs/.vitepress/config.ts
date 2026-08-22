@@ -1,6 +1,15 @@
 import { defineConfig } from 'vitepress';
 
 /**
+ * 站点来源（协议 + 主机名），用于 sitemap 与 og:url。
+ *
+ * **不写死真实域名**：这套框架要能当模板用，域名是部署方的事，不是代码的事。
+ * 构建时给 `DOCS_ORIGIN`（如 `https://docs.example.com`）即可；不给就用占位符，
+ * 站点照常能构建、能本地看，只是 sitemap 里是示例域名。
+ */
+const ORIGIN = process.env['DOCS_ORIGIN'] ?? 'https://docs.example.com';
+
+/**
  * 文档站配置。
  *
  * ## 为什么直接拿 `docs/` 当站点根，而不是新建一个 `apps/docs`
@@ -32,13 +41,13 @@ export default defineConfig({
   // 多一个 `../` 不该把发布卡住——它会在构建日志里报出来。
   ignoreDeadLinks: [/^\.\.\//],
 
-  sitemap: { hostname: 'https://docs.example.com' },
+  sitemap: { hostname: ORIGIN },
 
   head: [
     ['meta', { name: 'theme-color', content: '#7aa2ff' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:site_name', content: 'AIO 工具框架' }],
-    ['meta', { property: 'og:url', content: 'https://docs.example.com/' }],
+    ['meta', { property: 'og:url', content: `${ORIGIN}/` }],
   ],
 
   themeConfig: {

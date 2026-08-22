@@ -2,7 +2,7 @@
 
 **一个把散落在 10 个仓库里的能力缝成一套系统的开源框架**，外加它的控制面。
 
-📖 **文档站：<https://docs.example.com>**
+📖 **文档站**：`npm run docs:dev` 本地看，或见 [部署与域名](docs/guide/deploy.md)。
 
 不是把几个网站放进一个域名。判据只有一条：
 
@@ -104,7 +104,7 @@ python3 tools/test-check-sources.py     # 27 个坏样本必须全被拦下
 
 ## 文档
 
-完整文档在 <https://docs.example.com>。源文件：
+完整文档由 `docs/` 构建成站（`npm run docs:dev`）。源文件：
 
 ```
 docs/guide/                 上手、六个能力、三层、守卫、部署

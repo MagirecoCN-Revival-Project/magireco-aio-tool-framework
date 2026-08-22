@@ -43,11 +43,20 @@ jobs:
 
       - run: npm ci
 
-      # docs/public/CNAME 里写着 docs.example.com，VitePress 会把它原样
-      # 拷进产物；Pages 据此绑定自定义域名。DNS 那条 CNAME 记录要手动配一次，
-      # 见 docs/guide/deploy.md。
+      # 域名不入库（这套框架要能当模板用），从仓库变量取：
+      # Settings → Secrets and variables → Actions → Variables → DOCS_DOMAIN。
+      # 没设就跳过 CNAME，站点仍然能发到 *.github.io，只是没有自定义域名。
       - name: 构建文档站
-        run: npm run docs:build
+        env:
+          DOCS_ORIGIN: ${{ vars.DOCS_DOMAIN && format('https://{0}', vars.DOCS_DOMAIN) || '' }}
+        run: |
+          npm run docs:build
+          if [ -n "${{ vars.DOCS_DOMAIN }}" ]; then
+            printf '%s\n' "${{ vars.DOCS_DOMAIN }}" > docs/.vitepress/dist/CNAME
+            echo "已写入自定义域名到产物的 CNAME"
+          else
+            echo "未设置 vars.DOCS_DOMAIN，跳过 CNAME"
+          fi
 
       # 🔴 Pages 必须**先由人**在 Settings → Pages 把 Source 设成 GitHub Actions。
       # 2026-08-21 两次实测：

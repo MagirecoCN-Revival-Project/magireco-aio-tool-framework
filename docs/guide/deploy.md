@@ -7,8 +7,9 @@
 | **文档站**（就是本站） | VitePress，纯文档 | `npm run docs:build` | `docs/.vitepress/dist/` |
 | **工作站** `apps/station` | 带插件的 CMS 宿主 | `npm run -w @aio/station build` | `apps/station/out/` |
 
-文档站的域名是 **`docs.example.com`**。工作站的域名另定（还在
-[路线图](/AIO-ROADMAP)的先决条件里）。
+**两个产物各自一个域名，互不相干**：文档站一个（本站），业务站一个。
+具体主机名**不写进仓库**——这套框架要能当模板用，域名是部署方的事。
+下面一律用 `<文档域名>` / `<业务域名>` 指代，实际值填在托管平台的配置里。
 
 ## 文档站
 
@@ -29,7 +30,11 @@ npm run docs:preview   # 预览构建产物，**不要**去双击 dist/index.htm
 ### GitHub Pages（当前接线）
 
 `.github/workflows/docs.yml` 在 push 到 `main` 时构建并发布。
-`docs/public/CNAME` 里写着 `docs.example.com`，Pages 据此绑定自定义域名。
+
+自定义域名从**仓库变量**取，不入库：Settings → Secrets and variables → Actions →
+Variables → 新建 `DOCS_DOMAIN`，值填 `<文档域名>`（裸主机名，不带 `https://`）。
+workflow 会据此写出产物里的 `CNAME`，并把 `DOCS_ORIGIN` 传给构建（sitemap 与
+og:url 用它）。**不设也能跑**——站点照常发到 `*.github.io`，只是没有自定义域名。
 
 ::: danger 上线前要人工做两件事，都自动不了
 **一、开 Pages。** 仓库 Settings → Pages → Source 选 **GitHub Actions**。
@@ -48,11 +53,8 @@ workflow 里带了 `enablement: true`，但 2026-08-21 实测在本组织下**�
 :::
 
 ::: warning DNS 那条记录
-在 `example.com` 的 DNS 上加一条：
-
-```
-framework   CNAME   magirecocn-revival-project.github.io.
-```
+在你的 DNS 上给 `<文档域名>` 加一条 CNAME，指向
+`<组织名>.github.io.`（末尾那个点别丢）。
 
 然后在仓库 Settings → Pages 里确认自定义域名已识别、并勾上 Enforce HTTPS。
 证书签发要等几分钟。
@@ -111,8 +113,9 @@ EdgeOne 会读它；读不到就在环境变量里加 `NODE_VERSION=22`。
 ——跟编码没关系，是压根没有产物。
 :::
 
-域名在控制台绑。`docs/public/CNAME` 是给 GitHub Pages 用的，对 EdgeOne 无效
-但也无害（产物里多一个纯文本文件而已）。
+域名在控制台绑：文档站绑 `<文档域名>`，业务站绑 `<业务域名>`。
+若同一个域名两个平台都在发（比如 GitHub Pages 与 EdgeOne 并存），
+**DNS 只能指向其中一个**——另一个用各自平台的默认地址访问。
 
 ::: tip 如果页面出来了但中文是乱码
 那是**响应头**的问题，不是文档的问题：本站每一页都带 `<meta charset="utf-8">`，
@@ -121,9 +124,8 @@ EdgeOne 会读它；读不到就在环境变量里加 `NODE_VERSION=22`。
 :::
 
 ::: warning 国内加速需要备案
-`example.com` 若要走 EdgeOne 的国内节点，域名需完成 ICP 备案。
-另外 Cloudflare 托管的**根域名**不支持绑定，用子域——`framework.` 正是子域，
-这条不构成阻碍。
+要走 EdgeOne 的国内节点，域名需完成 ICP 备案。
+另外 Cloudflare 托管的**根域名**不支持绑定到 EdgeOne，用子域。
 :::
 
 ## 工作站 `apps/station`
