@@ -277,12 +277,12 @@ $('btn-bare').onclick = () => {
 };
 
 $('btn-collide').onclick = () => {
-  const ex = parseRef('b:character/100101');
-  const mr = parseRef('a:character/1001');
+  const inB = parseRef('b:character/100101');
+  const inA = parseRef('a:character/1001');
   log('guard',
-    `b:character/100101 = ${registry.displayName(ex)}；` +
-    `a:character/1001 = ${registry.displayName(mr)}（精灵 unit 100100）。` +
-    '两套编号会撞，所以 ref 必须带作品前缀。');
+    `b:character/100101 = ${registry.displayName(inB)}；` +
+    `a:character/1001 = ${registry.displayName(inA)}（精灵 unit 100100）。` +
+    '两个命名空间各自连续编号，交集处同号不同实体，所以 ref 必须带命名空间前缀。');
 };
 
 $('btn-fail').onclick = () => {
