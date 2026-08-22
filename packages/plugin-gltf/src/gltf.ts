@@ -8,7 +8,7 @@
  * ## 为什么是 glTF 而不是 FBX
  *
  * `model3d.show` 此前唯一的真实现是 `@aio/plugin-model-3d`——它包的是上游
- * `example-model-viewer`，而那个子包目前装不上（见 ACTIVE.md 阻塞项），于是这个能力
+ * 一个既有的上游查看器，而那个上游子包目前装不上（见 ACTIVE.md 阻塞项），于是这个能力
  * 一直是五个里唯一没有自有实现的。
  *
  * 选 glTF 的理由是它是**公开标准**：规范可读、结构是 JSON、外部依赖在

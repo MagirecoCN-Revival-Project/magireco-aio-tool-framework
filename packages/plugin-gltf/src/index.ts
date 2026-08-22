@@ -8,7 +8,7 @@ export * from './gltf.js';
  * `model3d.show` 的一个实现——**从零写的，不碰任何上游代码**。
  *
  * 这是五个能力里最后一个补齐自有实现的：此前它只有
- * `@aio/plugin-model-3d`（包上游 `example-model-viewer`），而那个上游子包装不上。
+ * `@aio/plugin-model-3d`（包装一个既有的上游查看器），而那个上游子包装不上。
  *
  * 与另外三个从零实现同一个切法：解析在 `gltf.ts`，画面交给注入的 `Stage`。
  * three.js / Babylon / 上游那套若要接进来，各自是 `Stage` 的一个实现。

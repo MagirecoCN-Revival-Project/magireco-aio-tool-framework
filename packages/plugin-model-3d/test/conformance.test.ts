@@ -5,7 +5,7 @@ import { Manifest, ManifestCdnProvider, OriginPool } from '@aio/resource';
 import { createModel3dPlugin, type CharacterManagerLike, type Model3dDeps } from '../src/index.js';
 
 /**
- * 把 example-model-viewer 适配器丢进**与实现无关**的能力套件。
+ * 把 wrapper 适配器丢进**与实现无关**的能力套件。
  *
  * 同一份判据，`packages/conformance/test/reference.test.ts` 里那个从零写的
  * 参考实现也在跑。两边都过，说明契约测的是契约，不是某一个实现——
@@ -30,7 +30,7 @@ const deps: Model3dDeps = {
 };
 
 runCapabilityConformance({
-  name: 'plugin-model-3d（example-model-viewer 适配器）',
+  name: 'plugin-model-3d（上游查看器适配器）',
   contract: MODEL3D_SHOW,
   createPlugin: () => createModel3dPlugin(deps),
   createResources: () =>

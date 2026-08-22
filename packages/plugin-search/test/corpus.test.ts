@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildCorpus, normalize, search, type SearchRecord } from '../src/corpus.js';
 
 /**
- * 语料是**合成的**，但字段形状取自 `example-search-site` 的角色目录实测：
+ * 语料是**合成的**，但字段形状取自一份真实上游角色目录的实测：
  * `zh / jp / roman / kana / aliases`，**没有 ID**。
  */
 

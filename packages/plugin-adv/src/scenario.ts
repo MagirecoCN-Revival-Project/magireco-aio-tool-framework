@@ -6,7 +6,7 @@
  *
  * ## 判据来自实测，不是猜的
  *
- * 上游研究记录（`example-adv-live2d/docs/ADV_WEB_RESEARCH.md`）
+ * 上游自己的 ADV 格式研究记录
  * 在 6,714 个剧情 JSON、814,730 条指令上扫出来的结论：
  *
  *   - 结构是 `sheetList[].headerRow.cellList` 与 `sheetList[].contentRowList[].cellList`；

@@ -31,7 +31,7 @@ export interface ResolvedPart {
    * 清单里登记的相对路径（不含 base）。
    *
    * 包装既有查看器时用得上：它们大多按**文件路径**索引资源，而不是按 role
-   * （example-model-viewer 要的是 `Record<路径, URL>`，viewer-sp 的 fetch 拦截器要按
+   * （有的查看器要的是 `Record<路径, URL>`，有的 fetch 拦截器要按
    * 原路径改写）。不给出路径的话，插件只能从 URL 里减去 base 反推，
    * 那是把资源层的内部约定漏给插件——正是铁律 3 要避免的。
    */

@@ -8,7 +8,7 @@ export * from './corpus.js';
  * `search.query` 的一个实现——**从零写的，不碰任何上游代码**。
  *
  * 目录经 `host.resources` 拿（铁律 3），匹配逻辑在 `corpus.ts`，
- * 结果怎么画交给注入的 `Stage`。`example-search-site` 那套 GAS + 前端
+ * 结果怎么画交给注入的 `Stage`。上游那套 GAS + 前端
  * 若要接进来，它是 `Stage` 的又一个实现。
  */
 

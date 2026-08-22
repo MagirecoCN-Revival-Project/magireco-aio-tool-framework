@@ -5,7 +5,7 @@ import { buildFiles } from './files.js';
 export * from './files.js';
 
 /**
- * `example-model-viewer` 的插件封装（Phase 1.2）。
+ * 一个既有 3D 查看器的插件封装（Phase 1.2）——**wrapper 模式的样例实现**。
  *
  * ## 为什么上游那两个类是**注入**进来的，而不是 import 的
  *

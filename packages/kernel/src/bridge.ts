@@ -8,7 +8,7 @@ import type { Plugin, PluginHost, PluginInstance, PluginManifest, SurfaceTarget 
  *
  * 四个查看器的运行时里有两个**靠全局变量活着**：
  *
- *   - example-sprite-mirror 的 cocos2d-html5 挂 `window.cc`
+ *   - 上游镜像站的 cocos2d-html5 挂 `window.cc`
  *   - Live2D Cubism Core 挂 `window.Live2DCubismCore`
  *
  * 同一个 realm 里装两份就会互相覆盖。传统解法是「一个页面只放一个查看器」，

@@ -48,7 +48,7 @@ import type { CatalogEntry } from '../kernel/station';
  * 舞台注入为 null（真渲染要等接一个 WebGL 舞台），所以这里 `usesWebGL: false`
  * ——多声明一个不存在的占用会让治理器白白挂起别的查看器。
  *
- * 它取代的是那个包上游 `example-model-viewer` 的适配器 `@aio/plugin-model-3d`：
+ * 它取代的是那个包装上游查看器的适配器 `@aio/plugin-model-3d`：
  * 那个适配器仍在仓库里、仍过同一套一致性判据，只是它依赖的上游子包装不上
  * （见 ACTIVE.md 阻塞项）。**同一个能力有两个实现，宿主选装哪个都行**
  * ——这正是 ADR 0002 要的形状。

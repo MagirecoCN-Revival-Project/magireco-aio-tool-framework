@@ -97,7 +97,7 @@ describe('ManifestCdnProvider', () => {
   it('resolve 带出清单里的相对路径——包装既有查看器要按路径索引', () => {
     const r = client().resolve(parseRef('a:sprite/100100/d_r'));
     // 不带 path 的话，插件只能从 URL 里减去 base 反推，那是把资源层的内部
-    // 约定漏给插件（铁律 3）。example-model-viewer 要的就是 Record<路径, URL>。
+    // 约定漏给插件（铁律 3）。实测过的那个查看器要的就是 Record<路径, URL>。
     expect(r.parts[2]!.path).toBe('100100/mini_100100_d_r0.png');
     expect(r.parts.every((p) => p.path.length > 0)).toBe(true);
     // path 是相对的：不含 base，拼接由资源层负责。

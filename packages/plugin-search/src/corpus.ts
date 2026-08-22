@@ -6,7 +6,7 @@
  *
  * ## 一条实测出来的硬约束：不能按名字 join
  *
- * `example-search-site` 的角色目录（186 条）字段是
+ * 实测过的一份上游角色目录（186 条）字段是
  * `zh / jp / roman / kana / image / star / classes / aliases`——**没有任何 ID**，
  * `image` 就是中文名本身。也就是说这份数据是按**显示名**索引的。
  *

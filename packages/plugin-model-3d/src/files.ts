@@ -3,7 +3,7 @@ import type { ResourceRef } from '@aio/core';
 import type { ResourceProvider } from '@aio/resource';
 
 /**
- * 「把 example-model-viewer 接进来」实际要写的那**一个函数**（docs/VIEWER-REFACTOR.md 的结论）。
+ * 「把一个既有查看器接进来」实际要写的那**一个函数**（docs/VIEWER-REFACTOR.md 的结论）。
  *
  * 上游 `CharacterManager` 的构造函数签名本来就是注入式的：
  *

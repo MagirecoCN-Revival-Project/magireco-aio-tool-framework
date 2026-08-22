@@ -7,7 +7,7 @@ import { movementOf, type SpriteDoc, type SpriteMovement } from './armature.js';
  * 画面交给注入的 `Stage`。于是整套播放逻辑（选动作、循环、暂停、
  * 释放）都能在 node 上验，不需要 cocos2d，也不需要 GPU。
  *
- * 这也是「不碰上游」的落点：`example-sprite-mirror` 那 367 个文件的 cocos2d 引擎
+ * 这也是「不碰上游」的落点：上游那套三百多个文件的 cocos2d 引擎
  * 若要接进来，它是 `Stage` 的一个实现，而不是我们必须去改的东西。
  */
 

@@ -12,7 +12,7 @@ import type { CapabilityId, FrameworkEventName, RefKind } from '@aio/core';
  *
  * 维护者的判断：这是开源仓库，**直接去改上游第一不合适、第二容易牵出许可证
  * 问题**。那么「把既有查看器改一改接进来」就不能是主路径——
- * `example-reader` 未授予任何开源许可，`example-live2d-viewer` 是他人仓库，
+ * 部分上游未授予任何开源许可，部分是他人仓库，
  * 改动别人的项目既是越界也是风险。
  *
  * 于是契约不再只是「将来好替换」的锦上添花，而是**这套系统能独立成立的前提**：
