@@ -127,7 +127,7 @@ await kernel.request({
 `data:` URI 不算外部依赖；无名动画按 `#下标` 显式指代，不给它编个名字。
 
 这个能力有**三个实现**同时过同一套判据——`plugin-gltf`（自有）、
-`plugin-model-3d`（包装 example-model-viewer，上游一行未改）、以及一致性套件里那个
+`plugin-model-3d`（包装一个既有查看器，上游一行未改）、以及一致性套件里那个
 从零写的参考实现。「换一个实现宿主零改动」就是这么被验证的。
 
 ## `search.query` —— 检索

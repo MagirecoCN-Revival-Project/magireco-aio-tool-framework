@@ -25,13 +25,13 @@
 
 ## Phase 1 — 第一个真插件 + 宿主外壳
 
-选 `example-model-viewer` 打头阵：three.js 是 ESM，`inline` 隔离，是最简单的一个；
-`example-sprite-mirror` 紧随其后，用来验证 iframe 桥在真浏览器里成立。
+先挑一个 ESM、`inline` 隔离的上游打头阵（最简单）；再挑一个靠全局变量活着的，
+用来验证 iframe 桥在真浏览器里成立。
 
 | 步骤 | 说明 |
 |---|---|
 | 1.1 | ✅ **已完成** `apps/station`：Next.js + React 19 宿主外壳，`output: 'export'` 静态导出到 EdgeOne Pages 单项目。含 React↔内核的 surface 桥、能力驱动的 UI、插件装卸后台。现在装着四个真实现，一个占位都不剩，见 [`apps/station/README.md`](https://github.com/MagirecoCN-Revival-Project/magireco-aio-tool-framework/blob/main/apps/station/README.md) |
-| 1.2 | ✅ **已完成** `packages/plugin-model-3d`：把 example-model-viewer 包成插件，模型走资源面。上游一行未改（它的构造函数本来就是 `Record<路径, URL>` 注入式），10 个测试全在 node 上跑——上游两个类是注入的，不需要 three.js 与 GPU。**尚未接进 `apps/station`**：要等 `upstream-three-subpackage` 可安装（发包或 git 依赖） |
+| 1.2 | ✅ **已完成** `packages/plugin-model-3d`：把 example-model-viewer 包成插件，模型走资源面。上游一行未改（它的构造函数本来就是 `Record<路径, URL>` 注入式），10 个测试全在 node 上跑——上游两个类是注入的，不需要 three.js 与 GPU。**尚未接进 `apps/station`**：要等上游那个 three.js 子包可安装（发包或 git 依赖） |
 | 1.3 | ✅ **已完成，但换了做法**：`sprite.show` 不再等 cocos2d 子帧，而是 `@aio/plugin-sprite` **从零实现**（骨骼 + 图集解析、父子合成、canvas2d 舞台），已装进 station。上游 cocos2d 那个候选仍登记在册（`contracts/capabilities.json` 的 `sprite-viewer`），接不接都不影响能用 |
 | 1.4 | 交叉表首批数据：先做 810 个精灵 unit ↔ charaId 的人工核对 |
 | 1.5 | ✅ **已完成** `apps/station` 的资料页：角色档案 → 点一下出精灵、出 3D、播剧情、看身高对比。每个按钮画不画都由 `kernel.can()` 决定 |
@@ -86,8 +86,8 @@
 | 步骤 | 说明 |
 |---|---|
 | 3.1 | `adv.play` ✅ 已有从零实现（`@aio/plugin-adv`，含 `progress` 上报）装在 station 里。把上游 命名空间 b ADV 包成 iframe 插件仍是可选的第二个实现 |
-| 3.2 | `live2d.show` ✅ 已有从零实现（`@aio/plugin-live2d`）。`viewer-sp` 同上，可选 |
-| 3.3 | `search.query` 与 `chart.height` ✅ 均已有从零实现（`plugin-search` / `plugin-chart`）。`call-search` 同上，可选 |
+| 3.2 | `live2d.show` ✅ 已有从零实现（`@aio/plugin-live2d`）。`example-live2d-viewer` 同上，可选 |
+| 3.3 | `search.query` 与 `chart.height` ✅ 均已有从零实现（`plugin-search` / `plugin-chart`）。`example-search-site` 同上，可选 |
 | 3.4 | **example-reader 装插件**：它作为独立宿主 `kernel.register(advPlayer)`，剧情页多出「实机播放」 |
 | 3.5 | `/story/` 反代进统一域名 |
 

@@ -38,7 +38,7 @@ npm run docs:dev                    # 本文档站
 （`apps/station/test/catalog.test.ts`）。
 
 `model3d.show` 目前有**三个实现**同时过同一套一致性判据（自有的 glTF 解析、
-包装 example-model-viewer 的适配器、以及套件自带的参考实现）。「换一个实现宿主零改动」
+包装一个既有查看器的适配器、以及套件自带的参考实现）。「换一个实现宿主零改动」
 因此是能被验证的事，而不是靠读代码相信。
 
 ## 包
@@ -59,7 +59,7 @@ npm run docs:dev                    # 本文档站
 | `@aio/plugin-gltf` | `model3d.show`：glTF 2.0 解析，舞台注入 |
 | `@aio/plugin-search` | `search.query`：跨中/日/罗马字/假名/别名匹配，结果 ref 化 |
 | `@aio/plugin-chart` | `chart.height`：角色档案解析 + 布局算术（量程、刻度、缺数据），DOM 舞台注入 |
-| `@aio/plugin-model-3d` | `example-model-viewer` 的插件封装。上游那两个类**注入**进来，所以本仓库不依赖 three.js，判据也能在 node 上跑 |
+| `@aio/plugin-model-3d` | 一个既有 3D 查看器的插件封装，**wrapper 模式样例**。上游的类**注入**进来，所以本仓库不依赖 three.js，判据也能在 node 上跑 |
 
 除最后一个外全部**不碰上游**。包的 `main` 直接指向 TS 源码，没有构建产物
 ——它们要能被任何宿主直接 import。
@@ -88,7 +88,7 @@ Cubism Core 挂 `window.Live2DCubismCore`，同 realm 会互相覆盖。框架�
 sha256 校验、下架降级）全在 `@aio/resource` 里。换 CDN、加备份源、
 下架某批素材，都不需要动插件。
 
-选路语义照抄 `example-client` 的 `CNMirrors`——那套被真实玩家验证过。
+选路语义照抄兄弟仓库客户端里的多镜像实现——那套被真实网络环境验证过。
 
 ## 判据写成守卫，不靠自觉
 
@@ -122,9 +122,9 @@ tools/build-manifest.py     扫目录生成资源清单（不猜 ref，匹配不
 
 ## 两条禁令
 
-`example-restricted-data`（上游 CI 强制的公开部署禁令）与 `example-user-archive`
-（190 名真实玩家的流量归档）**不进入任何公开面**。守卫会拦下绕过尝试，
-自测里有对应的坏样本。
+`repository-policy.json` 里标 `publish: forbidden` 的源**不进入任何公开面**
+（典型来源：上游 CI 强制的部署禁令、含真实用户数据的归档）。守卫会拦下绕过
+尝试，自测里有对应的坏样本。
 
 ## 🔴 这里没有游戏素材
 
@@ -138,5 +138,5 @@ tools/build-manifest.py     扫目录生成资源清单（不猜 ref，匹配不
 ## 许可
 
 本仓库 **GPLv3**（见 `LICENSE`）。上游各仓库的许可各归各的，逐条登记在
-`docs/CONSTRAINTS.md`。特别地：`example-reader` 未授予任何开源许可，
-**不得 vendor**——它作为独立宿主安装插件，主权不变，能力增加。
+`docs/CONSTRAINTS.md`。特别地：标 `vendor: forbidden` 的源（如未授予任何开源
+许可的上游）**不得 vendor**——它作为独立宿主安装插件，主权不变，能力增加。

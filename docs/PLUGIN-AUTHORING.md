@@ -9,7 +9,7 @@
 
 > 这是开源仓库，直接去改上游第一不合适、第二容易牵出许可证问题。
 
-`example-reader` 未授予任何开源许可，`example-live2d-viewer` 是他人仓库。所以
+有的上游未授予任何开源许可，有的是他人仓库。所以
 「把上游改一改接进来」不能是这套系统能不能成立的前提。现在六个能力
 （`model3d.show` / `sprite.show` / `live2d.show` / `adv.play` / `search.query` /
 `chart.height`）各有一个**不碰任何上游代码**的实现；上游若愿意接，
@@ -88,7 +88,7 @@ export function createSpritePlugin(deps: {
 1. **整套逻辑能在 node 上逐条验**——解析、选动作、循环、进度回流都不需要
    浏览器，更不需要 GPU。`npm test` 跑的就是这些。
 2. **上游查看器接进来时是 `Stage` 的又一个实现**，不是我们必须去改的东西。
-   `example-sprite-mirror` 那 367 个 cocos2d 引擎文件与 4,025 组素材可以留在原地。
+   上游那几百个 cocos2d 引擎文件与几千组素材可以留在原地。
 3. **`usesWebGL` 由舞台决定，不由能力决定**（见下）。
 
 `createStage` 拿不到 DOM 时返回 `null`，播放器照常推帧、照常发 `progress`，
@@ -255,11 +255,11 @@ runCapabilityConformance({
 
 | 仓库 | pluginId | 隔离 | 能力 | 状态 |
 |---|---|---|---|---|
-| example-model-viewer | `model-3d` | inline | `model3d.show` | `wrapper` 已写好，上游一行未改；等 `upstream-three-subpackage` 可安装 |
+| example-model-viewer | `model-3d` | inline | `model3d.show` | `wrapper` 已写好，上游一行未改；等上游那个 three.js 子包可安装 |
 | example-adv-live2d | `adv-player` | iframe | `adv.play`、`live2d.show` | 契约已写，尚未接线。Pixi 版本已 pin，不能被打破 |
 | example-sprite-mirror | `sprite-viewer` | iframe | `sprite.show` | 契约已写，尚未接线。cocos2d-html5 的 `window.cc` |
-| example-live2d-viewer | `viewer-sp` | iframe | `live2d.show` | 契约已写，尚未接线。自带 live2d 运行时 |
-| example-search-site | `call-search` | inline | `search.query`、`chart.height` | 契约已写，尚未接线。两项能力本仓库都已有自有实现 |
+| example-live2d-viewer | `live2d-viewer` | iframe | `live2d.show` | 契约已写，尚未接线。自带 live2d 运行时 |
+| example-search-site | `search-site` | inline | `search.query`、`chart.height` | 契约已写，尚未接线。两项能力本仓库都已有自有实现 |
 
 上面每一项都**已经有一个 `own` 实现在跑**，所以接线是「多一个可选实现」，
 不是「缺了就不能用」。逐条契约见 `contracts/*.source.json`，

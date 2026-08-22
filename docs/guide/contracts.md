@@ -75,7 +75,7 @@ DOM 舞台不占 WebGL，Pixi/Cubism 舞台占。**这是实现属性，不是�
 的参考实现，与真实现跑同一套判据。`model3d.show` 目前有三个实现同时全绿：
 
 - `@aio/plugin-gltf`（自有，解析 glTF 2.0）
-- `@aio/plugin-model-3d`（包装 example-model-viewer，上游两个类注入进来，上游一行未改）
+- `@aio/plugin-model-3d`（包装一个既有查看器，上游的类注入进来，上游一行未改）
 - 参考实现（套件自带，用来证明契约可满足）
 
 这就是「换一个实现宿主零改动」被验证的样子。
@@ -95,7 +95,7 @@ ADR 0002 有一句：**没有一个能跑的实现，契约一定设计错。** 
 ## 谁有几个实现：`contracts/capabilities.json`
 
 契约文件按上游仓库分（一个仓库一份），而「某能力有几个实现」是横着切的
-——`sprite.show` 的两个候选分别躺在 `kyu-sprite.source.json` 与
+——`sprite.show` 的两个候选分别躺在 `example-sprite-mirror.source.json` 与
 `packages/plugin-sprite` 里，两份文件谁也看不出全貌。看不出全貌，
 那条判据（少装一个模块宿主依然自洽）就没法查。
 
@@ -112,7 +112,7 @@ ADR 0002 有一句：**没有一个能跑的实现，契约一定设计错。** 
           "package": "@aio/plugin-sprite", "isolation": "inline", "usesWebGL": false,
           "note": "从零实现：ExportJson 骨骼 + plist 图集解析…" },
         { "id": "sprite-viewer", "origin": "upstream",
-          "source": "kyu-sprite", "isolation": "iframe", "usesWebGL": true,
+          "source": "example-sprite-mirror", "isolation": "iframe", "usesWebGL": true,
           "note": "上游 cocos2d-html5 运行时…" }
       ]
     }

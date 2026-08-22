@@ -39,7 +39,7 @@ b:model3d/100101            示例作品 B · 角色乙的 3D 模型
 |---|---|
 | 命名空间 b 的 `style3dCharacterMstId: 100101` = 角色乙；命名空间 a的 `sprite 100100` = 角色甲 | **同号不同人。** 裸数字在系统里流动，迟早把角色甲的档案配上角色乙的模型，而且不报错 |
 | 命名空间 b 的 `100101` 对应资源名 `chara_100107_battle_unit` | ID 与资源号根本不是一回事 |
-| wiki 给 charaId `1001` 登记 costumeIds `03/04/50/53`，kyu 镜像里实际存在 `100100/100101/100109` | 「charaId + 服装号」这条规律**不成立** |
+| wiki 给 charaId `1001` 登记 costumeIds `03/04/50/53`，而镜像里实际存在 `100100/100101/100109` | 「charaId + 服装号」这条规律**不成立** |
 
 所以解析器**拒绝没有前缀的字符串**（`packages/core/src/ref.ts`）。
 
@@ -106,9 +106,9 @@ packages/
 
 | 运行时 | 全局 | 隔离级别 |
 |---|---|---|
-| three.js 0.182（example-model-viewer） | 无，ESM | `inline` |
+| three.js（ESM 的现代库） | 无 | `inline` |
 | Pixi（命名空间 b ADV，版本已 pin） | 无，ESM，但 pin 不能被打破 | `iframe` |
-| cocos2d-html5（example-sprite-mirror） | `window.cc` | `iframe` |
+| cocos2d-html5（靠全局活着的老库） | `window.cc` | `iframe` |
 | Cubism Core（Live2D） | `window.Live2DCubismCore` | `iframe` |
 
 `iframe` 插件跑在独立 realm，通过 postMessage RPC 收发生命周期命令。
@@ -196,11 +196,11 @@ const spriteRef = registry.primaryLink(parseRef('a:character/1001'), 'sprite');
 
 ### 素材来源与那条禁令
 
-交叉表最重要的素材在 `example-restricted-data`（`charaId`、`costumeIds`、
+交叉表最重要的素材在一个 publish=forbidden 的源里（`charaId`、`costumeIds`、
 `voice_index`、`media_manifest`），而那个仓库有 CI 强制的公开部署禁令。
 
 交叉表是 ID 映射，不是 wiki 正文，但**它是否算「派生自禁止公开的仓库」
-需要维护者拍板**。本方案默认：交叉表的生成脚本可以读 wiki-data，
+需要维护者拍板**。本方案默认：交叉表的生成脚本可以读那个源，
 但生成结果能否随公开站发布，等你的决定。见「待拍板事项」。
 
 ---
@@ -210,14 +210,14 @@ const spriteRef = registry.primaryLink(parseRef('a:character/1001'), 'sprite');
 最容易被忽略的一点：**框架不吸收那些站点，是那些站点采用框架。**
 
 ```ts
-// example-reader 自己的 Next.js 站点里
+// 第三方阅读器自己的 Next.js 站点里
 kernel.register(advPlayerPlugin);
 // 从此它的剧情页多出一个「实机播放」按钮
 ```
 
-这一条同时解决了许可证问题：`example-reader` 明确未授予任何开源许可，
+这一条同时解决了许可证问题：那个阅读器明确未授予任何开源许可，
 **不能被 vendor**。但它可以作为**独立宿主**安装框架插件——主权不变，
-能力增加。`example-model-viewer` 同理，装上 voice 插件就有了语音。
+能力增加。别的上游同理，装上 voice 插件就有了语音。
 
 AIO 工作站只是**其中一个宿主**，装了全部插件而已。
 
@@ -231,7 +231,7 @@ AIO 工作站只是**其中一个宿主**，装了全部插件而已。
 | iframe 插件的子文档 | 同项目 `/frames/sprite/`、`/frames/adv/` 等路由 |
 | 资源（约 20 GiB） | COS 桶 + EdgeOne CDN，`assets.<域>` |
 | 清单与交叉表 | 与资源同桶，独立于网站发版更新 |
-| `/story/` | 反代 example-reader 既有 Cloudflare 部署 |
+| `/story/` | 反代那个阅读器既有的部署 |
 | 边缘函数 | 线路探测、鉴权后台会话（Phase 5） |
 
 EdgeOne Makers 的 Agent 托管留到最后（诊断 Agent > 剧情语义检索 > 资料问答），
@@ -260,7 +260,7 @@ EdgeOne Makers 的 Agent 托管留到最后（诊断 Agent > 剧情语义检索 
 
 ## 待拍板事项
 
-1. **交叉表能否公开。** 素材来自有公开禁令的 `example-restricted-data`。
+1. **交叉表能否公开。** 素材来自一个有公开禁令的源。
    本方案默认「生成可以、发布待定」。
 2. **Story 走反代还是迁移。** 默认反代（§七 的宿主模型让迁移不再必要）。
 3. **域名与备案。**

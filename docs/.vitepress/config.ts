@@ -19,11 +19,10 @@ const ORIGIN = process.env['DOCS_ORIGIN'] ?? 'https://docs.example.com';
  * 并且以后每个人都要记住「文档在两个地方」。所以站点就地长在 `docs/` 上：
  * 仓库里读到的 Markdown 与站点上看到的页面**是同一份文件**，不存在同步问题。
  *
- * ## `docs/reports/` 不进站点
+ * ## `srcExclude` 留着
  *
- * 那是一份内部工程盘点，会点名批评兄弟仓库（谁的 workflow 堆了 85 个、谁把
- * node_modules 提交了）。它在公开仓库里躺着是一回事，被摆到组织的文档域名上
- * 当成「对外说明」是另一回事。要放开就删掉下面 `srcExclude` 里那一行。
+ * `docs/reports/` 曾经放过一份点名批评具体仓库的内部盘点，已随「去实例化」
+ * 一起删掉。这条排除留着当护栏：下次再往那里放内部材料，它不会顺手上站。
  */
 export default defineConfig({
   lang: 'zh-CN',
@@ -131,7 +130,7 @@ export default defineConfig({
 
     footer: {
       message:
-        'GPLv3。素材版权归 各自的版权方所有，本站与本仓库不含任何游戏素材。',
+        'GPLv3。素材版权归各自的版权方所有，本站与本仓库不含任何素材。',
       copyright: 'MagirecoCN Revival Project',
     },
   },

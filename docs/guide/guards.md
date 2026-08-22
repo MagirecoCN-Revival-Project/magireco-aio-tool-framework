@@ -120,13 +120,13 @@ Python 3；实现在 `commit_msg.py` / `pre_push.py`，判据在共用的 `_msgr
 
 ## 两条发布禁令
 
-`example-restricted-data`（上游 CI 强制的公开部署禁令）与 `example-user-archive`
-（190 名真实玩家的流量归档）**不进入任何公开面**。
+`repository-policy.json` 里标 `publish: forbidden` 的源**不进入任何公开面**。
+典型来源：上游 CI 强制的部署禁令、含真实用户数据的归档。
 
 这不是本项目的判断，是既有约束；要改必须由维护者拍板，并同步修改上游仓库
 自己的策略文件——只改这边不算数。
 
-`example-reader` 未授予任何开源许可，**不得 vendor**，只能作为独立宿主装插件。
+标 `vendor: forbidden` 的源**不得 vendor**，只能作为独立宿主装插件。
 
 ## 提交约定
 

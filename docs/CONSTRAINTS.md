@@ -17,8 +17,8 @@
 | `example-sprite-mirror` | ✅ 允许 | 公开镜像 |
 | `example-search-site` | ✅ 允许 | 已在 Cloudflare Pages 对外 |
 | `example-reader` | ✅ 允许（**仅挂载/反代，不得 vendor**） | 仓库自述为公开归档用途 |
-| `example-restricted-data` | ❌ **禁止** | 仓库自带 `repository-policy.json` + CI 校验；2026-08-15 公开站已退役 |
-| `example-user-archive` | ❌ **禁止** | 私有仓库；190 名真实玩家 55 天流量归档 |
+| `example-restricted-data` | ❌ **禁止** | 仓库自带 `repository-policy.json` + CI 校验；其公开站已退役 |
+| `example-user-archive` | ❌ **禁止** | 私有仓库；含真实用户的流量归档 |
 | `magireco-aio-tool-framework` | ✅ 允许 | 本仓库 |
 
 **两条禁令不是本方案的判断，是既有约束。** 解除需维护者明确决定，
@@ -34,10 +34,10 @@
 | └ 其内 aria2（双后端） | GPLv2+，gnutls 组静态链 LGPL | 提供对应源码；LGPL 部分需可重链 |
 | └ 其内 libarchive | BSD-2-Clause + zlib | 附版权声明与许可全文 |
 | └ 其内 ShadowHook | MIT（且已改过源码） | 附声明并注明改动 |
-| └ 其内 命名空间 a CN 字体 | Apache-2.0 | 附许可、注明改动 |
+| └ 其内改过的字体 | Apache-2.0 | 附许可、注明改动 |
 | `example-reader` | **未授予任何开源许可** | 🔴 **绝不 vendor、绝不再分发其内容**；只能同域挂载或反代 |
-| `example-search-site` | fork 自 third-party-author 的开源项目 | 保留原作者署名与原始项目链接 |
-| `example-model-viewer` / `ExampleAdv…` | 代码可用；模型素材归版权方 | 素材进资产面，支持随时下架 |
+| `example-search-site` | fork 自第三方开源项目 | 保留原作者署名与原始项目链接 |
+| `example-model-viewer` / `example-adv-live2d` | 代码可用；模型素材归版权方 | 素材进资产面，支持随时下架 |
 | `example-sprite-mirror` / `example-live2d-viewer` | 游戏原始素材 | 同上 |
 | `example-restricted-data` | 见其 `NOTICE.md` / `TAKEDOWN.md` | 不进公开面，义务不适用 |
 | 本仓库 | GPLv3 | — |

@@ -25,10 +25,10 @@
 
 ```
 src/main.ts                          5 行
-upstream-three-subpackage/      889 行，独立子包，有 JSDoc 与 peerDependencies
+上游那个 three.js 子包/      889 行，独立子包，有 JSDoc 与 peerDependencies
 ```
 
-渲染逻辑**早就抽干净了**：`CharacterManager` 是个正经的库，
+渲染逻辑**早就抽干净了**：那个角色管理器是个正经的库，
 `src/main.ts` 只有 5 行，应用层是薄壳。
 
 更关键的是，它的构造函数签名本身就是注入式的：
@@ -135,7 +135,7 @@ window.bg_res = "image/image_native/bg/web/web_0015.ExportJson"
 | 查看器 | 资源缝 | 接口缝 | 改动量 | 手法 |
 |---|---|---|---|---|
 | example-model-viewer | ✅ 构造函数已是注入式 | ✅ 独立子包 | **一个函数** | 换 `Record` 来源 |
-| ExampleAdv ADV | ✅ `assetPaths.ts` 已集中 | ✅ `AdvEngineCallbacks` | 新增 `embed.ts` | 绕开 `main.ts` |
+| ADV 播放器 | ✅ 资源路径已集中 | ✅ 回调接口已有 | 新增一个 `embed.ts` | 绕开 `main.ts` |
 | example-sprite-mirror | ❌ 写死在函数里 | ❌ 完全没有 | 半天 | 提参数 + 暴露入口 |
 | example-live2d-viewer | ❌ 散落 + 挂 `window` | ❌ 完全没有 | 一个拦截器 | 不改源码，拦请求 |
 

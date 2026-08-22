@@ -118,7 +118,7 @@ npm run check      # typecheck + vitest + 契约守卫
 分支（`ci/*`、`build/*`、`*-driver-*`、`*-success`、带 9 位以上数字的 run-id）。
 
 也不要用「往仓库里放一个空的 trigger 文件」来触发 workflow——兄弟仓库
-`example-search-site` 的根目录因此躺着 9 个 `.deploy-v22-*-trigger`，
+见过的一个上游仓库根目录因此躺着 9 个 `.deploy-*-trigger` 空文件，
 没人敢删，因为不知道哪个还连着什么。
 
 ---
@@ -144,8 +144,8 @@ python3 tools/test-check-sources.py   # 守卫自测（坏样本必须被拦下�
 
 | 仓库 | 依据 |
 |---|---|
-| `MagirecoCN-Revival-Project/example-restricted-data` | 上游自带 `repository-policy.json` + CI 强制禁止公开托管；2026-08-15 公开站已退役 |
-| `MagirecoCN-Revival-Project/example-user-archive` | 私有仓库，190 名真实玩家的 55 天流量归档 |
+| `example-org/example-restricted-data` | 上游自带 `repository-policy.json` + CI 强制禁止公开托管；其公开站已退役 |
+| `example-org/example-user-archive` | 私有仓库，含真实用户的流量归档 |
 
 **这不是本项目的判断，是既有约束。** 把它们改成 `allowed`，
 `tools/check-sources.py` 的守卫就整个失效——而且**不报错**，契约只是变得
@@ -164,8 +164,8 @@ python3 tools/test-check-sources.py   # 守卫自测（坏样本必须被拦下�
 
 跑完就该删的诊断脚本、临时 workflow、trigger 文件，一律不入库。
 
-反面教材是现成的：`example-search-site` 有 85 个 workflow、
-`example-model-viewer` 有 46 个，绝大多数是 `apply-*` / `repair-*` / `diagnose-*`
+反面教材是现成的：见过的上游仓库里有堆到 85 个、46 个 workflow 的，
+绝大多数是 `apply-*` / `repair-*` / `diagnose-*`
 这类一次性作业。它们不删是因为没人敢确认还有没有用。
 
 需要长期存在的检查放 `tools/` 并配自测；一次性的东西跑在你自己的机器上。

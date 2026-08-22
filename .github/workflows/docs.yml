@@ -1,7 +1,7 @@
 name: docs
 
 # 文档站发布。**这是「发布类 workflow 一律手动」的一个有意的例外**
-# （分工见 checks.yml 的注释与 example-client CONTRIBUTING §四）。
+# （分工见 checks.yml 的注释与兄弟仓库 CONTRIBUTING §四）。
 # 两条理由：
 #
 #   - 落后的文档比没有文档更糟——它会让人按一份不成立的描述去改代码；

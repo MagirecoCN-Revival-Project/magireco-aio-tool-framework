@@ -90,7 +90,7 @@ const provider = new StaticProvider({
 **换 provider，插件与宿主零改动**——这不是口号：`packages/resource/test/` 里那套
 一致性套件不 import 任何实现，两个实现装进去都必须全绿（9 条判据 × 2）。
 
-选路语义照抄 `example-client` 的 `CNMirrors`——那套被真实玩家验证过：
+选路语义照抄兄弟仓库客户端里的多镜像实现——那套被真实网络环境验证过：
 按权重挑，失败进冷却，冷却期内不再选它。
 
 ## 清单长什么样
