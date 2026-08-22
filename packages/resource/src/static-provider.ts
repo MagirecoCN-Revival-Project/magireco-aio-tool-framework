@@ -66,7 +66,14 @@ export class StaticProvider implements ResourceProvider {
       }
       this.#entries.set(formatRef(ref), parts.map(toResolved));
     }
-    this.#fetch = options.fetchImpl ?? globalThis.fetch;
+    // 🔴 默认实现必须 bind 到 globalThis。
+    // 浏览器的 fetch 是 Window 上的方法，要求 this 是 window；不 bind 的话
+    // `this.#fetch(url)` 会把**本对象**当成 this，浏览器抛
+    // "Failed to execute 'fetch' on 'Window': Illegal invocation"。
+    //
+    // node 的 undici 不检查 this，所以整套测试在 node 上全绿也照样漏——
+    // 这条是拿真浏览器跑嵌入面时炸出来的，不是想出来的。
+    this.#fetch = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
     this.#subtle = options.subtle ?? globalThis.crypto?.subtle;
   }
 
@@ -91,7 +98,9 @@ export class StaticProvider implements ResourceProvider {
     /* c8 ignore next */
     if (candidate === undefined) throw new ResourceUnavailableError(ref, '没有候选地址');
 
-    const res = await this.#fetch(candidate.url);
+    // 同 manifest-cdn：取到局部再调，receiver 保持 undefined。
+    const doFetch = this.#fetch;
+    const res = await doFetch(candidate.url);
     if (!res.ok) {
       throw new ResourceUnavailableError(ref, `${candidate.url} → HTTP ${res.status}`);
     }

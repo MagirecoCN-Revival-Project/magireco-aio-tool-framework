@@ -38,7 +38,14 @@ export class ManifestCdnProvider implements ResourceProvider {
     for (const m of options.manifests) {
       this.#manifests.set(`${m.universe}:${m.kind}`, m);
     }
-    this.#fetch = options.fetchImpl ?? globalThis.fetch;
+    // 🔴 默认实现必须 bind 到 globalThis。
+    // 浏览器的 fetch 是 Window 上的方法，要求 this 是 window；不 bind 的话
+    // `this.#fetch(url)` 会把**本对象**当成 this，浏览器抛
+    // "Failed to execute 'fetch' on 'Window': Illegal invocation"。
+    //
+    // node 的 undici 不检查 this，所以整套测试在 node 上全绿也照样漏——
+    // 这条是拿真浏览器跑嵌入面时炸出来的，不是想出来的。
+    this.#fetch = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
     this.#subtle = options.subtle ?? globalThis.crypto?.subtle;
   }
 
@@ -88,7 +95,10 @@ export class ManifestCdnProvider implements ResourceProvider {
     const errors: string[] = [];
     for (const { url, base } of part.candidates) {
       try {
-        const res = await this.#fetch(url);
+        // 取到局部再调：`this.#fetch(...)` 的 receiver 是本对象，
+        // 调用方传进来的 fetchImpl 也会莫名其妙收到我们的实例。
+        const doFetch = this.#fetch;
+        const res = await doFetch(url);
         if (!res.ok) {
           this.#origins.reportFailure(base);
           errors.push(`${url} → HTTP ${res.status}`);
