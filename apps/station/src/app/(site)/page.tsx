@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { formatRef, parseRef } from '@aio/core';
 import type { CapabilityId, ResourceRef } from '@aio/core';
-import { usePluginVersion, useStation } from '../kernel/KernelProvider';
-import { SurfaceOutlet } from '../kernel/SurfaceOutlet';
+import { usePluginVersion, useStation } from '../../kernel/KernelProvider';
+import { SurfaceOutlet } from '../../kernel/SurfaceOutlet';
 
 /**
  * 角色资料页——用来演示「能力决定 UI」。

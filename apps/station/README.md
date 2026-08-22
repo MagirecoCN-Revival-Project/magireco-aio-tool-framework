@@ -45,10 +45,29 @@ React 的渲染是异步的，容器要等下一次 commit 才存在。
 
 ```
 src/kernel/     内核接线：Station 单例、surface 桥、React context
-src/station/    骨架期数据与插件目录
+src/station/    骨架期数据、插件目录、能力→插件 id 的推导
 src/cms/        CmsStore 接口 + 内存实现
-src/app/        路由：/ 资料页、/admin 后台
+src/app/
+  (site)/       站点：/ 资料页、/admin 后台（带顶栏与版心）
+  embed/        嵌入面：/embed/<能力>?ref=…（无外壳，给别的站嵌）
 ```
+
+## 嵌入面
+
+别的站（合作的 wiki）放一个 iframe 就能拿到我们的查看器。整套判定在
+`@aio/embed`，宿主这边分两半：
+
+| | 谁做 | 做什么 |
+|---|---|---|
+| 静态页 | `app/embed/[capability]/page.tsx` | 每个能力烘一个（能力有限，`ref` 在 query 里由客户端读） |
+| **准入** | 仓库根的 `functions/embed/[capability].js` | `resolveEmbed()`：下架、插件开关、CSP、noindex |
+
+客户端也判一次，但**那不是安全边界**——它只解决「本地开发没有边缘函数时，
+得有个东西告诉你为什么是空的」。细节与那条尚未复核的平台阻塞项见
+[`docs/guide/embed.md`](../../docs/guide/embed.md)。
+
+嵌入面不套站点外壳，所以顶栏与版心挪进了 `app/(site)/layout.tsx`；
+根 layout 只剩 `<html>`、`<body>` 与 `KernelProvider`——**内核仍是单例**。
 
 ## 哪些是真的，哪些还缺
 

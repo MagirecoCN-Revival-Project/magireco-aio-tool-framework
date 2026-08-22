@@ -184,3 +184,32 @@ th { color: var(--muted); font-weight: 600; font-size: 0.88em; }
 .plugins { list-style: none; padding: 0; }
 .plugins li { padding: 0.5rem 0; border-bottom: 1px solid var(--line); }
 .plugins label { display: flex; gap: 0.5rem; align-items: center; cursor: pointer; }
+
+/* ── 嵌入面 ─────────────────────────────────────────────
+   别人页面里的一块 UI，所以：没有版心、没有外边距、背景透明。
+   背景透明是为了跟随宿主页的配色——嵌进一个浅色 wiki 时，
+   一块深色方块会显得像广告。 */
+.embed-root {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.embed-slot {
+  /* 嵌入面没有标题栏与关闭按钮：关掉它是父页的事。 */
+  padding: 0;
+}
+
+.embed-error {
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--line);
+  border-left: 3px solid #ffb4a2;
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.embed-error p {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  font-size: 0.9em;
+}

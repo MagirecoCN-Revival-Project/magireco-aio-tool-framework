@@ -1,0 +1,14 @@
+{
+  "model3d.show": [
+    "model3d-gltf"
+  ],
+  "sprite.show": [
+    "sprite-play"
+  ],
+  "adv.play": [
+    "adv-play"
+  ],
+  "chart.height": [
+    "chart-height"
+  ]
+}

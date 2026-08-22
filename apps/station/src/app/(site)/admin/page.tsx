@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { usePluginVersion, useStation } from '../../kernel/KernelProvider';
-import { LocalCmsStore } from '../../cms/store';
-import type { ContentPage, ManifestStatus, Member, Role } from '../../cms/store';
-import { DEMO_REGISTRY } from '../../station/data';
+import { usePluginVersion, useStation } from '../../../kernel/KernelProvider';
+import { LocalCmsStore } from '../../../cms/store';
+import type { ContentPage, ManifestStatus, Member, Role } from '../../../cms/store';
+import { DEMO_REGISTRY } from '../../../station/data';
 
 /**
  * CMS 后台。四块，对应定下的范围：
