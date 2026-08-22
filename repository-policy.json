@@ -44,8 +44,8 @@
     },
     "example-org/example-reader": {
       "publish": "allowed",
-      "vendor": "forbidden",
-      "reason": "未授予任何开源许可，不得 vendor"
+      "vendor": "allowed",
+      "reason": "常规上游，可包装可链接"
     },
     "example-org/example-search-site": {
       "publish": "allowed",

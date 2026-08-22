@@ -5,5 +5,5 @@
   "integration": "proxy",
   "mount": "/story/",
   "phase": 3,
-  "license_note": "**未授予任何开源许可**，不得 vendor；只能反代其既有部署，或由它作为独立宿主装插件。"
+  "license_note": "衍生代码以 GPLv3 分发，保留原作者署名与原始项目链接。"
 }
