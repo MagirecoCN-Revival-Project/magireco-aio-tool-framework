@@ -79,6 +79,7 @@ export default defineConfig({
           { text: '内核：注册、派发、治理', link: '/guide/kernel' },
           { text: '边缘半边：路由、SEO、下架', link: '/guide/edge' },
           { text: '嵌出去：给别的站用', link: '/guide/embed' },
+          { text: '接入 Halo：迁移评估', link: '/HALO-MIGRATION' },
         ],
       },
       {
