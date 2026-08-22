@@ -66,26 +66,86 @@ Halo 的 `ui/` 正是 Vue。所以浏览器侧要写的新代码，**就是一�
 
 ---
 
-## 三、生态里现成的东西，替我们干掉一批活（✅ 来自官方插件库）
+## 三、生态里现成的东西（✅ 通读了 198 条，不是摘要）
 
-[`halo-sigs/awesome-halo`](https://github.com/halo-sigs/awesome-halo) 里能直接用上的：
+[`halo-sigs/awesome-halo`](https://github.com/halo-sigs/awesome-halo) 共 198 条。
+按**对我们的用法**分三档，别混为一谈——「能装上就用」和「能抄渲染层」
+和「只是模式参考」是三件事。
 
-| 插件 | 顶掉我们的什么 |
-|---|---|
-| `plugin-sitemap`（官方） | `@aio/site` 的 sitemap 生成 |
-| `plugin-feed`（官方） | 订阅面，我们本来没做 |
-| `plugin-s3`（官方，含腾讯云） | **资源面的对接**（Phase 2 的一大块） |
-| `plugin-cdn-cache`（含腾讯云） | 下架时的 **CDN purge** |
-| `plugin-meilisearch` / `plugin-search-widget` | 站内搜索（与我们的 `search.query` 是两件事，见下） |
-| `plugin-injector` | 往指定页面注入 HTML，可用于挂我们的 bundle |
+### 甲档：装上就用，不用写代码
+
+| 插件 | 顶掉我们的什么 | 对应阶段 |
+|---|---|---|
+| `plugin-s3`（官方，**含腾讯云**） | 资源面的对象存储对接 | Phase 2 |
+| `attachment-upload-cli`（官方） | 20 GiB 素材的批量上传 | Phase 2 |
+| `plugin-cdn-cache`（**含腾讯云**） | 下架时的 CDN purge | 铁律 11 |
+| `plugin-sitemap` `plugin-feed`（官方） | `@aio/site` 的 sitemap 与订阅 | — |
+| `plugin-IndexNow` `halo-plugin-sitepush` `plugin-time-factor` | SEO 收录推送，我们本来没做 | — |
+| `plugin-meilisearch` `plugin-search-widget`（官方） | 站内全文搜索 | — |
+| `plugin-oauth2`（官方）`auth-passkey` `halo-plugin-register`（邀请码）`global-private`（白名单） | **鉴权后台整块** | Phase 5 |
+| `plugin-download-links` | **APK 分发的下载卡片** | Phase 5 |
+| `plugin-redis-connector` | 下架清单的强一致存储 | 铁律 11 |
+| `plugin-aimodel-hub` | 统一的 AI 模型调用 | Phase 6 |
+| `plugin-maintenance` | 维护模式（应急收缩可见面） | — |
 
 > `search.query` 是**按 ref 检索实体**的能力（角色称呼等），
 > `plugin-meilisearch` 是**站内全文搜索**。两者不冲突也不互相替代，别合并。
 
-### 一个更native的形态：编辑器区块
+### 乙档：拿来当渲染层，但要适配
 
-`plugin-thyuu-embed`、`plugin-dplayer` 这类是**编辑器区块**——作者在文章里插一个
-块，前台渲染成播放器。我们的六个能力完全可以走同一条路：
+**这一档最有价值的是 Live2D**，因为它对上的正是我们最大的缺口之一
+——能力盘点里写着「Cubism 真渲染没有」。
+
+| 插件 | 许可 | 它解决了什么 |
+|---|---|---|
+| [`LIlGG/plugin-live2d`](https://github.com/LIlGG/plugin-live2d) | **MIT** | **Cubism 2/3/4/5 全系模型**、换装换肤、自定义接口与工具栏 |
+| [`alsdhkauuhw/halo-plugin-live2D`](https://github.com/alsdhkauuhw/halo-plugin-live2D) | GPL-3.0 | 表情切换、**高 DPI**、IndexedDB 缓存、自定义模型路径 |
+
+两者许可都与本仓库的 GPLv3 兼容。
+
+**但它们不是能直接用的能力提供者**，说清楚差在哪：
+
+- 它们是**看板娘**（页面角落的挂件），不是按 ref 寻址的查看器；
+- 模型从**配置好的路径**加载——那正是铁律 3 禁止的（插件不碰 URL）；
+- 不发 `entity.focused`，没有能力契约，没有 surface 生命周期；
+- alsdhkauuhw 那个**内置了游戏模型**，我们不能用（铁律 9，版权素材）。
+
+所以正确的用法是：**只取渲染层，装进我们的 `createStage`**。
+
+```ts
+createLive2dPlugin({ createStage: /* ← 这里放一个 Cubism 舞台 */ })
+```
+
+`@aio/plugin-live2d` 的舞台本来就是注入式的（六个插件全是这个形状），
+ref 解析、清单查表、下架降级、事件回流仍然走我们这边。
+**难的那一半（Cubism SDK 打包、WebGL 上下文、高 DPI、模型加载）它们做完了。**
+
+同一档还有：
+
+| 插件 | 能给我们什么 |
+|---|---|
+| `halo-plugin-aplayer` / `plugin-navidrome-player` | 音频播放器。我们有 `voice` 这个 RefKind，**却还没有对应能力** |
+| `plugin-dplayer` | 视频播放器，ADV 若要接视频演出可用 |
+| `plugin-photos`（官方） | 图库管理，与 `sprite` / `image` 的展示面相关 |
+
+### 丙档：只是模式参考
+
+- **`plugin-shortcode`** —— 编辑器通用标签 + **「只在实际用到时才加载对应 CSS/JS」**。
+  这正是我们六个能力该有的加载策略：一篇文章没插精灵查看器，就别下发
+  精灵那一坨。
+- **`plugin-thyuu-embed` / `plugin-dplayer` / `plugin-timeline` /
+  `plugin-data-statistics`** —— 编辑器区块的做法。我们的能力走这条路比 iframe
+  自然，见下。
+- **`plugin-bilibili-bangumi` / `plugin-douban` / `plugin-steam` /
+  `plugin-bangumi-data`** —— 全是「取外部数据 → 提供路由 + 给主题喂数据」，
+  结构上与我们的交叉表 + `/character/:id` 一模一样。写路由时照着来。
+- **`global-private` / `halo-private-posts` / `plugin-safe-redirect`** ——
+  请求拦截与访问控制的实际写法，是验证铁律 11 那个 🚧 的最好样本。
+
+### 一个更 native 的形态：编辑器区块
+
+`plugin-thyuu-embed` 那类是**编辑器区块**——作者在文章里插一个块，前台渲染。
+我们的六个能力完全可以走同一条路：
 
 ```
 编辑文章时插入「精灵查看器」区块 → 填 ref → 前台渲染我们的查看器
@@ -96,8 +156,6 @@ Halo 的 `ui/` 正是 Vue。所以浏览器侧要写的新代码，**就是一�
 
 **iframe 嵌入面仍然要留**——那是给 wiki 那边用的，跨站就只能走 iframe。
 两条路各有各的用处，不是替代关系。
-
----
 
 ## 四、铁律 11 不再是难题（✅ 前提成立，🚧 具体扩展点待验）
 
