@@ -77,8 +77,10 @@ const policy = { allowedAncestors: ['https://wiki.example.org'] };
 | `Vary: Origin` | 不同来源拿到的 CSP 不同 |
 
 ::: warning 静态导出发不出这些头
-`output: 'export'` 产出的是纯静态文件，头得由 EdgeOne 的规则引擎或边缘函数补。
-嵌入面**必须**走能发头的那条路径——`frame-ancestors` 发不出去等于白名单没生效。
+`output: 'export'` 产出的是纯静态文件，发不出任何响应头。而嵌入面必须发
+`frame-ancestors`——发不出去等于白名单没生效，等于谁都能嵌。
+
+所以嵌入页**不作为静态产物交付**，见下面「EdgeOne 路由冲突时静态优先」。
 :::
 
 **嵌入 URL 不进 sitemap。** 路由表能枚举，嵌入 URL 有无穷多个（ref × 参数组合），
@@ -122,8 +124,8 @@ bug**，不一定是攻击；设了上限，最坏情况是内容被截断，看
 
 | | 谁做 | 做什么 |
 |---|---|---|
-| 静态页 | `app/embed/[capability]/page.tsx` | 每个能力烘一个页（能力是有限的，`ref` 在 query 里由客户端读） |
-| **准入** | `functions/embed/[capability].js` | 调 `resolveEmbed()`：下架、插件开关、CSP、noindex |
+| 构建期 | `app/embed/[capability]/page.tsx` | 每个能力烘一个页（能力有限，`ref` 在 query 里由客户端读），随后由 `tools/pack-embed-pages.mjs` **搬进函数的包、从 `out/` 删掉** |
+| **请求期** | `functions/embed/[capability].js` | 调 `resolveEmbed()` 判准入，然后**自己吐 HTML** 并带上 CSP 与 noindex |
 
 客户端**也**判一次，但那不是安全边界——它只解决「本地开发没有边缘函数时，
 得有个东西告诉你为什么是空的」，外加边缘配错时至少不渲染内容。
@@ -153,14 +155,36 @@ bug**，不一定是攻击；设了上限，最坏情况是内容被截断，看
 「暂时打不开」可以接受，「本该下架的东西照常放出去」不行。
 :::
 
-::: warning 🚧 这一半尚未在真实平台复核
-边缘函数按 EdgeOne Pages Functions 的文档写成，但**没在真实环境跑通**。
-其中一条是阻塞项：**函数必须优先于同路径的静态产物**，否则
-`/embed/<cap>/index.html` 会被直接命中，整道判定形同虚设。
+::: danger 🔴 EdgeOne 路由冲突时**静态优先**——这决定了整套设计
+官方文档写明：Edge Functions 与 Node.js Functions 的路由若与静态资源冲突，
+请求**优先被路由到静态资源**，函数不会被触发（2026-08-22 查证）。
 
-平台做不到函数优先的话，嵌入面要挪到一个静态产物不存在的路径（如 `/e/<cap>`），
-由函数自己回源取 HTML。**在复核之前，不要认为嵌入面的安全约束已经生效。**
+所以只要 `out/embed/sprite.show.html` 存在，`/embed/sprite.show` 就永远命中它，
+边缘函数是一段死代码。而准入整个在那个函数里，失效的后果不报错：
+
+- 被下架的 ref 照常放出去（铁律 11 的请求期那一道整个失效）；
+- 后台关掉的插件，嵌在别人页面上的还在放（铁律 10 失效）；
+- **谁都能把这个页面套进 iframe**——`frame-ancestors` 只能由响应头下发
+  （CSP 规范规定它在 `<meta>` 里被忽略），发不出去等于开放点击劫持。
+
+**解法：让那条路径下没有静态产物。** 构建后由 `tools/pack-embed-pages.mjs`
+把 `out/embed/` 整个搬进 `functions/embed/pages.generated.js` 并删掉原目录，
+由函数自己吐 HTML。URL 一个字不用改，MediaWiki 那侧也不用动。
+
+> 另一条备选是把嵌入面挪到 `/e/<cap>` 这种静态产物不存在的路径。那要改 URL、
+> 改 wiki 扩展、改所有已经贴出去的嵌入链接；搬产物只动构建流程，代价小得多。
+
+`apps/station/test/embed-pages.test.ts` 盯着这条不变量：`out/embed/` 只要还在
+就红。放一个文件回去复验过，测试如实变红。
 :::
+
+### 哪些约束能由静态携带，哪些不能
+
+| 约束 | 在哪 | 为什么 |
+|---|---|---|
+| `frame-ancestors` | **只能在响应头** | CSP 规范：`<meta>` 里被忽略 |
+| 下架、插件开关 | **只能在边缘** | 静态页读不到 KV/Blob |
+| `noindex` | 页面里也有一份 | 能由静态携带的就别只靠响应头——谁把这份 HTML 拿去怎么托管，它都在 |
 
 ## MediaWiki 那一侧
 

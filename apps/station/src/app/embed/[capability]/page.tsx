@@ -34,6 +34,21 @@ export function generateStaticParams(): Array<{ capability: string }> {
 
 export const dynamicParams = false;
 
+/**
+ * `noindex` 写进 HTML，而不是只靠 `X-Robots-Tag` 响应头。
+ *
+ * 判据：**能由静态本身携带的约束，就别依赖响应头。** 响应头要经过边缘那一层，
+ * 而那一层的行为是平台决定的；`<meta name="robots">` 跟着 HTML 走，
+ * 谁把这个页面拿去、怎么托管，它都在。
+ *
+ * `frame-ancestors` 享受不到这个待遇——CSP 规范明确规定它**在 `<meta>` 里
+ * 被忽略**，只认响应头。所以防点击劫持那条无论如何都得走边缘，
+ * 见 `functions/embed/[capability].js`。
+ */
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 export default async function EmbedPage({
   params,
 }: {

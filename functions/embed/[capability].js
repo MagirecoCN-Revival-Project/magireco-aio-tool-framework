@@ -1,39 +1,32 @@
 /**
- * 嵌入面的**真正准入判定**（EdgeOne Pages Function）。
+ * 嵌入面：准入判定 + 吐 HTML（EdgeOne Pages Function）。
  *
- * 静态导出的页面发不出 404，也发不出 CSP。这两件事必须由请求路径上的东西做：
+ * ## 为什么这个函数**自己**返回 HTML，而不是 next() 拿静态产物
  *
- * - **下架**（铁律 11）：嵌入 URL 散在别人的页面里，重建我们的站碰不到它们
- *   一根汗毛。只有请求期这一道拦得住已经被复制出去的链接。
- * - **`frame-ancestors`**：发不出去等于白名单没生效，等于谁都能嵌，
- *   等于开放点击劫持。这条比 404 还要紧——它是**默认失效**的那种：
- *   忘了配，页面照常显示，没有任何报错。
- * - **`X-Robots-Tag: noindex`**：嵌入面被索引会与资料页构成重复内容。
+ * **EdgeOne Pages 在路由冲突时静态优先。** 官方文档写明：Edge Functions 与
+ * Node.js Functions 的路由若与静态资源冲突，请求优先被路由到静态资源，
+ * 函数不会被触发（2026-08-22 查证）。
  *
- * 判定本身全在 `@aio/embed` 的 `resolveEmbed()` 里，与浏览器侧、与
- * `@aio/site` 共用同一份判据和**同一张插件开关表**（铁律 10）。
- * 这个文件只负责：读配置 → 调它 → 把结果翻译成 HTTP。
+ * 所以只要 `out/embed/sprite.show.html` 存在，这个文件就是一段死代码，
+ * 而准入判定整个不存在。后果不是「函数没生效」这么轻：
  *
- * ---
+ * - 被下架的 ref 照常放出去（铁律 11 的请求期那一道失效）；
+ * - 后台关掉的插件，嵌在别人页面上的还在放（铁律 10 失效）；
+ * - **谁都能把这个页面套进 iframe**——`frame-ancestors` 只能由响应头下发
+ *   （CSP 规范明确规定它在 `<meta>` 里被忽略），发不出去等于开放点击劫持。
+ *   而这件事不报错、页面照常显示。
  *
- * ## 🚧 待在真实平台上复核
+ * 于是构建后由 `tools/pack-embed-pages.mjs` 把 `out/embed/` 整个搬进
+ * `pages.generated.js` 并删掉原目录：那条路径下没有静态产物了，
+ * 函数才会被触发，HTML 也就只能由它来给。
  *
- * 以下三点按 EdgeOne Pages Functions 的文档写成，**尚未在真实环境跑通**
- * （与 `repository-policy.json` 的 `platform_limits.verified=false` 同一性质）：
+ * ## 哪些约束在这里，哪些不在
  *
- * 1. 函数的文件路由是否吃 `[capability]` 这种动态段，以及它与静态产物
- *    `/embed/<cap>/index.html` 谁优先——**必须是函数优先**，否则静态页会
- *    直接命中，这一整道判定形同虚设；
- * 2. `context.next()` 能否取回同路径的静态产物以便改写响应头；
- * 3. KV 与 Blob 的读取 API 名称。
- *
- * 位置上跟着部署配置走：EdgeOne 两个项目的「根目录」都填仓库根（见
- * `docs/guide/deploy.md`），所以 `functions/` 也放在仓库根，而不是
- * `apps/station/` 下面。改了那边的根目录设置，这个目录要跟着挪。
- *
- * 第 1 条是**阻塞项**：如果平台做不到函数优先，就得把嵌入面挪到一个
- * 静态产物不存在的路径（如 `/e/<cap>`），由函数自己回源取 HTML。
- * 在复核之前，不要认为嵌入面的安全约束已经生效。
+ * | 约束 | 在哪 | 为什么 |
+ * |---|---|---|
+ * | `frame-ancestors` | **只能在这里** | CSP 规范：`<meta>` 里被忽略 |
+ * | 下架、插件开关 | **只能在这里** | 静态页读不到 KV/Blob |
+ * | `noindex` | 页面里也有一份 | 能由静态携带的就别只靠响应头 |
  */
 
 import { resolveEmbed } from '@aio/embed';
@@ -45,6 +38,7 @@ import { loadConfig } from '@aio/site';
 // 填漏一条，新插件的能力就嵌不出去，而且不报错——正是「两张表各自自洽」
 // 那种查不出来的状态。
 import PROVIDERS from './providers.generated.json' with { type: 'json' };
+import { EMBED_PAGES } from './pages.generated.js';
 
 /** 允许把我们嵌进去的来源。逗号分隔，**没有默认值**——留空即谁都不许嵌。 */
 function policyFrom(env) {
@@ -85,42 +79,53 @@ async function readTakedown(env) {
   return null;
 }
 
+const deny = (status) =>
+  new Response(null, {
+    status,
+    headers: { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' },
+  });
+
 export async function onRequest(context) {
-  const { request, env, params, next } = context;
+  const { request, env, params } = context;
   const url = new URL(request.url);
+  const capability = params.capability;
 
   const takedown = await readTakedown(env);
   if (takedown === null) {
     return new Response('下架清单暂时读不到，嵌入面已暂停', {
       status: 503,
-      headers: { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' },
+      headers: { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' },
     });
   }
 
   const config = await readConfig(env);
-  const decision = resolveEmbed(
-    `/embed/${params.capability}`,
-    url.search,
-    {
-      config,
-      policy: policyFrom(env),
-      takedown,
-      capabilityProviders: PROVIDERS,
-    },
-  );
+  const decision = resolveEmbed(`/embed/${capability}`, url.search, {
+    config,
+    policy: policyFrom(env),
+    takedown,
+    capabilityProviders: PROVIDERS,
+  });
 
   if (decision.status !== 200) {
     // 理由只回给日志，不回给调用方：区分「被下架」与「插件关了」
     // 对外是信息泄露（能探测出哪些东西存在过）。
     console.warn(`[embed] ${decision.status} ${decision.reason}: ${decision.message}`);
-    return new Response(null, {
-      status: decision.status,
-      headers: { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' },
-    });
+    return deny(decision.status);
   }
 
-  const res = await next();
-  const headers = new Headers(res.headers);
-  for (const [k, v] of Object.entries(decision.headers)) headers.set(k, v);
-  return new Response(res.body, { status: res.status, headers });
+  const html = EMBED_PAGES[capability];
+  if (html === undefined) {
+    // 判定放行了却没有页面，说明生成物与契约表不同步。
+    // 这是我们自己的构建问题，不该表现成对调用方的 404。
+    console.error(`[embed] 判定放行 ${capability} 但 pages.generated.js 里没有它`);
+    return deny(404);
+  }
+
+  return new Response(html, {
+    status: 200,
+    headers: {
+      ...decision.headers,
+      'Content-Type': 'text/html; charset=utf-8',
+    },
+  });
 }

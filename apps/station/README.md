@@ -59,11 +59,15 @@ src/app/
 
 | | 谁做 | 做什么 |
 |---|---|---|
-| 静态页 | `app/embed/[capability]/page.tsx` | 每个能力烘一个（能力有限，`ref` 在 query 里由客户端读） |
-| **准入** | 仓库根的 `functions/embed/[capability].js` | `resolveEmbed()`：下架、插件开关、CSP、noindex |
+| 构建期 | `app/embed/[capability]/page.tsx` | 烘出 6 个页，随后由 `tools/pack-embed-pages.mjs` **搬进函数的包、从 `out/` 删掉** |
+| 请求期 | 仓库根的 `functions/embed/[capability].js` | `resolveEmbed()` 判准入，然后自己吐 HTML 并带上 CSP |
+
+**为什么要把产物搬走**：EdgeOne Pages 在路由冲突时**静态优先**——`out/embed/`
+只要还在，边缘函数就永远不触发，下架判定、插件开关与 `frame-ancestors`
+整个失效，而且不报错。`test/embed-pages.test.ts` 盯着这条不变量。
 
 客户端也判一次，但**那不是安全边界**——它只解决「本地开发没有边缘函数时，
-得有个东西告诉你为什么是空的」。细节与那条尚未复核的平台阻塞项见
+得有个东西告诉你为什么是空的」。细节见
 [`docs/guide/embed.md`](../../docs/guide/embed.md)。
 
 嵌入面不套站点外壳，所以顶栏与版心挪进了 `app/(site)/layout.tsx`；
