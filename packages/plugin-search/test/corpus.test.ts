@@ -24,7 +24,7 @@ const corpus = buildCorpus(RECORDS);
 
 describe('normalize', () => {
   it('片假名折叠成平假名——不折的话敲片假名会「查无此人」', () => {
-    expect(normalize('タマキ')).toBe(normalize('たまき'));
+    expect(normalize('ヘイキャラ')).toBe(normalize('へいきゃら'));
   });
 
   it('去空白与大小写', () => {

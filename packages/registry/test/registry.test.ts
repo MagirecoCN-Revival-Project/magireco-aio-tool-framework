@@ -16,7 +16,7 @@ const data = {
     },
     {
       ref: 'a:character/1002',
-      nameZh: '七海八千代',
+      nameZh: '角色丙',
       links: { sprite: ['a:sprite/100200/d_r'] },
     },
     {

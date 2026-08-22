@@ -15,7 +15,7 @@ export const registry = Registry.from({
         voice: ['a:voice/vo_char_1001_00_01'],
       },
     },
-    { ref: 'a:character/1002', nameZh: '七海八千代', links: { sprite: ['a:sprite/100200/d_r'] } },
+    { ref: 'a:character/1002', nameZh: '角色丙', links: { sprite: ['a:sprite/100200/d_r'] } },
   ],
 });
 

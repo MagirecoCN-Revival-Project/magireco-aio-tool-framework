@@ -20,8 +20,8 @@ export const registryData: RegistryData = {
     },
     {
       ref: 'a:character/1002',
-      nameZh: '七海八千代',
-      nameJa: '七海やちよ',
+      nameZh: '角色丙',
+      nameJa: '丙キャラ',
       links: { sprite: ['a:sprite/100200/d_r'] },
     },
     {
@@ -72,10 +72,10 @@ export const manifests: ManifestDoc[] = [
 export const script: readonly { speaker: string; text: string }[] = [
   { speaker: '角色甲', text: '这里是第一行台词。剧本内容是占位的。' },
   { speaker: '旁白', text: '阅读器只知道自己在显示一篇剧情。' },
-  { speaker: '七海八千代', text: '它不知道有没有播放器，也不知道播放器叫什么。' },
+  { speaker: '角色丙', text: '它不知道有没有播放器，也不知道播放器叫什么。' },
   { speaker: '角色甲', text: '它只会问内核：有人能播 a:scenario/310241@zh 吗？' },
   { speaker: '旁白', text: '有人能播，才画出这一行的播放按钮。' },
-  { speaker: '七海八千代', text: '播放开始后，进度会顺着事件总线回到这里。' },
+  { speaker: '角色丙', text: '播放开始后，进度会顺着事件总线回到这里。' },
   { speaker: '角色甲', text: '于是当前行会高亮——两个模块从未互相引用。' },
   { speaker: '旁白', text: '这就是「插件化」与「放个跳转链接」的区别。' },
 ];

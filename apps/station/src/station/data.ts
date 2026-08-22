@@ -197,7 +197,7 @@ export const DEMO_GLTF = {
 export const DEMO_PROFILES: Record<string, unknown> = {
   'a:character/1001': { name: '角色甲', heightCm: 158, aliases: ['角色甲'] },
   'b:character/100101': { name: '角色乙', heightCm: 153, aliases: ['角色乙'] },
-  'a:character/1002': { name: '七海八千代', heightCm: null },
+  'a:character/1002': { name: '角色丙', heightCm: null },
 };
 
 const dataUrl = (value: unknown): string =>
